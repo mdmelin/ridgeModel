@@ -1,5 +1,5 @@
 function rateDisc_RegressModel(cPath,Animal,Rec,dType)
-
+addpath('C:\Data\churchland\ridgeModel\widefield');
 if ~strcmpi(cPath(end),filesep)
     cPath = [cPath filesep];
 end
@@ -899,7 +899,7 @@ save([cPath 'orgdimBeta.mat'], 'dimBeta', 'ridgeVals');
 save([cPath filesep 'orgregData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
 rateDisc_videoRebuild(cPath, 'org'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
 [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-save([cPath 'orgfullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
+save([cPath 'orgfullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
 mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels)));
 motorR = fullR(:, mInd);
