@@ -43,7 +43,7 @@ load([fPath 'orgRegData.mat'], 'fullR', 'recLabels', 'recIdx', 'idx'); %load des
 recIdx(idx) = []; %reject non-used regressors
 vidR = fullR(:,end-399:end); %last 400 PCs are video components
 
-% task eventshttps://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab
+% task events
 taskLabels = {'time' 'lVisStim' 'rVisStim' 'Choice' 'prevReward'}; %some task variables
 taskEventType = [1 2 2 1 1]; %different type of events.
 taskEvents(:,1) = fullR(:,find(recIdx == find(ismember(recLabels, taskLabels(1))),1)); %find time regressor. This happens every first frame in every trial.

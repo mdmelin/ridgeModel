@@ -1,4 +1,4 @@
-function ridgeModel_stateEncoding(cPath,Animal,Rec,glmFile,dType)
+function ridgeModel_stateEncoding_withjitter(cPath,Animal,Rec,glmFile,dType)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019 
 %on that same dataset, but adds regressors for neural state (predicted by 
@@ -91,28 +91,31 @@ fprintf('\nGLM weights:\n');
 disp(glmweights);
 statelabels = predictlabels(glmweights); %[index of attentive state, i_leftbias, i_rightbias]
 
-figure;
-plot(glmweights','LineWidth',2);%plot states to make sure predicted labels are reasonable
-y = 5;
-line([1,2],[0,0],'LineStyle','--','Color','black');
-title('Latent state weights - Verify that these labels look correct');
-figureleg = cell([1,3]);
-figureleg{statelabels(1)} = 'Attentive';
-figureleg{statelabels(2)} = 'LBias';
-figureleg{statelabels(3)} = 'RBias';
-legend(figureleg);
+% figure;
+% plot(glmweights','LineWidth',2);%plot states to make sure predicted labels are reasonable
+% y = 5;
+% line([1,2],[0,0],'LineStyle','--','Color','black');
+% title('Latent state weights - Verify that these labels look correct');
+% figureleg = cell([1,3]);
+% figureleg{statelabels(1)} = 'Attentive';
+% figureleg{statelabels(2)} = 'LBias';
+% figureleg{statelabels(3)} = 'RBias';
+% legend(figureleg);
+% drawnow;
+% 
+% figure;
+% plot(postprobs,'LineWidth',2);%plot states to make sure predicted labels are reasonable
+% y = 5;
+% title('Posterior probabilities');
+% figureleg = cell([1,3]);
+% figureleg{statelabels(1)} = 'Attentive';
+% figureleg{statelabels(2)} = 'LBias';
+% figureleg{statelabels(3)} = 'RBias';
+% legend(figureleg);
+% drawnow;
 
-figure;
-plot(postprobs,'LineWidth',2);%plot states to make sure predicted labels are reasonable
-y = 5;
-title('Posterior probabilities');
-figureleg = cell([1,3]);
-figureleg{statelabels(1)} = 'Attentive';
-figureleg{statelabels(2)} = 'LBias';
-figureleg{statelabels(3)} = 'RBias';
-legend(figureleg);
+postprobs = postprobs(:,statelabels); %now re-sort the latent states so that they are indexed by [p_attentive, p_lbias, p_rbias]
 
-postprobs = postprobs(:,statelabels); %now re-sort the latent states so that they are indexed by [attentive, lbias, rbias]
 
 if strcmpi(dType,'Widefield')
     if exist([cPath vcFile],'file') ~= 2 %check if data file exists and get from server otherwise
@@ -158,7 +161,7 @@ Vc = Vc(:,:,choiceIdx);
 postprobs = postprobs(choiceIdx,:);
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset   
 trialCnt = length(bTrials);
-
+[~,trialstates] = max(postprobs,[],2);
 %% load behavior data
 if exist([cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],'file') ~= 2 || ... %check if svd behavior exists on hdd and pull from server otherwise
         exist([cPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat'],'file') ~= 2
@@ -256,6 +259,7 @@ for iTrials = 1:trialCnt
         stimGrab(iTrials) = leverTimes(find(leverTimes == bhv.RawEvents.Trial{iTrials}.States.WaitForCam(1))-1); %find start of lever state that triggered stimulus onset
         handleSounds{iTrials} = leverTimes(1:2:end) - stimGrab(iTrials); %track indicator sound when animal is grabing both handles
         stimTime(iTrials) = bhv.RawEvents.Trial{iTrials}.Events.Wire3High - stimGrab(iTrials); %time of stimulus onset - measured from soundcard
+        stimEndTime(iTrials) = bhv.RawEvents.Trial{iTrials}.States.DecisionWait(1) - stimGrab(iTrials); %end of stimulus period, relative to handle grab, from simons email
     catch
         stimTime(iTrials) = NaN;
         stimGrab(iTrials) = 0;
@@ -342,6 +346,8 @@ spoutOutR = cell(1,trialCnt);
 
 rewardR = cell(1,trialCnt);
 ChoiceR = cell(1,trialCnt);
+
+attentiveR = cell(1,trialCnt); %attentive state regressor added by max
 
 prevRewardR = cell(1,trialCnt);
 prevChoiceR = cell(1,trialCnt);
@@ -506,8 +512,9 @@ for iTrials = 1:trialCnt
     else
         stimTemp(:, end - stimShift - frames + 1 : end - stimShift) = timeR;
     end
-    
+    attentiveR{iTrials} = false(size(stimTemp));
     rewardR{iTrials} = false(size(stimTemp));
+    
     if bhv.Rewarded(iTrials) %rewarded
         rewardR{iTrials} = stimTemp; %trial was rewarded
     end
@@ -516,6 +523,11 @@ for iTrials = 1:trialCnt
     ChoiceR{iTrials} = false(size(stimTemp));
     if bhv.ResponseSide(iTrials) == 1
         ChoiceR{iTrials} = stimTemp;
+    end
+    
+    % get attentive state as binary design matrix
+    if trialstates(iTrials) == 1
+        attentiveR{iTrials} = stimTemp; %mouse was in attentive state for this trial
     end
     
     % previous trial regressors
@@ -769,7 +781,7 @@ temp1 = NaN(dims,frames,trialCnt);
 temp2 = NaN(frames,trialCnt,bhvDimCnt);
 temp3 = NaN(frames,trialCnt,bhvDimCnt);
 temp4 = NaN(2,frames,trialCnt);
-for x = 1 : size(vidR,2)
+for x = 1 : size(vidR,2) %iterate thru trials
     try
         temp1(:,:,x) = Vc(:,(shVal - ceil(stimTime(x) / (1/sRate))) - (preStimDur * sRate) : (shVal - ceil(stimTime(x) / (1/sRate))) + (postStimDur * sRate) - 1,x);
         temp2(:,x,:) = vidR((shVal - ceil(stimTime(x) / (1/sRate))) - (preStimDur * sRate) : (shVal - ceil(stimTime(x) / (1/sRate))) + (postStimDur * sRate) - 1,x,:);
@@ -789,38 +801,7 @@ if strcmpi(dType,'twoP')
     DS = reshape(temp4,2,[]); %keep image motion trace for 2p imaging
 end
 clear temp4
-%% create latent state regressors
-%convert state probabilities to one hot matrix/arrays of current state.
-[~,maxind] = max(postprobs,[],2);
-attentive = zeros(trialCnt,1);
-lBias = zeros(trialCnt,1);
-rBias = zeros(trialCnt,1);
 
-attentive(maxind == 1) = 1;
-lBiasind(maxind == 2) = 1;
-rBiasind(maxind == 3) = 1;
-attentiveind = find(attentive == 1)*frames - frames + 1; %This operation gives us the indices of frame 1 from trials where the mouse is in the designated state
-lBiasind = find(lBias == 1)*frames - frames + 1;
-rBiasind = find(rBias == 1)*frames - frames + 1;
-
-attentiveR = false(frames*trialCnt,frames);
-lBiasR = false(frames*trialCnt,frames);
-rBiasR = false(frames*trialCnt,frames);
-diagmat = diag(true(frames,1));
-
-for inds = 1:length(attentiveind)
-    attentiveR(attentiveind(inds):attentiveind(inds)+frames-1,:) = diagmat;
-end
-for inds = 1:length(lBiasind)
-    lBiasR(lBiasind(inds):lBiasind(inds)+frames-1,:) = diagmat;
-end
-for inds = 1:length(rBiasind)
-    rBiasR(rBiasind(inds):rBiasind(inds)+frames-1,:) = diagmat;
-end
-
-attentiveR = attentiveR(:,1:end-4);
-lBiasR = lBiasR(:,1:end-4);
-rBiasR = rBiasR(:,1:end-4);
 
 %% reshape regressors, make design matrix and indices for regressors that are used for the model
 timeR = repmat(logical(diag(ones(1,frames))),trialCnt,1); %time regressor
@@ -858,6 +839,8 @@ prevRewardR = cat(1,prevRewardR{:});
 
 ChoiceR = cat(1,ChoiceR{:});
 
+attentiveR = cat(1,attentiveR{:});
+
 prevChoiceR = cat(1,prevChoiceR{:});
 prevStimR = cat(1,prevStimR{:});
 nextChoiceR = cat(1,nextChoiceR{:});
@@ -873,13 +856,13 @@ fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
     lLickR rLickR handleSoundR lfirstTacStimR lTacStimR rfirstTacStimR rTacStimR ...
     lfirstAudStimR lAudStimR rfirstAudStimR rAudStimR prevRewardR prevChoiceR ...
     nextChoiceR waterR piezoR whiskR noseR fastPupilR ...
-    slowPupilR faceR bodyR moveR vidR attentiveR lBiasR rBiasR];
+    slowPupilR faceR bodyR moveR vidR attentiveR];
 
 % labels for different regressor sets. It is REALLY important this agrees with the order of regressors in fullR.
 regLabels = {
     'time' 'Choice' 'reward' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
     'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' 'rfirstAudStim' 'rAudStim' ...
-    'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo' 'attentive' 'lBias' 'rBias'};
+    'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo' 'attentive'};
 
 %index to reconstruct different response kernels
 regIdx = [
@@ -914,9 +897,7 @@ regIdx = [
     ones(1,size(bodyR,2))*find(ismember(regLabels,'body')) ...
     ones(1,size(moveR,2))*find(ismember(regLabels,'Move')) ...
     ones(1,size(vidR,2))*find(ismember(regLabels,'bhvVideo')) ...
-    ones(1,size(attentiveR,2))*find(ismember(regLabels,'attentive')) ...
-    ones(1,size(lBiasR,2))*find(ismember(regLabels,'lBias')) ...
-    ones(1,size(rBiasR,2))*find(ismember(regLabels,'rBias'))];
+    ones(1,size(attentiveR,2))*find(ismember(regLabels,'attentive'))];
 
 % orthogonalize video against spout/handle movement
 vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'Move' 'bhvVideo'})))); %index for video regressors
@@ -977,118 +958,61 @@ if gaussShift > 1
 end
 
 %% clear individual regressors
-clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
-    lAudStimR rAudStimR rewardR prevRewardR ChoiceR ...
-    prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
+ clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
+     lAudStimR rAudStimR rewardR prevRewardR ChoiceR ...
+     prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
 
-%% run ridge regression in low-D
-% run model. Zero-mean without intercept. only video qr.
+ glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
+ 
+%% run ridge regression in low-D, with state this time
+%run model. Zero-mean without intercept. only video qr.
 [ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for original video, zero-mean model: %f\n', mean(ridgeVals));
+fprintf('Mean ridge penalty for original video, zero-mean model, WITH state: %f\n', mean(ridgeVals));
 save([cPath 'orgdimBeta_withstate.mat'], 'dimBeta', 'ridgeVals');
 save([cPath filesep 'orgregData_withstate.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
 rateDisc_videoRebuild(cPath, 'org'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
+
 [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-save([cPath 'orgfullcorr_withstate.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
+save([cPath glmFile 'withstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
-mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels)));
-motorR = fullR(:, mInd);
-[motorRidge, motorBeta] = ridgeMML(Vc', motorR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for original video, motor only model: %f\n', mean(motorRidge));
-Vm = (motorR * motorBeta)';
-save([cPath 'orgVMotor.mat'], 'Vm', 'frames'); %save predicted data based on motor model
+%% Run with state ONLY
 
-mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels(~ismember(motorLabels,opMotorLabels)))));
-spontMotorR = fullR(:, mInd);
-[spontMotorRidge, spontMotorBeta] = ridgeMML(Vc', spontMotorR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for original video, spont-motor only model: %f\n', mean(spontMotorRidge));
-Vm = (spontMotorR * spontMotorBeta)';
-save([cPath 'orgVspontMotor.mat'], 'Vm', 'frames'); %save predicted data based on spont motor model
+labels = {'attentive'};
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
 
-%% run motor/task/opMotor and spontMotor only models. Zero-mean without intercept.
-cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels))); %get index for motor regressors
-motorLabels = regLabels(sort(find(ismember(regLabels,motorLabels)))); %make sure motorLabels is in the right order
+%cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,labels)));
+Ind = ismember(regIdx(~rejIdx), find(ismember(regLabels,labels)));
+stateR = fullR(:, Ind);
+[stateRidge, stateBeta] = ridgeMML(Vc', stateR, true); %get ridge penalties and beta weights.
+fprintf('Mean ridge penalty for state only model: %f\n', mean(stateRidge));
+Vm = (stateR * stateBeta)';
 
-[Vmotor, motorBeta, motorR, motorIdx, motorRidge, motorLabels, motorMap, motorMovie] = crossValModel(motorLabels);
-fprintf('Mean ridge penalty for motor-only, zero-mean model: %f\n', mean(motorRidge));
-save([cPath 'interpVmotor.mat'], 'Vmotor', 'frames'); %save predicted data based on motor model
-save([cPath 'motorBeta.mat'], 'motorBeta', 'motorRidge');
-save([cPath filesep 'motorregData.mat'], 'motorR','trialIdx', 'motorIdx', 'motorLabels', 'motorMap', 'motorMovie', 'gaussShift','-v7.3');
 
-[Vtask, taskBeta, taskR, taskIdx, taskRidge, taskLabels, taskMap, taskMovie] = crossValModel(regLabels(~ismember(regLabels,motorLabels)));
-fprintf('Mean ridge penalty for task-only, zero-mean model: %f\n', mean(taskRidge));
-save([cPath 'interpVtask.mat'], 'Vtask', 'frames'); %save predicted data based on task model
-save([cPath 'taskBeta.mat'], 'taskBeta', 'taskRidge');
-save([cPath filesep 'taskregData.mat'], 'taskR','trialIdx', 'taskIdx', 'taskLabels', 'taskMap', 'taskMovie', 'gaussShift','-v7.3');
+[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'onlystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
-[VtaskOpMotor, taskOpMotorBeta, taskOpMotorR, taskOpMotorIdx, taskOpMotorRidge, taskOpMotorLabels, taskOpMotorMap, taskOpMotorMovie] = crossValModel([regLabels(~ismember(regLabels,motorLabels)) opMotorLabels]);
-fprintf('Mean ridge penalty for task+opMotor, zero-mean model: %f\n', mean(taskOpMotorRidge));
-save([cPath 'interpVtaskOpMotor.mat'], 'VtaskOpMotor', 'frames'); %save predicted data based on taskOpMotor model
-save([cPath 'taskOpMotorBeta.mat'], 'taskOpMotorBeta', 'taskOpMotorRidge');
-save([cPath filesep 'taskOpMotorregData.mat'], 'taskOpMotorR','trialIdx', 'taskOpMotorIdx', 'taskOpMotorLabels', 'taskOpMotorMap', 'taskOpMotorMovie', 'gaussShift','-v7.3');
+%% Run with choice ONLY
 
-[VtaskSpMotor, taskSpMotorBeta, taskSpMotorR, taskSpMotorIdx, taskSpMotorRidge, taskSpMotorLabels, taskSpMotorMap, taskSpMotorMovie] = crossValModel(regLabels(~ismember(regLabels,opMotorLabels)));
-fprintf('Mean ridge penalty for task+opMotor, zero-mean model: %f\n', mean(taskSpMotorRidge));
-save([cPath 'interpVtaskSpMotor.mat'], 'VtaskSpMotor', 'frames'); %save predicted data based on taskSpMotor model
-save([cPath 'taskSpMotorBeta.mat'], 'taskSpMotorBeta', 'taskSpMotorRidge');
-save([cPath filesep 'taskSpMotorregData.mat'], 'taskSpMotorR','trialIdx', 'taskSpMotorIdx', 'taskSpMotorLabels', 'taskSpMotorMap', 'taskSpMotorMovie', 'gaussShift','-v7.3');
+labels = {'Choice'};
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
 
-[VopMotor, opMotorBeta, opMotorR, opMotorIdx, opMotorRidge, opMotorLabels, opMotorMap, opMotorMovie] = crossValModel(opMotorLabels);
-fprintf('Mean ridge penalty for opMotor-only, zero-mean model: %f\n', mean(opMotorRidge));
-save([cPath 'interpVopMotor.mat'], 'VopMotor', 'frames'); %save predicted data based on operant motor model
-save([cPath 'opMotorBeta.mat'], 'opMotorBeta', 'opMotorRidge');
-save([cPath filesep 'opMotorregData.mat'], 'opMotorR','trialIdx', 'opMotorIdx', 'opMotorLabels', 'opMotorMap', 'opMotorMovie', 'gaussShift','-v7.3');
+[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'onlychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on choice only
+%% Run with reward ONLY
 
-[VspontMotor, spontMotorBeta, spontMotorR, spontMotorIdx, spontMotorRidge, spontMotorLabels, spontMotorMap, spontMotorMovie] = crossValModel(motorLabels(~ismember(motorLabels,opMotorLabels)));
-fprintf('Mean ridge penalty for spontMotor-only, zero-mean model: %f\n', mean(spontMotorRidge));
-save([cPath 'interpVspontMotor.mat'], 'VspontMotor', 'frames'); %save predicted data based on spontaneous motor model
-save([cPath 'spontMotorBeta.mat'], 'spontMotorBeta', 'spontMotorRidge');
-save([cPath filesep 'spontMotorregData.mat'], 'spontMotorR','trialIdx', 'spontMotorIdx', 'spontMotorLabels', 'spontMotorMap', 'spontMotorMovie', 'gaussShift','-v7.3');
+labels = {'reward'};
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
 
-%% orthogonalize some regressors for clarity
-% orthogonalize spontaneous from operant movement regressors
-lInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'lLick', 'rLick'})));
-hInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel'})));
-pInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'fastPupil', 'slowPupil'})));
-wInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'whisk')));
-nInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'nose')));
-piInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'piezo')));
-fInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'face')));
-bInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'body')));
-mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'Move')));
-vInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'bhvVideo')));
+[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'onlyreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on lLick only
+%% Run WITHOUT state - should mirror original model
 
-smallR = [fullR(:,lInd) fullR(:,hInd) fullR(:,pInd) fullR(:,wInd) fullR(:,nInd) fullR(:,piInd) fullR(:,fInd)  fullR(:,bInd)  fullR(:,mInd) fullR(:,vInd)];
-[Q, redQRR] = qr(smallR,0); clear smallR %orthogonalize spont. from operant movement
+labels = regLabels(1:end-1); %get all regressors except state
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
 
-% replace original with orthogonalized regressors (only for spont. movements)
-fullR(:,pInd) = Q(:,sum(lInd | hInd) + 1 : sum(lInd | hInd | pInd)); %pupil
-fullR(:,wInd) = Q(:,sum(lInd | hInd | pInd) + 1 : sum(lInd | hInd | pInd | wInd)); %whisk
-fullR(:,nInd) = Q(:,sum(lInd | hInd | pInd | wInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd)); %nose
-fullR(:,piInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd)); %piezo
-fullR(:,fInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd)); %face
-fullR(:,bInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd)); %body
-fullR(:,mInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd)); %motion energy
-fullR(:,vInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd | vInd)); %video
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'nostate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 
-%% run model with orthogonalized spontaneous movement regressors. Zero-mean without intercept.
-[ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for zero-mean model: %f\n', mean(ridgeVals));
-save([cPath 'dimBeta.mat'], 'dimBeta', 'ridgeVals');
-save([cPath 'regData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','redQRR','-v7.3');
-[Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-save([cPath 'fullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
-rateDisc_videoRebuild(cPath); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
-
-%% run video only model. Zero-mean without intercept.
-rejIdx = false(1,size(vidR,2));
-regLabels = {'bhvVideo'};
-regIdx = ones(1,size(vidR,2));
-[ridgeVals, dimBeta] = ridgeMML(Vc', vidR(~trialIdx,:), true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for video-only zero-mean model: %f\n', mean(ridgeVals));
-save([cPath 'vidOnlydimBeta.mat'], 'dimBeta', 'ridgeVals');
-save([cPath filesep 'vidOnlyregData.mat'], 'vidR', 'rejIdx', 'trialIdx', 'regIdx', 'regLabels','gaussShift','-v7.3');
-rateDisc_videoRebuild(cPath, 'vidOnly'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
 
 %% nested functions
     function [Vm, cBeta, cR, subIdx, cRidge, cLabels, cMap, cMovie] =  crossValModel(cLabels)
@@ -1165,7 +1089,7 @@ rateDisc_videoRebuild(cPath, 'vidOnly'); % rebuild video regressors by projectin
             clear cData cModel
             
         end
-        fprintf('Run finished. RMSE: %f\n', median(cMovie(:).^2));
+        fprintf('Run finished. Mean Rsquared: %f... Median Rsquared: %f\n', mean(cMap(:).^2), median(cMap(:).^2));
         
         
     end

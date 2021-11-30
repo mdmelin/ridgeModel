@@ -899,9 +899,7 @@ save([cPath 'orgdimBeta.mat'], 'dimBeta', 'ridgeVals');
 save([cPath filesep 'orgregData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
 rateDisc_videoRebuild(cPath, 'org'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
 [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-save([cPath 'orgfullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
-
-mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels)));
+save([cPath 'orgfullcorr_simon.mat'], 'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regremInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels)));
 motorR = fullR(:, mInd);
 [motorRidge, motorBeta] = ridgeMML(Vc', motorR, true); %get ridge penalties and beta weights.
 fprintf('Mean ridge penalty for original video, motor only model: %f\n', mean(motorRidge));
