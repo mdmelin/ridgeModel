@@ -1,0 +1,43 @@
+cPath = 'Y:\Widefield'
+
+cPath =
+
+    'Y:\Widefield'
+
+animal = 'mSM64'
+
+animal =
+
+    'mSM64'
+
+
+wrkdir = [cPath filesep animal filesep 'SpatialDisc' filesep];
+files = dir(wrkdir);
+dirflags = [files.isdir];
+subfolders = files(dirflags);
+sessiondates = {subfolders(:).name};
+numsess = length(sessiondates)
+
+numsess =
+
+    82
+
+length(sessiondates{1})
+
+ans =
+
+     1
+
+length(sessiondates{2})
+
+ans =
+
+     2
+
+length(sessiondates{3})
+
+ans =
+
+    11
+
+RegressModel_allSessions

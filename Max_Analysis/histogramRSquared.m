@@ -17,7 +17,7 @@ hold on;
 for i = 1:length(modelfiles) %iterate thru trial periods
     load([datapath modelfiles{i}]);
     modelfiles{i} = strrep(modelfiles{i},'_','\_'); %need to escape underscore when plotting
-    histogram(fullMovie.^2);
+    histogram(fullMovie.^2,'BinWidth',.002);
     xlim(lims)
 end
 title('Variance explained for each pixel and timepoint');

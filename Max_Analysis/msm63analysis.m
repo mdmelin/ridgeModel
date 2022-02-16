@@ -1,61 +1,80 @@
+parpool('local',16);
+%% 
 close all;
 mouse = 'mSM63';
-% rec = '09-Jul-2018';
-rec = '17-Jul-2018';
-frames = {1:31; ...
-          31:45; ...
-          45:60; ...
-          60:71}; %need to modify these to proper timeperiods in trial
+frames = {1:31, ...
+    31:45, ...
+    45:60, ...
+    60:71}; %need to modify these to proper timeperiods in trial
+recs = {'04-Jul-2018','05-Jul-2018','09-Jul-2018','17-Jul-2018','18-Jul-2018','19-Jul-2018','20-Jul-2018'};
+recs1 = recs;
+recs2 = {'09-Jul-2018','10-Jul-2018'}; %for mSM65
+recs3 = {'27-Jun-2018','28-Jun-2018','29-Jun-2018','30-Jun-2018','02-Jul-2018','03-Jul-2018','04-Jul-2018','05-Jul-2018'};%for mSM66
 
-%% Get cvRsquared histograms
-modelfiles = {'orgfullcorr_simon.mat','orgfullcorr.mat','orgfullcorr_withstate.mat','orgfullcorr_onlychoice.mat','orgfullcorr_onlystate.mat','orgfullcorr_onlyreward.mat'};
-histogramRSquared(mouse,rec,modelfiles);
+%% compare r handle betas across sessions - sanity check
+betac = 1.5e-3;
+frames = {1:10, 10:15}; %need to modify these to proper timeperiods in trial
+for i = 1:length(recs)
+    plotBetas(mouse,recs{i},'forchaoqun_withstate.mat',{'rGrab'},frames,[-betac betac]);
+end
 
-%% Plot some CVRsquared for various models
-plotRSquared(mouse,rec,'orgfullcorr_simon.mat',frames,[0 .8]);
-plotRSquared(mouse,rec,'orgfullcorr.mat',frames,[0 .8]);
-plotRSquared(mouse,rec,'orgfullcorr_withstate.mat',frames,[0 .8]);
-[x,y] = plotRSquared(mouse,rec,'test_onlystate.mat',frames,[0 .1]);
-[x2,y2] = plotRSquared(mouse,rec,'orgfullcorr_onlychoice.mat',frames,[0 .1]);
-[x3,y3] = plotRSquared(mouse,rec,'orgfullcorr_onlyreward.mat',frames,[0 .25]);
+%% compare whisk betas across sessions - sanity check, lack of somatosensory
+betac = 1.5e-3;
+frames = {1:10, 10:15,15:40,70:90}; %need to modify these to proper timeperiods in trial
+for i = 1:length(recs)
+    plotBetas(mouse,recs{i},'forchaoqun_withstate.mat',{'nose'},frames,[-betac betac]);
+end
 
-%% Plot some stimulus betas
+%% compare stimulus betas across sessions - sanity check, weird
 betac = 3e-4;
-plotBetas(mouse,rec,'orgfullcorr_simon.mat',{'rAudStim'},{1:10},[-betac betac]);
-plotBetas(mouse,rec,'orgfullcorr.mat',{'rAudStim'},{1:10},[-betac betac]);
-plotBetas(mouse,rec,'orgfullcorr_withstate.mat',{'rAudStim'},{1:10},[-betac betac]);
-betac = 5e-3;
-plotBetas(mouse,rec,'orgfullcorr_onlyreward.mat',{'reward'},frames,[-betac betac]);
+frames = {1:10};
+for i = 1:length(recs)
+    plotBetas(mouse,recs{i},'forchaoqun_withstate.mat',{'rAudStim'},frames,[-betac betac]);
+end
 
-%% Plot some attentive state betas
-
-betac = 1e-3;      
-plotBetas(mouse,rec,'orgfullcorr_withstate.mat',{'attentive'},frames,[-betac betac]);
-plotBetas(mouse,rec,'orgfullcorr_withstate.mat',{'time'},frames,[-betac betac]);
-betac = 5e-3;
-plotBetas(mouse,rec,'orgfullcorr_onlystate.mat',{'attentive'},frames,[-betac betac]);
-plotBetas(mouse,rec,'orgfullcorr_onlychoice.mat',{'Choice'},frames,[-betac betac]);
-
-%% compare across sessions
+%% plot state betas
 betac = 1e-3;
-rec = '04-Jul-2018';
-plotBetas(mouse,rec,'orgfullcorr.mat',{'reward'},frames,[-betac betac]);
+frames = {1:31, ...
+    31:45, ...
+    45:60, ...
+    60:71}; %need to modify these to proper timeperiods in trial
+for i = 1:length(recs)
+    plotBetas(mouse,recs{i},'forchaoqun_withstate.mat',{'attentive'},frames,[-betac betac]);
+end
+
+
+
+%% Plot CVRsquared maps for various models
+mouse = 'mSM63';
+frames = {1:31, ...
+    31:45, ...
+    45:60, ...
+    60:71}; %need to modify these to proper timeperiods in trial
 rec = '05-Jul-2018';
-plotBetas(mouse,rec,'orgfullcorr.mat',{'reward'},frames,[-betac betac]);
+plotRSquared(mouse,rec,'allaudio_onlystate.mat',frames,[0 .15]);
 
-%% check with jitter added
-modelfiles = {'orgfullcorr.mat','test_withstate.mat'};
-histogramRSquared(mouse,rec,modelfiles,[0 .5]);
-modelfiles = {'orgfullcorr_onlystate.mat','test_onlystate.mat','orgfullcorr_onlychoice.mat'};
-histogramRSquared(mouse,rec,modelfiles,[0 .05]);
+%% Plot CVRsquared maps for single variable models - reward and state seem kinda similar
+recs = {'16-Jul-2018','17-Jul-2018','18-Jul-2018','19-Jul-2018','20-Jul-2018'};
+for i = 1:length(recs)
+    %plotRSquared(mouse,recs{i},'allaudio_onlyreward.mat',frames,[0 .05]);
+    plotRSquared(mouse,recs{i},'forchaoqun_onlystate.mat',frames,[0 .05]);
+end
 
-plotRSquared(mouse,rec,'test_onlystate.mat',frames,[0 .15]);
-plotRSquared(mouse,rec,'test_withstate.mat',frames,[0 .9]);
 
-betac = 1e-3;      
-plotBetas(mouse,rec,'test_withstate.mat',{'attentive'},frames,[-betac betac]);
-betac = 10e-3;
-plotBetas(mouse,rec,'test_onlystate.mat',{'attentive'},frames,[-betac betac]);
+%% check with shuffled regressors
+
+parfor i = 1:length(recs)
+    lgrab(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlylGrab.mat');
+    state(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlystate.mat');
+    choice(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlychoice.mat');
+    reward(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlyreward.mat');
+    audstim(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlyllaudStim.mat');
+    time(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlytime.mat');
+    llick(i) = getRSquaredNew(mouse,recs{i},'allaudio_onlyllick.mat');
+
+end
+
+
 
 
 

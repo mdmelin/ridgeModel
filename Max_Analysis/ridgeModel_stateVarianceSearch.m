@@ -1,4 +1,4 @@
-function ridgeModel_stateEncoding_withjitter(cPath,Animal,Rec,glmFile,dType)
+function ridgeModel_stateVarianceSearch(cPath,Animal,Rec,glmFile,dType)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019 
 %on that same dataset, but adds regressors for neural state (predicted by 
@@ -67,55 +67,44 @@ dims = 200; %number of dims in Vc that are used in the model
 %% load data
 bhvFile = dir([cPath filesep Animal '_' Paradigm '*.mat']);
 load([cPath bhvFile(1).name],'SessionData'); %load behavior data
-load([glmPath filesep glmFile],'glmhmm_params','choices','posterior_probs','model_training_sessions'); %load latent states and model info
+load([glmPath filesep glmFile],'glmhmm_params','choices','posterior_probs','model_training_sessions','state_label_indices'); %load latent states and model info
 SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trailstart timestamps to seconds
 nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
 
 model_training_sessions = cellstr(model_training_sessions); %convert to cell
 sessionidx = find(strcmp(Rec,model_training_sessions)); %find the index of the session we want to pull latent states for
 postprob_nonan = posterior_probs{sessionidx}; %get latent states for desired session
-lag = 0;
-for i = 1:length(postprob_nonan) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice. 
-    if ~nochoice(i+lag) %if a choice was made
-        postprob_withnan(i+lag,:) = postprob_nonan(i,:); %just put the probabilities into the new array
+counterind = 1;
+for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice. 
+    if ~nochoice(i) %if a choice was made
+        postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
+        counterind = counterind + 1;
     else %if no choice was made
-        postprob_withnan(i+lag,:) = NaN; %insert a NaN to new array
-        postprob_withnan(i+lag+1,:) = postprob_nonan(i,:);
-        lag = lag + 1; %add 1 lag index
+        postprob_withnan(i,:) = NaN; %insert a NaN to new array
     end
 end
 postprobs = postprob_withnan;
+postprobs = postprobs(:,str2num(state_label_indices));
 clear postprob_withnan postprob_nonan;
 glmweights = squeeze(glmhmm_params.observations.Wk);
+glmweights = glmweights(str2num(state_label_indices),:);
 fprintf('\nGLM weights:\n');
 disp(glmweights);
-statelabels = predictlabels(glmweights); %[index of attentive state, i_leftbias, i_rightbias]
 
 % figure;
 % plot(glmweights','LineWidth',2);%plot states to make sure predicted labels are reasonable
 % y = 5;
 % line([1,2],[0,0],'LineStyle','--','Color','black');
 % title('Latent state weights - Verify that these labels look correct');
-% figureleg = cell([1,3]);
-% figureleg{statelabels(1)} = 'Attentive';
-% figureleg{statelabels(2)} = 'LBias';
-% figureleg{statelabels(3)} = 'RBias';
-% legend(figureleg);
+% legend('Attentive','Lbias','Rbias');
 % drawnow;
 % 
 % figure;
 % plot(postprobs,'LineWidth',2);%plot states to make sure predicted labels are reasonable
 % y = 5;
 % title('Posterior probabilities');
-% figureleg = cell([1,3]);
-% figureleg{statelabels(1)} = 'Attentive';
-% figureleg{statelabels(2)} = 'LBias';
-% figureleg{statelabels(3)} = 'RBias';
-% legend(figureleg);
+% legend('Attentive','Lbias','Rbias');
 % drawnow;
-
-postprobs = postprobs(:,statelabels); %now re-sort the latent states so that they are indexed by [p_attentive, p_lbias, p_rbias]
-
 
 if strcmpi(dType,'Widefield')
     if exist([cPath vcFile],'file') ~= 2 %check if data file exists and get from server otherwise
@@ -152,9 +141,13 @@ elseif strcmpi(dType,'twoP')
 end
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 postprobs = postprobs(bTrials,:); %trim to sessions with good imaging
+[~,inds] = max(postprobs,[],2); 
+attentiveind = inds == 1; %get attentive trials
+
 %equalize L/R choices
 useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
 choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
+choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', [], inf, []); %equalize attentive and inattentive state
 trials = trials(choiceIdx);
 bTrials = bTrials(choiceIdx);
 Vc = Vc(:,:,choiceIdx);
@@ -169,7 +162,7 @@ if exist([cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],'file') ~= 2
     if ~exist([cPath 'BehaviorVideo' filesep], 'dir')
         mkdir([cPath 'BehaviorVideo' filesep]);
     end
-    copyfile([sPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat']);
+    copyfile([sPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments']);
     copyfile([sPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat']);
     copyfile([sPath 'BehaviorVideo' filesep 'FilteredPupil.mat'],[cPath 'BehaviorVideo' filesep 'FilteredPupil.mat']);
     copyfile([sPath 'BehaviorVideo' filesep 'segInd1.mat'],[cPath 'BehaviorVideo' filesep 'segInd1.mat']);
@@ -917,7 +910,7 @@ fullR(trialIdx,:) = []; %clear bad trials
 %% run QR and check for rank-defficiency
 rejIdx = nansum(abs(fullR)) < 10;
 [~, fullQRR] = qr(bsxfun(@rdivide,fullR(:,~rejIdx),sqrt(sum(fullR(:,~rejIdx).^2))),0); %orthogonalize design matrix
-% figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
+figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
 if sum(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1))) < size(fullR,2) %check if design matrix is full rank
     temp = ~(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1)));
     fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
@@ -964,54 +957,80 @@ end
 
  glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
  
-%% run ridge regression in low-D, with state this time
-%run model. Zero-mean without intercept. only video qr.
-[ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for original video, zero-mean model, WITH state: %f\n', mean(ridgeVals));
-save([cPath 'orgdimBeta_withstate.mat'], 'dimBeta', 'ridgeVals');
-save([cPath filesep 'orgregData_withstate.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
-rateDisc_videoRebuild(cPath, 'org'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
+ %% create label sets
+taskvarlabels = {'Choice','reward','handleSound','lfirstTacStim','lTacStim','rfirstTacStim','rTacStim','lfirstAudStim','lAudStim','rfirstAudStim','rAudStim','prevReward','prevChoice','nextChoice','water'};
+opmotorlabels = {'lGrab','lGrabRel','rGrab','rGrabRel','lLick','rLick'};
+spontmotorlabels = {'piezo','whisk','nose','fastPupil','slowPupil','face','body','Move','bhvVideo'};
+timelabels = {'time'};
+ 
+%% Run WITHOUT task variables 
 
-[Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-save([cPath glmFile 'withstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
-
-%% Run with state ONLY
-
-labels = {'attentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-%cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,labels)));
-Ind = ismember(regIdx(~rejIdx), find(ismember(regLabels,labels)));
-stateR = fullR(:, Ind);
-[stateRidge, stateBeta] = ridgeMML(Vc', stateR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for state only model: %f\n', mean(stateRidge));
-Vm = (stateR * stateBeta)';
-
-
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-%% Run with choice ONLY
-
-labels = {'Choice'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
-
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on choice only
-%% Run with reward ONLY
-
-labels = {'reward'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
-
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlyreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on lLick only
-%% Run WITHOUT state - should mirror original model
-
-labels = regLabels(1:end-1); %get all regressors except state
+labels = regLabels(~ismember(regLabels, taskvarlabels)); %get all regressors except task vars
 labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
 
 [Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'nostate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+save([cPath glmFile 'notaskvars.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+%% Run WITHOUT task variables AND state
+
+labels = regLabels(~ismember(regLabels, [taskvarlabels, 'attentive'])); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'notaskvarsstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+
+%% Run WITHOUT operant motor labels
+
+labels = regLabels(~ismember(regLabels, opmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'noopmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+%% Run WITHOUT operant motor labels AND state
+
+labels = regLabels(~ismember(regLabels, [opmotorlabels, 'attentive'])); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'noopmotorstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+%% Run WITHOUT spontaneous motor labels
+
+labels = regLabels(~ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'nospontmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+%% Run WITHOUT spontaneous motor labels AND state
+
+labels = regLabels(~ismember(regLabels, [spontmotorlabels, 'attentive'])); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'nospontmotorstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+
+%% Run WITHOUT time label
+
+labels = regLabels(~ismember(regLabels, timelabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'notime.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+%% Run WITHOUT time label AND state
+
+labels = regLabels(~ismember(regLabels, [timelabels, 'attentive'])); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'notimestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+
+
+
 
 
 %% nested functions

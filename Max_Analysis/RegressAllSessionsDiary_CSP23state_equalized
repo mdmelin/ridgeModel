@@ -1,0 +1,2523 @@
+
+cPath =
+
+    'X:\Widefield'
+
+
+animal =
+
+    'CSP23'
+
+
+glmfile =
+
+    'forchaoqun.mat'
+
+
+numsess =
+
+    53
+
+
+
+Running session number 1. Date is .
+
+
+
+Running session number 2. Date is ..
+
+
+
+Running session number 3. Date is 02-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 4. Date is 03-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+something wrong with the session from this day...
+
+Running session number 5. Date is 03-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 6. Date is 04-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 7. Date is 05-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 174
+Elapsed time is 1.765214 seconds.
+Current trial is 100 out of 174
+Elapsed time is 3.301922 seconds.
+Current trial is 150 out of 174
+Elapsed time is 4.817416 seconds.
+Rejected 2/174 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 2/2399 additional regressors.
+Rejected 473/2870 empty regressors
+fminbnd failed to converge 137/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 4855.830587
+fminbnd failed to converge 140/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.624394... Median Rsquared: 0.663393
+fminbnd failed to converge 80/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.106500... Median Rsquared: 0.109882
+fminbnd failed to converge 73/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.079762... Median Rsquared: 0.079358
+fminbnd failed to converge 56/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.191031... Median Rsquared: 0.197166
+fminbnd failed to converge 2/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.446266... Median Rsquared: 0.472468
+fminbnd failed to converge 137/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.625028... Median Rsquared: 0.664873
+fminbnd failed to converge 131/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.625609... Median Rsquared: 0.665225
+fminbnd failed to converge 139/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.626279... Median Rsquared: 0.666044
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.571009... Median Rsquared: 0.605675
+fminbnd failed to converge 160/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.523311... Median Rsquared: 0.561074
+fminbnd failed to converge 163/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.522548... Median Rsquared: 0.560482
+fminbnd failed to converge 143/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.390348... Median Rsquared: 0.413899
+fminbnd failed to converge 150/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.391292... Median Rsquared: 0.415383
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.625505... Median Rsquared: 0.664467
+fminbnd failed to converge 145/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.624687... Median Rsquared: 0.663781
+
+
+Running session number 8. Date is 05-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 9. Date is 06-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 10. Date is 07-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 58
+Elapsed time is 1.447863 seconds.
+Rejected 3/58 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 8/2223 additional regressors.
+Rejected 655/2870 empty regressors
+fminbnd failed to converge 100/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 2143.858035
+fminbnd failed to converge 104/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.647194... Median Rsquared: 0.705395
+fminbnd failed to converge 100/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.112952... Median Rsquared: 0.121516
+fminbnd failed to converge 80/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.078156... Median Rsquared: 0.082382
+fminbnd failed to converge 68/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.212640... Median Rsquared: 0.232913
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.551643... Median Rsquared: 0.588895
+fminbnd failed to converge 88/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.642030... Median Rsquared: 0.700163
+fminbnd failed to converge 94/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.648189... Median Rsquared: 0.706185
+fminbnd failed to converge 87/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.645847... Median Rsquared: 0.704418
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.543947... Median Rsquared: 0.594530
+fminbnd failed to converge 161/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.475123... Median Rsquared: 0.524658
+fminbnd failed to converge 169/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.476086... Median Rsquared: 0.525651
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.373194... Median Rsquared: 0.409877
+fminbnd failed to converge 152/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.371673... Median Rsquared: 0.408375
+fminbnd failed to converge 87/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.644060... Median Rsquared: 0.701332
+fminbnd failed to converge 91/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.644478... Median Rsquared: 0.702956
+
+
+Running session number 11. Date is 10-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/30 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 36/2090 additional regressors.
+Rejected 816/2870 empty regressors
+fminbnd failed to converge 58/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 1377.111247
+something wrong with the session from this day...
+
+Running session number 12. Date is 11-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 134
+Elapsed time is 1.467167 seconds.
+Current trial is 100 out of 134
+Elapsed time is 2.955492 seconds.
+Rejected 134/134 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 13. Date is 11-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 14. Date is 12-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/26 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 1/2057 additional regressors.
+something wrong with the session from this day...
+
+Running session number 15. Date is 12-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 216
+Elapsed time is 1.524950 seconds.
+Current trial is 100 out of 216
+Elapsed time is 3.050659 seconds.
+Current trial is 150 out of 216
+Elapsed time is 4.568134 seconds.
+Current trial is 200 out of 216
+Elapsed time is 6.078626 seconds.
+Rejected 216/216 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 16. Date is 12-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 17. Date is 13-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 156
+Elapsed time is 1.905876 seconds.
+Current trial is 100 out of 156
+Elapsed time is 3.758150 seconds.
+Current trial is 150 out of 156
+Elapsed time is 5.591918 seconds.
+Rejected 2/156 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2317 additional regressors.
+Rejected 553/2870 empty regressors
+fminbnd failed to converge 126/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 4288.040106
+fminbnd failed to converge 135/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.628879... Median Rsquared: 0.670845
+fminbnd failed to converge 70/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.115807... Median Rsquared: 0.122026
+fminbnd failed to converge 70/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.178974... Median Rsquared: 0.197583
+fminbnd failed to converge 53/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.228630... Median Rsquared: 0.249144
+fminbnd failed to converge 3/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.443638... Median Rsquared: 0.464379
+fminbnd failed to converge 132/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.628069... Median Rsquared: 0.670561
+fminbnd failed to converge 131/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.630357... Median Rsquared: 0.673334
+fminbnd failed to converge 122/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.628677... Median Rsquared: 0.671039
+fminbnd failed to converge 153/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.585098... Median Rsquared: 0.630370
+fminbnd failed to converge 168/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.537490... Median Rsquared: 0.586770
+fminbnd failed to converge 164/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.536123... Median Rsquared: 0.586717
+fminbnd failed to converge 138/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.458404... Median Rsquared: 0.498200
+fminbnd failed to converge 136/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.456924... Median Rsquared: 0.498803
+fminbnd failed to converge 145/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.629651... Median Rsquared: 0.671806
+fminbnd failed to converge 125/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.629112... Median Rsquared: 0.671596
+
+
+Running session number 18. Date is 13-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 19. Date is 14-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/20 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 8/1702 additional regressors.
+something wrong with the session from this day...
+
+Running session number 20. Date is 14-Jun-2020
+
+something wrong with the session from this day...
+
+Running session number 21. Date is 14-Jun-2020_1
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 62
+Elapsed time is 1.392321 seconds.
+Rejected 2/62 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2069 additional regressors.
+Rejected 801/2870 empty regressors
+fminbnd failed to converge 136/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 4587.546001
+fminbnd failed to converge 136/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.484521... Median Rsquared: 0.490221
+fminbnd failed to converge 102/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.022997... Median Rsquared: 0.020863
+fminbnd failed to converge 97/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.022122... Median Rsquared: 0.019245
+fminbnd failed to converge 81/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.044234... Median Rsquared: 0.042710
+fminbnd failed to converge 8/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.446393... Median Rsquared: 0.448949
+fminbnd failed to converge 119/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.481876... Median Rsquared: 0.486688
+fminbnd failed to converge 121/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.484582... Median Rsquared: 0.490902
+fminbnd failed to converge 132/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.486729... Median Rsquared: 0.493699
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.434206... Median Rsquared: 0.440552
+fminbnd failed to converge 173/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.368465... Median Rsquared: 0.379376
+fminbnd failed to converge 165/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.372275... Median Rsquared: 0.383744
+fminbnd failed to converge 155/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.302167... Median Rsquared: 0.314651
+fminbnd failed to converge 132/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.307503... Median Rsquared: 0.320158
+fminbnd failed to converge 123/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.481504... Median Rsquared: 0.486172
+fminbnd failed to converge 118/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.484623... Median Rsquared: 0.490209
+
+
+Running session number 22. Date is 15-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 106
+Elapsed time is 1.561308 seconds.
+Current trial is 100 out of 106
+Elapsed time is 2.997545 seconds.
+Rejected 106/106 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 23. Date is 16-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 134
+Elapsed time is 1.473099 seconds.
+Current trial is 100 out of 134
+Elapsed time is 2.922480 seconds.
+Rejected 134/134 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 24. Date is 16-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 25. Date is 17-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/24 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 10/1895 additional regressors.
+something wrong with the session from this day...
+
+Running session number 26. Date is 17-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 172
+Elapsed time is 1.483604 seconds.
+Current trial is 100 out of 172
+Elapsed time is 2.889779 seconds.
+Current trial is 150 out of 172
+Elapsed time is 4.317689 seconds.
+Rejected 172/172 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 27. Date is 17-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 28. Date is 18-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 102
+Elapsed time is 1.430925 seconds.
+Current trial is 100 out of 102
+Elapsed time is 2.837582 seconds.
+Rejected 102/102 trials for NaN entries in regressors
+something wrong with the session from this day...
+
+Running session number 29. Date is 18-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 30. Date is 19-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 178
+Elapsed time is 1.713152 seconds.
+Current trial is 100 out of 178
+Elapsed time is 3.410841 seconds.
+Current trial is 150 out of 178
+Elapsed time is 5.108127 seconds.
+Rejected 2/178 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2307 additional regressors.
+Rejected 563/2870 empty regressors
+fminbnd failed to converge 138/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 5640.147529
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.580755... Median Rsquared: 0.613518
+fminbnd failed to converge 65/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.093967... Median Rsquared: 0.087219
+fminbnd failed to converge 75/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.073514... Median Rsquared: 0.070826
+fminbnd failed to converge 59/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.121097... Median Rsquared: 0.116509
+fminbnd failed to converge 5/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.431305... Median Rsquared: 0.458444
+fminbnd failed to converge 134/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.580524... Median Rsquared: 0.613009
+fminbnd failed to converge 141/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.582108... Median Rsquared: 0.614389
+fminbnd failed to converge 148/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.580512... Median Rsquared: 0.612575
+fminbnd failed to converge 151/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.536936... Median Rsquared: 0.567680
+fminbnd failed to converge 164/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.477542... Median Rsquared: 0.507199
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.472272... Median Rsquared: 0.503061
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.425958... Median Rsquared: 0.454451
+fminbnd failed to converge 135/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.418517... Median Rsquared: 0.449206
+fminbnd failed to converge 140/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.581799... Median Rsquared: 0.614615
+fminbnd failed to converge 149/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.582663... Median Rsquared: 0.615462
+
+
+Running session number 31. Date is 19-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 312
+Elapsed time is 1.425396 seconds.
+Current trial is 100 out of 312
+Elapsed time is 2.821100 seconds.
+Current trial is 150 out of 312
+Elapsed time is 4.251852 seconds.
+Current trial is 200 out of 312
+Elapsed time is 5.665309 seconds.
+Current trial is 250 out of 312
+Elapsed time is 7.080690 seconds.
+Current trial is 300 out of 312
+Elapsed time is 8.498298 seconds.
+Rejected 2/312 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2329 additional regressors.
+Rejected 541/2870 empty regressors
+fminbnd failed to converge 155/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 15400.246938
+fminbnd failed to converge 157/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.549651... Median Rsquared: 0.572803
+fminbnd failed to converge 92/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.066625... Median Rsquared: 0.062998
+fminbnd failed to converge 82/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.068626... Median Rsquared: 0.067243
+fminbnd failed to converge 77/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.099916... Median Rsquared: 0.096708
+fminbnd failed to converge 26/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.386593... Median Rsquared: 0.400907
+fminbnd failed to converge 152/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.550149... Median Rsquared: 0.573513
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.550087... Median Rsquared: 0.573310
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.550739... Median Rsquared: 0.574106
+fminbnd failed to converge 165/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.523192... Median Rsquared: 0.549289
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.474942... Median Rsquared: 0.503079
+fminbnd failed to converge 153/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.474588... Median Rsquared: 0.502830
+fminbnd failed to converge 119/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.419659... Median Rsquared: 0.446169
+fminbnd failed to converge 119/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.420478... Median Rsquared: 0.447197
+fminbnd failed to converge 143/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.550448... Median Rsquared: 0.573414
+fminbnd failed to converge 161/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.549687... Median Rsquared: 0.572728
+
+
+Running session number 32. Date is 19-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 33. Date is 20-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 336
+Elapsed time is 1.706164 seconds.
+Current trial is 100 out of 336
+Elapsed time is 3.401070 seconds.
+Current trial is 150 out of 336
+Elapsed time is 5.103657 seconds.
+Current trial is 200 out of 336
+Elapsed time is 6.750530 seconds.
+Current trial is 250 out of 336
+Elapsed time is 8.404295 seconds.
+Current trial is 300 out of 336
+Elapsed time is 10.028938 seconds.
+Rejected 2/336 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2395 additional regressors.
+Rejected 475/2870 empty regressors
+fminbnd failed to converge 147/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 11025.719700
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.559426... Median Rsquared: 0.587791
+fminbnd failed to converge 76/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.067996... Median Rsquared: 0.065781
+fminbnd failed to converge 77/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.094281... Median Rsquared: 0.097323
+fminbnd failed to converge 57/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.120625... Median Rsquared: 0.115303
+fminbnd failed to converge 24/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.391726... Median Rsquared: 0.412652
+fminbnd failed to converge 151/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.559543... Median Rsquared: 0.587643
+fminbnd failed to converge 149/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.561314... Median Rsquared: 0.589440
+fminbnd failed to converge 145/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.560713... Median Rsquared: 0.589015
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.524522... Median Rsquared: 0.555520
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.471530... Median Rsquared: 0.503412
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.467363... Median Rsquared: 0.500470
+fminbnd failed to converge 113/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.397029... Median Rsquared: 0.420955
+fminbnd failed to converge 119/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.387747... Median Rsquared: 0.411486
+fminbnd failed to converge 156/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.560772... Median Rsquared: 0.589063
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.560079... Median Rsquared: 0.588738
+
+
+Running session number 34. Date is 20-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 35. Date is 20-Mar-2020_1
+
+something wrong with the session from this day...
+
+Running session number 36. Date is 21-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 264
+Elapsed time is 1.644627 seconds.
+Current trial is 100 out of 264
+Elapsed time is 3.288723 seconds.
+Current trial is 150 out of 264
+Elapsed time is 4.923115 seconds.
+Current trial is 200 out of 264
+Elapsed time is 6.572686 seconds.
+Current trial is 250 out of 264
+Elapsed time is 8.206805 seconds.
+Rejected 2/264 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2360 additional regressors.
+Rejected 510/2870 empty regressors
+fminbnd failed to converge 157/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 9414.518371
+fminbnd failed to converge 156/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.494058... Median Rsquared: 0.511123
+fminbnd failed to converge 77/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.081061... Median Rsquared: 0.075217
+fminbnd failed to converge 74/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.071588... Median Rsquared: 0.068896
+fminbnd failed to converge 73/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.111844... Median Rsquared: 0.106583
+fminbnd failed to converge 23/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.377770... Median Rsquared: 0.389518
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.494811... Median Rsquared: 0.511931
+fminbnd failed to converge 171/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.495262... Median Rsquared: 0.512167
+fminbnd failed to converge 157/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.495667... Median Rsquared: 0.512490
+fminbnd failed to converge 165/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.456671... Median Rsquared: 0.475292
+fminbnd failed to converge 161/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.416135... Median Rsquared: 0.436599
+fminbnd failed to converge 157/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.415220... Median Rsquared: 0.435644
+fminbnd failed to converge 131/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.364852... Median Rsquared: 0.379554
+fminbnd failed to converge 132/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.362667... Median Rsquared: 0.377929
+fminbnd failed to converge 153/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.495623... Median Rsquared: 0.512462
+fminbnd failed to converge 148/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.495665... Median Rsquared: 0.512803
+
+
+Running session number 37. Date is 21-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+something wrong with the session from this day...
+
+Running session number 38. Date is 21-Jun-2020_1
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 178
+Elapsed time is 1.444316 seconds.
+Current trial is 100 out of 178
+Elapsed time is 2.873834 seconds.
+Current trial is 150 out of 178
+Elapsed time is 4.301323 seconds.
+Rejected 2/178 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2304 additional regressors.
+Rejected 566/2870 empty regressors
+fminbnd failed to converge 141/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 6517.833898
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.459594... Median Rsquared: 0.468682
+fminbnd failed to converge 95/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.028504... Median Rsquared: 0.023669
+fminbnd failed to converge 82/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.054503... Median Rsquared: 0.048608
+fminbnd failed to converge 71/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.061899... Median Rsquared: 0.053919
+fminbnd failed to converge 6/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.360414... Median Rsquared: 0.368338
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.459936... Median Rsquared: 0.468724
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.460438... Median Rsquared: 0.469587
+fminbnd failed to converge 155/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.458714... Median Rsquared: 0.467315
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.414021... Median Rsquared: 0.426269
+fminbnd failed to converge 164/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.363077... Median Rsquared: 0.376520
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.363521... Median Rsquared: 0.376763
+fminbnd failed to converge 135/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.295454... Median Rsquared: 0.295437
+fminbnd failed to converge 130/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.294467... Median Rsquared: 0.294793
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.457927... Median Rsquared: 0.467036
+fminbnd failed to converge 143/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.461225... Median Rsquared: 0.470719
+
+
+Running session number 39. Date is 21-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 40. Date is 21-Mar-2020_1
+
+something wrong with the session from this day...
+
+Running session number 41. Date is 22-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 282
+Elapsed time is 1.508352 seconds.
+Current trial is 100 out of 282
+Elapsed time is 3.017478 seconds.
+Current trial is 150 out of 282
+Elapsed time is 4.543230 seconds.
+Current trial is 200 out of 282
+Elapsed time is 6.044345 seconds.
+Current trial is 250 out of 282
+Elapsed time is 7.549448 seconds.
+Rejected 2/282 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2363 additional regressors.
+Rejected 507/2870 empty regressors
+fminbnd failed to converge 142/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 8969.379627
+fminbnd failed to converge 137/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.543355... Median Rsquared: 0.574921
+fminbnd failed to converge 92/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.062405... Median Rsquared: 0.055869
+fminbnd failed to converge 83/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.078625... Median Rsquared: 0.070984
+fminbnd failed to converge 79/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.096208... Median Rsquared: 0.087090
+fminbnd failed to converge 9/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.371966... Median Rsquared: 0.390941
+fminbnd failed to converge 148/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.542665... Median Rsquared: 0.574539
+fminbnd failed to converge 152/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.544120... Median Rsquared: 0.576054
+fminbnd failed to converge 151/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.543276... Median Rsquared: 0.575381
+fminbnd failed to converge 156/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.509407... Median Rsquared: 0.544052
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.472115... Median Rsquared: 0.509665
+fminbnd failed to converge 160/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.473167... Median Rsquared: 0.511297
+fminbnd failed to converge 124/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.423619... Median Rsquared: 0.456431
+fminbnd failed to converge 107/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.423710... Median Rsquared: 0.456576
+fminbnd failed to converge 149/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.544693... Median Rsquared: 0.576314
+fminbnd failed to converge 143/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.543927... Median Rsquared: 0.576154
+
+
+Running session number 42. Date is 22-Mar-2020
+
+something wrong with the session from this day...
+
+Running session number 43. Date is 22-Mar-2020_1
+
+something wrong with the session from this day...
+
+Running session number 44. Date is 23-Jun-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+Current trial is 50 out of 204
+Elapsed time is 1.489601 seconds.
+Current trial is 100 out of 204
+Elapsed time is 2.983362 seconds.
+Current trial is 150 out of 204
+Elapsed time is 4.466448 seconds.
+Current trial is 200 out of 204
+Elapsed time is 5.962180 seconds.
+Rejected 2/204 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2372 additional regressors.
+Rejected 498/2870 empty regressors
+fminbnd failed to converge 148/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 7353.304098
+fminbnd failed to converge 155/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.506503... Median Rsquared: 0.535846
+fminbnd failed to converge 76/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.052815... Median Rsquared: 0.043160
+fminbnd failed to converge 82/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.076079... Median Rsquared: 0.068621
+fminbnd failed to converge 65/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.089630... Median Rsquared: 0.074612
+fminbnd failed to converge 17/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.348956... Median Rsquared: 0.366741
+fminbnd failed to converge 150/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.507631... Median Rsquared: 0.537141
+fminbnd failed to converge 139/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.507935... Median Rsquared: 0.537874
+fminbnd failed to converge 138/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.508614... Median Rsquared: 0.538185
+fminbnd failed to converge 151/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.460365... Median Rsquared: 0.493278
+fminbnd failed to converge 157/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.410107... Median Rsquared: 0.443500
+fminbnd failed to converge 163/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.410832... Median Rsquared: 0.444549
+fminbnd failed to converge 126/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.346196... Median Rsquared: 0.375276
+fminbnd failed to converge 122/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.348438... Median Rsquared: 0.377941
+fminbnd failed to converge 149/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.506950... Median Rsquared: 0.536349
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.507465... Median Rsquared: 0.537147
+
+
+Running session number 45. Date is 23-Jun-2020_1
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+something wrong with the session from this day...
+
+Running session number 46. Date is 24-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 216
+Elapsed time is 1.695608 seconds.
+Current trial is 100 out of 216
+Elapsed time is 3.382952 seconds.
+Current trial is 150 out of 216
+Elapsed time is 5.083287 seconds.
+Current trial is 200 out of 216
+Elapsed time is 6.798958 seconds.
+Rejected 2/216 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2346 additional regressors.
+Rejected 524/2870 empty regressors
+fminbnd failed to converge 152/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 6953.458363
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.510524... Median Rsquared: 0.552448
+fminbnd failed to converge 84/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.087388... Median Rsquared: 0.089270
+fminbnd failed to converge 82/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.095940... Median Rsquared: 0.100460
+fminbnd failed to converge 56/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.142066... Median Rsquared: 0.146599
+fminbnd failed to converge 13/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.359017... Median Rsquared: 0.383685
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.511028... Median Rsquared: 0.553153
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.512131... Median Rsquared: 0.554073
+fminbnd failed to converge 152/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.511581... Median Rsquared: 0.553953
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.476674... Median Rsquared: 0.520874
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.437755... Median Rsquared: 0.484248
+fminbnd failed to converge 167/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.437587... Median Rsquared: 0.485033
+fminbnd failed to converge 140/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.356973... Median Rsquared: 0.389532
+fminbnd failed to converge 141/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.354034... Median Rsquared: 0.387596
+fminbnd failed to converge 150/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.511197... Median Rsquared: 0.553250
+fminbnd failed to converge 150/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.511169... Median Rsquared: 0.553184
+
+
+Running session number 47. Date is 25-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 90
+Elapsed time is 1.718311 seconds.
+Rejected 2/90 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2237 additional regressors.
+Rejected 633/2870 empty regressors
+fminbnd failed to converge 115/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 4017.496617
+fminbnd failed to converge 125/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.483014... Median Rsquared: 0.495231
+fminbnd failed to converge 90/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.051199... Median Rsquared: 0.048305
+fminbnd failed to converge 77/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.077573... Median Rsquared: 0.079710
+fminbnd failed to converge 68/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.085860... Median Rsquared: 0.087286
+fminbnd failed to converge 5/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.397254... Median Rsquared: 0.409654
+fminbnd failed to converge 116/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.483176... Median Rsquared: 0.497586
+fminbnd failed to converge 126/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.483956... Median Rsquared: 0.496923
+fminbnd failed to converge 118/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.482922... Median Rsquared: 0.496103
+fminbnd failed to converge 142/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.425327... Median Rsquared: 0.441951
+fminbnd failed to converge 166/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.374469... Median Rsquared: 0.392389
+fminbnd failed to converge 166/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.372636... Median Rsquared: 0.390929
+fminbnd failed to converge 142/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.303250... Median Rsquared: 0.315403
+fminbnd failed to converge 136/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.301290... Median Rsquared: 0.313635
+fminbnd failed to converge 126/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.481732... Median Rsquared: 0.494666
+fminbnd failed to converge 119/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.482801... Median Rsquared: 0.496546
+
+
+Running session number 48. Date is 26-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/8 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 13/1025 additional regressors.
+something wrong with the session from this day...
+
+Running session number 49. Date is 27-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 74
+Elapsed time is 1.739064 seconds.
+Rejected 2/74 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2234 additional regressors.
+Rejected 636/2870 empty regressors
+fminbnd failed to converge 109/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 3401.685107
+fminbnd failed to converge 113/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.566458... Median Rsquared: 0.600324
+fminbnd failed to converge 102/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.108214... Median Rsquared: 0.113497
+fminbnd failed to converge 81/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.141875... Median Rsquared: 0.152968
+fminbnd failed to converge 74/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.170027... Median Rsquared: 0.182265
+fminbnd failed to converge 1/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.460238... Median Rsquared: 0.486445
+fminbnd failed to converge 106/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.565087... Median Rsquared: 0.598806
+fminbnd failed to converge 123/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.566571... Median Rsquared: 0.601538
+fminbnd failed to converge 123/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.567433... Median Rsquared: 0.601212
+fminbnd failed to converge 155/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.505761... Median Rsquared: 0.548388
+fminbnd failed to converge 169/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.459400... Median Rsquared: 0.505379
+fminbnd failed to converge 174/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.458443... Median Rsquared: 0.503948
+fminbnd failed to converge 144/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.397362... Median Rsquared: 0.435164
+fminbnd failed to converge 156/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.396093... Median Rsquared: 0.432536
+fminbnd failed to converge 100/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.567266... Median Rsquared: 0.600998
+fminbnd failed to converge 115/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.567459... Median Rsquared: 0.600688
+
+
+Running session number 50. Date is 28-Feb-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/40 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 1/2191 additional regressors.
+Rejected 680/2870 empty regressors
+fminbnd failed to converge 94/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 2424.228923
+fminbnd failed to converge 98/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.540766... Median Rsquared: 0.550620
+fminbnd failed to converge 124/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.070919... Median Rsquared: 0.068877
+fminbnd failed to converge 88/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.076653... Median Rsquared: 0.073134
+fminbnd failed to converge 67/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.147051... Median Rsquared: 0.148361
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.476772... Median Rsquared: 0.487425
+fminbnd failed to converge 108/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.539882... Median Rsquared: 0.550171
+fminbnd failed to converge 97/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.536578... Median Rsquared: 0.546797
+fminbnd failed to converge 94/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.538498... Median Rsquared: 0.546256
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.454062... Median Rsquared: 0.466974
+fminbnd failed to converge 159/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.407861... Median Rsquared: 0.425290
+fminbnd failed to converge 163/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.398350... Median Rsquared: 0.413642
+fminbnd failed to converge 135/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.317153... Median Rsquared: 0.321686
+fminbnd failed to converge 151/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.309203... Median Rsquared: 0.311614
+fminbnd failed to converge 99/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.540127... Median Rsquared: 0.549560
+fminbnd failed to converge 105/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.539927... Median Rsquared: 0.548874
+
+
+Running session number 51. Date is 29-Jan-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 96
+Elapsed time is 1.780628 seconds.
+Rejected 6/96 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 80/2354 additional regressors.
+Rejected 596/2870 empty regressors
+fminbnd failed to converge 111/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 4130.104566
+fminbnd failed to converge 122/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.644824... Median Rsquared: 0.689910
+fminbnd failed to converge 70/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.062941... Median Rsquared: 0.053292
+fminbnd failed to converge 113/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.058860... Median Rsquared: 0.052985
+fminbnd failed to converge 72/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.153951... Median Rsquared: 0.141025
+fminbnd failed to converge 3/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.545105... Median Rsquared: 0.572442
+fminbnd failed to converge 124/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.646246... Median Rsquared: 0.691031
+fminbnd failed to converge 118/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.649189... Median Rsquared: 0.694416
+fminbnd failed to converge 108/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.647035... Median Rsquared: 0.692444
+fminbnd failed to converge 147/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.560845... Median Rsquared: 0.601155
+fminbnd failed to converge 165/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.484499... Median Rsquared: 0.524575
+fminbnd failed to converge 161/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.486827... Median Rsquared: 0.527358
+fminbnd failed to converge 143/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.349905... Median Rsquared: 0.367746
+fminbnd failed to converge 148/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.353874... Median Rsquared: 0.371227
+fminbnd failed to converge 113/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.645900... Median Rsquared: 0.691238
+fminbnd failed to converge 105/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.645988... Median Rsquared: 0.691211
+
+
+Running session number 52. Date is 30-Jan-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Rejected 2/28 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 36/2049 additional regressors.
+something wrong with the session from this day...
+
+Running session number 53. Date is 31-Jan-2020
+
+
+GLM weights:
+    8.9798    0.4092
+    3.2758    0.5156
+    4.4239   -1.0805
+
+[Warning: Behavioral and video timestamps are shifted by 1h. Will adjust timestamps in video data
+accordingly.] 
+[> In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('ridgeModel_stateEncoding', 'C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m', 212)" style="font-weight:bold">ridgeModel_stateEncoding</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\ridgeModel_stateEncoding.m',212,0)">line 212</a>)
+In <a href="matlab:matlab.internal.language.introspective.errorDocCallback('RegressModel_allSessions', 'C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m', 27)" style="font-weight:bold">RegressModel_allSessions</a> (<a href="matlab: opentoline('C:\Data\churchland\ridgeModel\rateDisc\RegressModel_allSessions.m',27,0)">line 27</a>)] 
+Current trial is 50 out of 286
+Elapsed time is 1.724252 seconds.
+Current trial is 100 out of 286
+Elapsed time is 3.451827 seconds.
+Current trial is 150 out of 286
+Elapsed time is 5.173653 seconds.
+Current trial is 200 out of 286
+Elapsed time is 6.892757 seconds.
+Current trial is 250 out of 286
+Elapsed time is 8.608843 seconds.
+Rejected 11/286 trials for NaN entries in regressors
+Design matrix is rank-defficient. Removing 0/2412 additional regressors.
+Rejected 458/2870 empty regressors
+fminbnd failed to converge 146/200 times
+Mean ridge penalty for original video, zero-mean model, WITH state: 6771.756207
+fminbnd failed to converge 157/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.613605... Median Rsquared: 0.653789
+fminbnd failed to converge 82/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.143239... Median Rsquared: 0.141841
+fminbnd failed to converge 56/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.113786... Median Rsquared: 0.116444
+fminbnd failed to converge 56/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.234527... Median Rsquared: 0.247123
+fminbnd failed to converge 16/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.434718... Median Rsquared: 0.457168
+fminbnd failed to converge 144/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.612897... Median Rsquared: 0.652999
+fminbnd failed to converge 142/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.613199... Median Rsquared: 0.653539
+fminbnd failed to converge 146/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.612242... Median Rsquared: 0.652625
+fminbnd failed to converge 158/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.568808... Median Rsquared: 0.604766
+fminbnd failed to converge 154/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.521733... Median Rsquared: 0.559224
+fminbnd failed to converge 155/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.518468... Median Rsquared: 0.555261
+fminbnd failed to converge 126/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.459572... Median Rsquared: 0.488772
+fminbnd failed to converge 118/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.453797... Median Rsquared: 0.482309
+fminbnd failed to converge 139/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.612704... Median Rsquared: 0.652713
+fminbnd failed to converge 142/200 times
+Current fold is 2 out of 10
+Current fold is 4 out of 10
+Current fold is 6 out of 10
+Current fold is 8 out of 10
+Current fold is 10 out of 10
+Run finished. Mean Rsquared: 0.613376... Median Rsquared: 0.653533

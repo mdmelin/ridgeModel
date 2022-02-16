@@ -1,5 +1,5 @@
 % function cLine = stdshade(amatrix,acolor,F,alpha,smth,varargin)
-function stdshade(amatrix,alpha,acolor,F,smth,varargin)
+function stdshade(amatrix,alpha,acolor,F,smth,naninds,varargin)
 % usage: stdshade(amatrix,acolor,F,alpha,smth)
 % plot mean and sem/std coming from a matrix of data, at which each row is an
 % observation. sem/std is shown as shading.
@@ -48,19 +48,50 @@ end
 
 lineMean = amean;
 amean = fillmissing(amean, 'previous');
+fillx = [F fliplr(F)];
+filly = [amean+astd fliplr(amean-astd)];
+ignoreinds = naninds;
 
-if exist('alpha','var')==0 || isempty(alpha)
-    fill([F fliplr(F)],[amean+astd fliplr(amean-astd)],acolor,'linestyle','none');
-    acolor='k';
-else
-    fill([F fliplr(F)],[amean+astd fliplr(amean-astd)],acolor, 'FaceAlpha', alpha,'linestyle','none');
-end
-
-if ishold==0
-    check=true; else check=false;
+x = cell(length(ignoreinds)+1,1);
+y = cell(length(ignoreinds)+1,1);
+%create separate boxes to fill around nans
+for i = 1:length(ignoreinds)+1
+    if i==1 %first box
+        inds = 1:ignoreinds(1)-1;
+        fillx = [F(inds) fliplr(F(inds))];
+        filly = [amean(inds)+astd(inds) fliplr(amean(inds)-astd(inds))];
+        x{i} = fillx;
+        y{i} = filly;
+    elseif i==length(ignoreinds)+1 %last box
+        inds = ignoreinds(i-1)+1:length(F);
+        fillx = [F(inds) fliplr(F(inds))];
+        filly = [amean(inds)+astd(inds) fliplr(amean(inds)-astd(inds))];
+        x{i} = fillx;
+        y{i} = filly;
+    else %all other boxes
+        inds = ignoreinds(i-1)+1:ignoreinds(i)-1;
+        fillx = [F(inds) fliplr(F(inds))];
+        filly = [amean(inds)+astd(inds) fliplr(amean(inds)-astd(inds))];
+        x{i} = fillx;
+        y{i} = filly;
+    end
 end
 
 hold on;
+for i = 1:length(x) %iterate thru boxes
+    if exist('alpha','var')==0 || isempty(alpha)
+        fill(x{i},y{i},acolor,'linestyle','none');
+        acolor='k';
+    else
+        fill(x{i},y{i},acolor, 'FaceAlpha', alpha,'linestyle','none');
+    end
+    
+    if ishold==0
+        check=true; else check=false;
+    end
+end
+hold on;
+lineMean(naninds) = NaN;
 cLine = plot(F,lineMean,'color',acolor,'linewidth',1.5); %% change color or linewidth to adjust mean line
 
 if check

@@ -2,10 +2,11 @@ clc;clear all;close all;
 %runs encoding model over ALL sessions for given mouse/mice
 addpath('C:\Data\churchland\ridgeModel\widefield');
 
-diary RegressAllSessionsDiary_mSM6state %turn the diary on
+diary RegressAllSessionsDiary_CSP22state_equalized %turn the diary on
 cPath = 'X:\Widefield'
-animal = 'mSM63'
-glmfile = 'allaudio.mat';
+animal = 'CSP22'
+%glmfile = 'forchaoqun_subsetofsessions.mat'
+glmfile = 'forchaoqun.mat'
 
 wrkdir = [cPath filesep animal filesep 'SpatialDisc' filesep];
 files = dir(wrkdir);
