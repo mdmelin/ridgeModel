@@ -14,7 +14,7 @@ SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trails
 nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
 sRate = 30;
 load([cPath 'Vc.mat'],'Vc','U','trials','bTrials'); %just need trials variable here. Vs is [dims of temporal components,frames,trials]
-load([cPath 'opts.mat'],'opts');
+load([cPath 'opts2.mat'],'opts');
 nRequested = length(trialInds);
 
 %% get proper trials from Vc and SessionData
