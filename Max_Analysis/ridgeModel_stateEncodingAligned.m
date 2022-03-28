@@ -1,11 +1,12 @@
-function ridgeModel_deleteme(cPath,Animal,Rec,glmFile,dType)
+function ridgeModel_stateEncodingAligned(cPath,Animal,Rec,glmFile,dType)
 
-%Mods by Max Melin. Trains the ridge regression model described in Musall 2019 
-%on that same dataset, but adds regressors for neural state (predicted by 
+%Mods by Max Melin. Trains the ridge regression model described in Musall 2019
+%on that same dataset, but adds regressors for neural state (predicted by
 %the Ashwood GLM-HMM). State regressors span the whole trial length and
 %include the following states: ___,___,___.
 addpath('C:\Data\churchland\ridgeModel\widefield');
 addpath('C:\Data\churchland\ridgeModel\rateDisc');
+addpath('C:\Data\churchland\ridgeModel\smallStuff');
 if ~strcmpi(cPath(end),filesep)
     cPath = [cPath filesep];
 end
@@ -59,6 +60,7 @@ shVal = sRate * opts.preStim  + 1; %expected position of stimulus onset in the i
 maxStimShift = 1 * sRate; % maximal stimulus onset after handle grab. (default is 1s - this means that stimulus onset should not be more than 1s after handle grab. Cognitive regressors will have up to 1s of baseline because of stim jitter.)
 bhvDimCnt = 200;    % number of dimensions from behavioral videos that are used as regressors.
 gaussShift = 1;     % inter-frame interval between regressors. Will use only every 'gaussShift' regressor and convolve with gaussian of according FHWM to reduce total number of used regressors.
+%[~, motorLabels] = rateDiscRecordings; %get motor labels for motor-only model
 dims = 200; %number of dims in Vc that are used in the model
 
 
@@ -75,7 +77,7 @@ model_training_sessions = cellstr(model_training_sessions); %convert to cell
 sessionidx = find(strcmp(Rec,model_training_sessions)); %find the index of the session we want to pull latent states for
 postprob_nonan = posterior_probs{sessionidx}; %get latent states for desired session
 counterind = 1;
-for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice. 
+for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice.
     if ~nochoice(i) %if a choice was made
         postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
         counterind = counterind + 1;
@@ -84,7 +86,7 @@ for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. 
     end
 end
 postprobs = postprob_withnan;
-postprobs = postprobs(:,str2num(state_label_indices));
+postprobs = postprobs(:,str2num(state_label_indices)); %permute the states to the correct indices
 clear postprob_withnan postprob_nonan;
 glmweights = squeeze(glmhmm_params.observations.Wk);
 glmweights = glmweights(str2num(state_label_indices),:);
@@ -98,7 +100,7 @@ disp(glmweights);
 % title('Latent state weights - Verify that these labels look correct');
 % legend('Attentive','Lbias','Rbias');
 % drawnow;
-% 
+%
 % figure;
 % plot(postprobs,'LineWidth',2);%plot states to make sure predicted labels are reasonable
 % y = 5;
@@ -122,7 +124,7 @@ if strcmpi(dType,'Widefield')
     trials(ind) = [];
     bTrials(ind) = [];
     Vc(:,:,ind) = [];
-
+    
 elseif strcmpi(dType,'twoP')
     
     load([cPath 'data'], 'data'); %load 2p data
@@ -141,18 +143,18 @@ elseif strcmpi(dType,'twoP')
 end
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 postprobs = postprobs(bTrials,:); %trim to sessions with good imaging
-[~,inds] = max(postprobs,[],2); 
+[~,inds] = max(postprobs,[],2);
 attentiveind = inds == 1; %get attentive trials
 
 %equalize L/R choices
 useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
 choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
-choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', [], inf, []); %equalize attentive and inattentive state
+choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', bhv.Rewarded, inf, []); %equalize attentive and inattentive state
 trials = trials(choiceIdx);
 bTrials = bTrials(choiceIdx);
 Vc = Vc(:,:,choiceIdx);
 postprobs = postprobs(choiceIdx,:);
-bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset   
+bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 trialCnt = length(bTrials);
 [~,trialstates] = max(postprobs,[],2);
 %% load behavior data
@@ -340,7 +342,11 @@ spoutOutR = cell(1,trialCnt);
 rewardR = cell(1,trialCnt);
 ChoiceR = cell(1,trialCnt);
 
-attentiveR = cell(1,trialCnt); %attentive state regressor added by max
+handleAttentiveR = cell(1,trialCnt); %attentive state regressor added by max
+stimAttentiveR = cell(1,trialCnt);
+delayAttentiveR = cell(1,trialCnt);
+responseAttentiveR = cell(1,trialCnt);
+
 
 prevRewardR = cell(1,trialCnt);
 prevChoiceR = cell(1,trialCnt);
@@ -505,7 +511,7 @@ for iTrials = 1:trialCnt
     else
         stimTemp(:, end - stimShift - frames + 1 : end - stimShift) = timeR;
     end
-    attentiveR{iTrials} = false(size(stimTemp));
+    
     rewardR{iTrials} = false(size(stimTemp));
     
     if bhv.Rewarded(iTrials) %rewarded
@@ -514,14 +520,51 @@ for iTrials = 1:trialCnt
     
     % get L/R choices as binary design matrix
     ChoiceR{iTrials} = false(size(stimTemp));
-    if bhv.ResponseSide(iTrials) == 1
+    if bhv.ResponseSide(iTrials) == 1 %IF LEFT CHOICE!!! Left choice is 1, right is 2
         ChoiceR{iTrials} = stimTemp;
     end
     
     % get attentive state as binary design matrix
-    if trialstates(iTrials) == 1
-        attentiveR{iTrials} = stimTemp; %mouse was in attentive state for this trial
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleAttentiveR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleAttentiveR{iTrials},2); stimShift = size(handleAttentiveR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+        if trialstates(iTrials) == 1
+            handleAttentiveR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+        end
     end
+    
+    % get attentive state as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimAttentiveR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+        if trialstates(iTrials) == 1
+            stimAttentiveR{iTrials}(:,1:responseReg-stimReg) = temp;
+        end
+    end
+    
+    % get attentive state as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayAttentiveR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if trialstates(iTrials) == 1
+            delayAttentiveR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+        end
+    end
+    
+    % get attentive state as binary design matrix during delay period. 2s max duration
+    responseAttentiveR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if trialstates(iTrials) == 1
+            responseAttentiveR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
     
     % previous trial regressors
     if iTrials == 1 %don't use first trial
@@ -571,8 +614,8 @@ for iTrials = 1:trialCnt
         ChoiceR{iTrials} = ChoiceR{iTrials}(:,1:gaussShift:end);
         prevChoiceR{iTrials} = prevChoiceR{iTrials}(:,1:gaussShift:end);
         prevStimR{iTrials} = prevStimR{iTrials}(:,1:Shift:end);
-        nextChoiceR{iTrials} = nextChoiceR{iTrials}(:,1:gaussShift:end);        
-        repeatChoiceR{iTrials} = repeatChoiceR{iTrials}(:,1:gaussShift:end);        
+        nextChoiceR{iTrials} = nextChoiceR{iTrials}(:,1:gaussShift:end);
+        repeatChoiceR{iTrials} = repeatChoiceR{iTrials}(:,1:gaussShift:end);
     end
     
     %determine timepoint of reward given
@@ -832,7 +875,10 @@ prevRewardR = cat(1,prevRewardR{:});
 
 ChoiceR = cat(1,ChoiceR{:});
 
-attentiveR = cat(1,attentiveR{:});
+handleAttentiveR = cat(1,handleAttentiveR{:});
+stimAttentiveR = cat(1,stimAttentiveR{:});
+delayAttentiveR = cat(1,delayAttentiveR{:});
+responseAttentiveR = cat(1,responseAttentiveR{:});
 
 prevChoiceR = cat(1,prevChoiceR{:});
 prevStimR = cat(1,prevStimR{:});
@@ -849,13 +895,13 @@ fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
     lLickR rLickR handleSoundR lfirstTacStimR lTacStimR rfirstTacStimR rTacStimR ...
     lfirstAudStimR lAudStimR rfirstAudStimR rAudStimR prevRewardR prevChoiceR ...
     nextChoiceR waterR piezoR whiskR noseR fastPupilR ...
-    slowPupilR faceR bodyR moveR vidR attentiveR];
+    slowPupilR faceR bodyR moveR vidR handleAttentiveR stimAttentiveR delayAttentiveR responseAttentiveR];
 
 % labels for different regressor sets. It is REALLY important this agrees with the order of regressors in fullR.
 regLabels = {
     'time' 'Choice' 'reward' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
     'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' 'rfirstAudStim' 'rAudStim' ...
-    'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo' 'attentive'};
+    'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo' 'handleAttentive' 'stimAttentive' 'delayAttentive' 'responseAttentive'};
 
 %index to reconstruct different response kernels
 regIdx = [
@@ -890,7 +936,10 @@ regIdx = [
     ones(1,size(bodyR,2))*find(ismember(regLabels,'body')) ...
     ones(1,size(moveR,2))*find(ismember(regLabels,'Move')) ...
     ones(1,size(vidR,2))*find(ismember(regLabels,'bhvVideo')) ...
-    ones(1,size(attentiveR,2))*find(ismember(regLabels,'attentive'))];
+    ones(1,size(handleAttentiveR,2))*find(ismember(regLabels,'handleAttentive')) ...
+    ones(1,size(stimAttentiveR,2))*find(ismember(regLabels,'stimAttentive')) ...
+    ones(1,size(delayAttentiveR,2))*find(ismember(regLabels,'delayAttentive')) ...
+    ones(1,size(responseAttentiveR,2))*find(ismember(regLabels,'responseAttentive'))];
 
 % orthogonalize video against spout/handle movement
 vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'Move' 'bhvVideo'})))); %index for video regressors
@@ -907,19 +956,8 @@ trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
 
-%% run QR and check for rank-defficiency
-rejIdx = nansum(abs(fullR)) < 10;
-[~, fullQRR] = qr(bsxfun(@rdivide,fullR(:,~rejIdx),sqrt(sum(fullR(:,~rejIdx).^2))),0); %orthogonalize design matrix
-figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
-if sum(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1))) < size(fullR,2) %check if design matrix is full rank
-    temp = ~(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1)));
-    fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
-    rejIdx(~rejIdx) = temp; %reject regressors that cause rank-defficint matrix
-end
-
-% reject regressors that are too sparse or rank-defficient
-fullR(:,rejIdx) = []; %clear empty regressors
-fprintf(1, 'Rejected %d/%d empty regressors\n', sum(rejIdx),length(rejIdx));
+saveLabels = regLabels;
+saveR = fullR;
 
 %% save modified Vc
 Vc(:,trialIdx) = []; %clear bad trials
@@ -933,70 +971,106 @@ elseif strcmpi(dType,'twoP')
 end
 
 %% apply gaussian filter to design matrix if using sub-sampling
-if gaussShift > 1
-    [a,b] = size(fullR);
-    
-    % find non-continous regressors (contain values different from -1, 0 or 1)
-    temp = false(size(fullR));
-    temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
-    regIdx = nanmean(temp) == 0; %index for non-continous regressors
-    
-    % do gaussian convolution. perform trialwise to avoid overlap across trials.
-    trialCnt = a/frames;
-    fullR = reshape(fullR,frames,trialCnt,b);
-    for iTrials = 1:trialCnt
-        fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
-    end
-    fullR = reshape(fullR,a,b);
-end
+% if gaussShift > 1
+%     [a,b] = size(fullR);
+%
+%     % find non-continous regressors (contain values different from -1, 0 or 1)
+%     temp = false(size(fullR));
+%     temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
+%     regIdx = nanmean(temp) == 0; %index for non-continous regressors
+%
+%     % do gaussian convolution. perform trialwise to avoid overlap across trials.
+%     trialCnt = a/frames;
+%     fullR = reshape(fullR,frames,trialCnt,b);
+%     for iTrials = 1:trialCnt
+%         fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
+%     end
+%     fullR = reshape(fullR,a,b);
+% end
 
 %% clear individual regressors
- clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
-     lAudStimR rAudStimR rewardR prevRewardR ChoiceR ...
-     prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
+clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
+    lAudStimR rAudStimR rewardR prevRewardR ChoiceR ...
+    prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
 
- glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
- 
+glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
 
+%% run ridge regression in low-D, with state this time
+%run model. Zero-mean without intercept. only video qr.
+% %rateDisc_videoRebuild(cPath, 'org'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
+
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(saveLabels);
+% save([cPath glmFile 'allvarsaligned.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
 %% Run with state ONLY
 
-labels = {'attentive'};
+labels = {'handleAttentive'};
+labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'handlestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+
+labels = {'stimAttentive'};
 labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
 
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'stimstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
-%% Run with choice ONLY
+labels = {'delayAttentive'};
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
 
-labels = {'Choice'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'delaystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on choice only
-%% Run with reward ONLY
 
-labels = {'reward'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure in the right order
+labels = {'responseAttentive'};
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
 
-[Vm, fullBeta, stateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'onlyreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'stateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on lLick only
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+
 
 %% nested functions
-    function [Vm, cBeta, cR, subIdx, cRidge, cLabels, cMap, cMovie] =  crossValModel(cLabels)
+
+
+    function [Vm, cBeta, cR, subIdx, cRidge, keptLabels, cLabelInds, cMap, cMovie] =  crossValModel(cLabels)
         
-        cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,cLabels))); %get index for task regressors
-        cLabels = regLabels(sort(find(ismember(regLabels,cLabels)))); %make sure motorLabels is in the right order
-        
-        %create new regressor index that matches motor labels
-        subIdx = regIdx(~rejIdx);
-        subIdx = subIdx(cIdx);
-        temp = unique(subIdx);
-        for x = 1 : length(temp)
-            subIdx(subIdx == temp(x)) = x;
+        regs2grab = ismember(regIdx,find(ismember(regLabels,cLabels))); %these are just the regressors chosen by labels, no rejection yet
+        cR = fullR(:,regs2grab); %grab desired labels from design matrix
+        %reject regressors
+        rejIdx = nansum(abs(cR)) < 10;
+        [~, fullQRR] = qr(bsxfun(@rdivide,cR(:,~rejIdx),sqrt(sum(cR(:,~rejIdx).^2))),0); %orthogonalize design matrix
+        %figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
+        if sum(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1))) < size(cR,2) %check if design matrix is full rank
+            temp = ~(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1)));
+            fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
+            rejIdx(~rejIdx) = temp; %reject regressors that cause rank-defficint matrix
         end
-        cR = fullR(:,cIdx);
         
+        cR = cR(:,~rejIdx); % reject regressors that are too sparse or rank-defficient
+        
+        regs2grab = regIdx(regs2grab); %get indices that have our desired labels
+        
+        temporary = unique(regs2grab);
+        keptLabels = regLabels(temporary);
+        for x = 1 : length(temporary)
+            cLabelInds(regs2grab == temporary(x)) = x; %make it so that cLabelInds doesn't skip any integers when we move past a label we don't want
+        end
+        
+        cLabelInds = cLabelInds(~rejIdx); %now reject the regressors (from our subselection of labels) that had NaN's or were rank deficient
+        subIdx = cLabelInds; %get rid of this redundant variable later
+        
+        fprintf(1, 'Rejected %d/%d empty or rank deficient regressors\n', sum(rejIdx),length(rejIdx));
+        
+        discardLabels = cLabels(~ismember(cLabels,keptLabels));
+        
+        if length(discardLabels) > 0
+            fprintf('\nFully discarded regressor: %s because of NaN''s or emptiness \n', discardLabels{:});
+        else 
+            fprintf('\nNo regressors were FULLY discarded\n');
+        end
+        
+        %now move on to the regression
         Vm = zeros(size(Vc),'single'); %pre-allocate motor-reconstructed V
         randIdx = randperm(size(Vc,2)); %generate randum number index
         foldCnt = floor(size(Vc,2) / ridgeFolds);
@@ -1061,23 +1135,8 @@ save([cPath glmFile 'onlyreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullI
         
         
     end
-    
-    function labels = predictlabels(glmweights) %This function attempts to properly label the latent states
-        [numstates,numinpts] = size(glmweights);
-        [~,stimsorted] = sort(glmweights(:,1),'descend');
-        [~,biassorted] = sort(abs(glmweights(:,2)),'ascend');
-        
-        if stimsorted(1) ~= biassorted(1)
-            fprintf('\nThe state with highest stim weight does not have the lowest bias weight. Exiting function.\n');
-            labels = [];
-            return
-        else
-            [~,biasresort] = sort(glmweights(1:end ~= stimsorted(1),2),'ascend'); %ignores the attentive state and sorts the two biased states
-            labels(1) = stimsorted(1);
-            [~,labels(2)] = min(biasresort);
-            [~,labels(3)] = max(biasresort);
-        end
-        
-    end
+
 end
+
+
 

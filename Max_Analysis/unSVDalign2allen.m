@@ -11,11 +11,12 @@ alignU = alignAllenTransIm(double(U),transParams); %align to allen atlas
 alignU = alignU(:, 1:size(allenMask,2),:);
 edgemap = dorsalMaps.edgeMapScaled(1:size(alignU,1),:); %allen edge map
 alignU(allenMask == 1) = NaN;
-%alignU(edgemap == 1) = NaN; %apply allen edge map
 if ~isempty(selectRegion)
     areaMap = dorsalMaps.areaMap(1:size(alignU,1),:);
     alignU = alignU .* repmat(ismember(areaMap,selectRegion),[1,1,200]);
     alignU(alignU == 0) = NaN;
+else
+    alignU(edgemap == 1) = NaN; %apply allen edge map for visualization
 end
 %figure;imagesc(alignU(:,:,1));title(['Plot of regions that will be extracted for analysis: ',num2str(selectRegion)]);
 Vreshape = reshape(Vc,200,[]);

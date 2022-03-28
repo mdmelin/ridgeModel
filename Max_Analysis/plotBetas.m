@@ -13,7 +13,7 @@
 % c = 5e-4;
 % clims = [-c c]; %colorbar lims
 
-function [out,meanout,betalength] = plotBetas(mouse,rec,modelfile,myLabel,frames,clims)
+function [out,meanout,betalength] = plotBetas(mouse,rec,modelfile,myLabel,frames,clims,suppress)
 load('C:\Data\churchland\ridgeModel\widefield\allenDorsalMapSM.mat','dorsalMaps'); %Get allen atlas
 addpath('C:\Data\churchland\ridgeModel\widefield');
 addpath('C:\Data\churchland\ridgeModel\smallstuff');
@@ -29,10 +29,11 @@ plottitle = [mouse ' ' rec ': ' sprintf('%s',modelfile) ' ... ' myLabel{1} ' reg
 
 %%
 
-regInd = ismember(regIdx(~rejIdx), find(ismember(fullLabels,myLabel))); %get the indices of desired regressor
+%regInd = ismember(regIdx(~rejIdx), find(ismember(fullLabels,myLabel))); %get the indices of desired regressor
+regInd = fullLabelInds == find(ismember(fullLabels,myLabel)); 
 
 for i = 1:length(fullBeta)
-    betas = fullBeta{i}(regInd,:); %extract desired betas
+    betas(:,:,i) = fullBeta{i}(regInd,:); %extract desired betas
 end
 meanbeta = nanmean(betas,3); %compute mean beta over 10 fold crossval
 betareconstructed = svdFrameReconstruct(U, meanbeta'); %recover from SVD space
@@ -61,6 +62,9 @@ alignedmat(edgemap == 1) = NaN; %apply allen edge map
 alignedmat(allenMask == 1) = NaN; %apply allen mask
 
 meanout = alignedmat;
+if suppress == "True"
+    return
+end
 %% plotting
 figure('units','normalized','outerposition',[0 0 1 1])
 sgtitle(plottitle);

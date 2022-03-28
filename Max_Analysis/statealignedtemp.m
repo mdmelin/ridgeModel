@@ -1,5 +1,7 @@
-function rateDisc_choiceModel_20210130(cPath,Animal,Rec,dType)
+function ridgeModel_stateEncodingAligned(cPath,Animal,Rec,glmFile,dType)
 addpath('C:\Data\churchland\ridgeModel\widefield');
+addpath('C:\Data\churchland\ridgeModel\rateDisc');
+addpath('C:\Data\churchland\ridgeModel\smallStuff');
 if ~strcmpi(cPath(end),filesep)
     cPath = [cPath filesep];
 end
