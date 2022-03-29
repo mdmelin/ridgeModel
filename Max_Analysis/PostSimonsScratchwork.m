@@ -201,173 +201,156 @@ end
 legend('mSM63','mSM64','mSM65','mSM66');
 %% Now check cvR2 for some different trial periods
 
+%% Train aligned encoding models
+%parpool('local',16);
+clc;clear all;
+mSM63recs = {'09-Jul-2018','13-Jul-2018','16-Jul-2018','17-Jul-2018','18-Jul-2018','19-Jul-2018','20-Jul-2018'}; %mSM63
+mSM64recs = {'24-Jul-2018','27-Jul-2018'}; %,,'25-Jul-2018' only has one state ,'26-Jul-2018' also not in
+mSM65recs = {'05-Jul-2018','28-Jun-2018','29-Jun-2018','02-Jul-2018'}; %for mSM65, maybe put , back in
+mSM66recs = {'27-Jun-2018','28-Jun-2018','29-Jun-2018','30-Jun-2018','02-Jul-2018','04-Jul-2018','05-Jul-2018','11-Jul-2018','16-Jul-2018'};%for mSM66 add , back in
+%^these sessions are basically all of the audio discrimination sessions from these mice
+addpath('C:\Data\churchland\ridgeModel\rateDisc');
+addpath('C:\Data\churchland\ridgeModel\smallStuff');
+mSM63labels = cell(1,length(mSM63recs));
+mSM63labels(:) = {'mSM63'};
+mSM64labels = cell(1,length(mSM64recs));
+mSM64labels(:) = {'mSM64'};
+mSM65labels = cell(1,length(mSM65recs));
+mSM65labels(:) = {'mSM65'};
+mSM66labels = cell(1,length(mSM66recs));
+mSM66labels(:) = {'mSM66'};
 
-%% Decode choice
-tic
-count = 1; clear Mdl accuracy accuracyshuff betas Vc;
-for i = 1:length(animals)
-    fprintf('\n%s, %s\n ',animals{i},encodingrecs{i});
-    [sessMdl,sessaccuracy,sessbetas,sessVc] = logisticModel(cPath,animals{i},encodingrecs{i},glmFile,10,"Choice","False");
-    [~,sessaccuracyshuff,~,~] = logisticModel(cPath,animals{i},encodingrecs{i},glmFile,10,"Choice","True");
-    
-    if ~isempty(sessMdl) %get the sessions with sufficient trials for plotting (output from sessions without sufficient trials are empty)
-        Mdl{count} = sessMdl;
-        accuracy(count,:) = sessaccuracy;
-        accuracyshuff(count,:) = sessaccuracyshuff;
-        betas(:,:,:,count) = sessbetas;
-        Vc(count) = sessVc;
-        count = count + 1;
-    end
+encodingrecs = [mSM63recs,mSM64recs,mSM65recs,mSM66recs];
+animals = [mSM63labels,mSM64labels,mSM65labels,mSM66labels];
+cPath = 'X:/Widefield';
+glmFile = 'allaudio.mat';
+
+parfor i = 1:length(animals)
+    animals{i}
+    encodingrecs{i}
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[]);
 end
-toc
-segframes = Vc(1).segFrames; clear Vc;
-cols = {'r','b','g'};
-figure
-stdshade(accuracy,.2,cols{1},[],6,[1],[]); %plot average accuracy
-stdshade(accuracyshuff,.2,cols{2},[],6,[1],[]); %plot average accuracy
-xline(segframes);
-ylim([.4 1]);
-yline(.5);
-trialperiod = 5;
 
-segframes = [1 segframes];
-avginds = segframes(trialperiod):segframes(trialperiod+1);
-meanbetas = squeeze(mean(betas,4,'omitnan')); %betas are [xpix,ypix,frames,animals]
-periodbetas = meanbetas(:,:,avginds);
-trialperiodmean = squeeze(mean(periodbetas,3,'omitnan'));
-
-clims = [-.0005 .0005];
-figure
-mapImg = imshow(trialperiodmean, clims);
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Response period decoder weights');
-set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
-hcb = colorbar;
-hcb.Title.String = 'Mean beta weight';
-
-%% Decode state
-tic
-count = 1; clear Mdl accuracy accuracyshuff betas Vc;
-for i = 1:length(animals)
-    fprintf('\n%s, %s\n ',animals{i},encodingrecs{i});
-    [sessMdl,sessaccuracy,sessbetas,sessVc] = logisticModel(cPath,animals{i},encodingrecs{i},glmFile,25,"State","False");
-    [~,sessaccuracyshuff,~,~] = logisticModel(cPath,animals{i},encodingrecs{i},glmFile,25,"State","True");
-    
-    if ~isempty(sessMdl) %get the sessions with sufficient trials for plotting (output from sessions without sufficient trials are empty)
-        Mdl{count} = sessMdl;
-        accuracy(count,:) = sessaccuracy;
-        accuracyshuff(count,:) = sessaccuracyshuff;
-        betas(:,:,:,count) = sessbetas;
-        Vc(count) = sessVc;
-        count = count + 1;
-    end
+parfor i = 1:length(animals)
+    animals{i}
+    encodingrecs{i}
+    ridgeModel_handleRewardShuffDeleteme(cPath,animals{i},encodingrecs{i},glmFile,[]);
+    ridgeModel_stimRewardShuffDeleteme(cPath,animals{i},encodingrecs{i},glmFile,[]);
+    ridgeModel_delayRewardShuffDeleteme(cPath,animals{i},encodingrecs{i},glmFile,[]);
+    ridgeModel_responseRewardShuffDeleteme(cPath,animals{i},encodingrecs{i},glmFile,[]);
 end
-toc
-segframes = Vc(1).segFrames; clear Vc;
-cols = {'r','b','g'};
-figure
-stdshade(accuracy,.2,cols{1},[],6,[1],[]); %plot average accuracy
-stdshade(accuracyshuff,.2,cols{2},[],6,[1],[]); %plot average accuracy
-xline(segframes);
-ylim([.4 1]);
-yline(.5);
-trialperiod = 5;
 
-segframes = [1 segframes];
-avginds = segframes(trialperiod):segframes(trialperiod+1);
-meanbetas = squeeze(mean(betas,4,'omitnan')); %betas are [xpix,ypix,frames,animals]
-periodbetas = meanbetas(:,:,avginds);
-trialperiodmean = squeeze(mean(periodbetas,3,'omitnan'));
 
-clims = [-.0005 .0005];
-figure
-mapImg = imshow(trialperiodmean, clims);
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Response period decoder weights');
-set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
-hcb = colorbar;
-hcb.Title.String = 'Mean beta weight';
 
-%% Decode choice over different states
+%% plot reward single variable models
+clear h s d r h2 s2 d2 r2
+clim = [0 .9];
+parfor i = 1:length(encodingrecs)
+    h(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlereward.mat');
+    s(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimreward.mat');
+    d(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delayreward.mat');
+    r(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responsereward.mat');
 
-tic
-count1 = 1;count2 = 1; clear attentive_accuracy bias_accuracy attentive_betas bias_betas;
-for i = 1:length(animals)
-    fprintf('\n%s, %s\n ',animals{i},encodingrecs{i});
-    [aMdl,aaccuracy,abetas,aVc] = logisticModel_sepByState(cPath,animals{i},encodingrecs{i},glmFile,10,"Attentive","Choice","False");
-    [bMdl,baccuracy,bbetas,bVc] = logisticModel_sepByState(cPath,animals{i},encodingrecs{i},glmFile,10,"Bias","Choice","False");
-    
-    if ~isempty(aMdl) %get the sessions with sufficient trials for plotting (output from sessions without sufficient trials are empty)
-        attentive_Mdl{count1} = aMdl;
-        attentive_accuracy(count1,:) = aaccuracy;
-        attentive_betas(:,:,:,count1) = abetas;
-        attentive_Vc(count1) = aVc;
-        
-        count1 = count1 + 1;
-    end
-    
-    if ~isempty(bMdl)
-        bias_Mdl{count2} = bMdl;
-        bias_accuracy(count2,:) = baccuracy;
-        bias_betas(:,:,:,count2) = bbetas;
-        bias_Vc(count2) = bVc;
-        
-        count2 = count2 + 1;
-    end
+    h2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlerewardshuff.mat');
+    s2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimrewardshuff.mat');
+    d2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delayrewardshuff.mat');
+    r2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responserewardshuff.mat');
 end
-toc
 
-segframes = attentive_Vc(1).segFrames; clear Vc;
-cols = {'r','b','g'};
-figure
-stdshade(attentive_accuracy,.2,cols{1},[],6,[1],[]); %plot average accuracy
-stdshade(bias_accuracy,.2,cols{2},[],6,[1],[]); %plot average accuracy
-xline(segframes);
-ylim([.4 1]);
-yline(.5);
-legend('','Engaged','','Biased','','','','','','');
+x = [h;h2;s;s2;d;d2;r;r2]';
+figure;
+set(gca,'FontSize',18);
+hold on;
+cols = {'.r' '.b' '.g' '.c'};
+plot(NaN,NaN,cols{1});
+plot(NaN,NaN,cols{2});
+plot(NaN,NaN,cols{3});
+plot(NaN,NaN,cols{4});
 
-segframes = [1 segframes];
-%avginds = segframes(5):segframes(6); %response period
-%avginds = segframes(4):segframes(5); %delay period
-avginds = 87:97; %late delay period
-a_meanbetas = squeeze(mean(attentive_betas,4,'omitnan')); %betas are [xpix,ypix,frames,animals]
-b_meanbetas = squeeze(mean(bias_betas,4,'omitnan')); %betas are [xpix,ypix,frames,animals]
+boxplot(x);
+ylim([0,.15]);
+ylabel('cvR^2');
+title('cvR^2 - REWARD single variable models');
+xticklabels({'Handle','Handleshuff','Stim','Stimshuff','Delay','Delayshuff','Response','Responseshuff'});
+yline(0);
+animalinds{1} = 1:length(mSM63recs);
+animalinds{2} = animalinds{1}(end)+1 : animalinds{1}(end)+1+length(mSM64recs)-1;
+animalinds{3} = animalinds{2}(end)+1 : animalinds{2}(end)+1+length(mSM65recs)-1;
+animalinds{4} = animalinds{3}(end)+1 : animalinds{3}(end)+1+length(mSM66recs)-1;
 
-a_periodbetas = a_meanbetas(:,:,avginds);
-b_periodbetas = b_meanbetas(:,:,avginds);
+for i = 1:4 %iterate thru animals
+    
+    x1 = ones(length(animalinds{i}),1);
+    x2 = x1+1;
+    x3 = x2+1;
+    x4 = x3+1;
+    x5 = x4+1;
+    x6 = x5+1;
+    x7 = x6+1;
+    x8 = x7+1;
+    
+    scatter(x1, h(animalinds{i}),200,cols{i});
+    scatter(x2, h2(animalinds{i}),200,cols{i});
+    scatter(x3, s(animalinds{i}),200,cols{i});
+    scatter(x4, s2(animalinds{i}),200,cols{i});
+    scatter(x5, d(animalinds{i}),200,cols{i});
+    scatter(x6, d2(animalinds{i}),200,cols{i});
+    scatter(x7, r(animalinds{i}),200,cols{i});
+    scatter(x8, r2(animalinds{i}),200,cols{i});
+end
+legend('mSM63','mSM64','mSM65','mSM66');
 
-a_trialperiodmean = squeeze(mean(a_periodbetas,3,'omitnan'));
-b_trialperiodmean = squeeze(mean(b_periodbetas,3,'omitnan'));
+%% plot reward full model deltar2
+clear h s d r h2 s2 d2 r2
+clim = [0 .9];
+parfor i = 1:length(encodingrecs)
+    full(i,:,:) = plotRSquared(animals{i},encodingrecs{i},'allaudio_cogvarsaligned.mat',clim,"True");
 
-clims = [-.0005 .0005];
+    h2(i,:,:) = plotRSquared(animals{i},encodingrecs{i},'allaudio_fullhandlerewardshuff.mat',clim,"True");
+    s2(i,:,:) = plotRSquared(animals{i},encodingrecs{i},'allaudio_fullstimrewardshuff.mat',clim,"True");
+    d2(i,:,:) = plotRSquared(animals{i},encodingrecs{i},'allaudio_fulldelayrewardshuff.mat',clim,"True");
+    r2(i,:,:) = plotRSquared(animals{i},encodingrecs{i},'allaudio_fullresponserewardshuff.mat',clim,"True");
+end
 
-figure
-mapImg = imshow(a_trialperiodmean, clims);
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Engaged - Late delay period decoder weights');
-set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
-hcb = colorbar;
-hcb.Title.String = 'Mean beta weight';
+handlediff = nanmean(full - h2,[2 3]);
+stimdiff = nanmean(full - s2,[2 3]);
+delaydiff = nanmean(full - d2,[2 3]);
+responsediff = nanmean(full - r2,[2 3]);
 
-figure
-mapImg = imshow(b_trialperiodmean, clims);
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Disengaged - Late delay period decoder weights');
-set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
-hcb = colorbar;
-hcb.Title.String = 'Mean beta weight';
+x = [handlediff,stimdiff,delaydiff,responsediff];
+figure;
+set(gca,'FontSize',18);
+hold on;
+cols = {'.r' '.b' '.g' '.c'};
+plot(NaN,NaN,cols{1});
+plot(NaN,NaN,cols{2});
+plot(NaN,NaN,cols{3});
+plot(NaN,NaN,cols{4});
 
-figure
-mapImg = imshow(a_trialperiodmean - b_trialperiodmean, clims);
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Difference - Late delay period decoder weights');
-set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
-hcb = colorbar;
-hcb.Title.String = 'Mean beta weight';
+boxplot(x);
+ylim([-.005,.005]);
+ylabel('cvR^2');
+title('Pixel-wise deltaR^2 - Full model, shuffle REWARD in different periods');
+xticklabels({'Handle','Stim','Delay','Response'});
+yline(0);
+animalinds{1} = 1:length(mSM63recs);
+animalinds{2} = animalinds{1}(end)+1 : animalinds{1}(end)+1+length(mSM64recs)-1;
+animalinds{3} = animalinds{2}(end)+1 : animalinds{2}(end)+1+length(mSM65recs)-1;
+animalinds{4} = animalinds{3}(end)+1 : animalinds{3}(end)+1+length(mSM66recs)-1;
 
-
-
-
-
-
-
-
+for i = 1:4 %iterate thru animals
+    
+    x1 = ones(length(animalinds{i}),1);
+    x2 = x1+1;
+    x3 = x2+1;
+    x4 = x3+1;
+    
+    scatter(x1, handlediff(animalinds{i}),200,cols{i});
+    scatter(x2, stimdiff(animalinds{i}),200,cols{i});
+    scatter(x3, delaydiff(animalinds{i}),200,cols{i});
+    scatter(x4, responsediff(animalinds{i}),200,cols{i});
+end
+legend('mSM63','mSM64','mSM65','mSM66');
 
 
 
