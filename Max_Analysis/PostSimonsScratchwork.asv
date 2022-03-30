@@ -122,8 +122,8 @@ plot(NaN,NaN,cols{4});
 
 boxplot(x);
 ylim([-.1,.1]);
-ylabel('cvR^2');
-title('Pixel-wise deltaR^2');
+ylabel('deltaR^2');
+title('Pixel-wise deltaR^2 - single variable model');
 xticklabels({'State','Choice','Reward','Prevchoice'});
 yline(0);
 animalinds{1} = 1:length(mSM63recs);
@@ -179,7 +179,7 @@ plot(NaN,NaN,cols{4});
 
 boxplot(x);
 ylim([-.05,.05]);
-ylabel('cvR^2');
+ylabel('deltaR^2');
 title('Pixel-wise deltaR^2 - full model');
 xticklabels({'State','Choice','Reward',});
 yline(0);
@@ -225,7 +225,7 @@ animals = [mSM63labels,mSM64labels,mSM65labels,mSM66labels];
 cPath = 'X:/Widefield';
 glmFile = 'allaudio.mat';
 
-parfor i = 1:length(animals)
+for i = 1:length(animals)
     animals{i}
     encodingrecs{i}
     ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[]);
@@ -299,7 +299,121 @@ for i = 1:4 %iterate thru animals
     scatter(x8, r2(animalinds{i}),200,cols{i});
 end
 legend('mSM63','mSM64','mSM65','mSM66');
+%% plot CHOICE single variable models
+clear h s d r h2 s2 d2 r2
+clim = [0 .9];
+parfor i = 1:length(encodingrecs)
+    h(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlechoice.mat');
+    s(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimchoice.mat');
+    d(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delaychoice.mat');
+    r(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responsechoice.mat');
 
+    h2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlechoiceshuff.mat');
+    s2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimchoiceshuff.mat');
+    d2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delaychoiceshuff.mat');
+    r2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responsechoiceshuff.mat');
+end
+
+x = [h;h2;s;s2;d;d2;r;r2]';
+figure;
+set(gca,'FontSize',18);
+hold on;
+cols = {'.r' '.b' '.g' '.c'};
+plot(NaN,NaN,cols{1});
+plot(NaN,NaN,cols{2});
+plot(NaN,NaN,cols{3});
+plot(NaN,NaN,cols{4});
+
+boxplot(x);
+ylim([0,.15]);
+ylabel('cvR^2');
+title('cvR^2 - CHOICE single variable models');
+xticklabels({'Handle','Handleshuff','Stim','Stimshuff','Delay','Delayshuff','Response','Responseshuff'});
+yline(0);
+animalinds{1} = 1:length(mSM63recs);
+animalinds{2} = animalinds{1}(end)+1 : animalinds{1}(end)+1+length(mSM64recs)-1;
+animalinds{3} = animalinds{2}(end)+1 : animalinds{2}(end)+1+length(mSM65recs)-1;
+animalinds{4} = animalinds{3}(end)+1 : animalinds{3}(end)+1+length(mSM66recs)-1;
+
+for i = 1:4 %iterate thru animals
+    
+    x1 = ones(length(animalinds{i}),1);
+    x2 = x1+1;
+    x3 = x2+1;
+    x4 = x3+1;
+    x5 = x4+1;
+    x6 = x5+1;
+    x7 = x6+1;
+    x8 = x7+1;
+    
+    scatter(x1, h(animalinds{i}),200,cols{i});
+    scatter(x2, h2(animalinds{i}),200,cols{i});
+    scatter(x3, s(animalinds{i}),200,cols{i});
+    scatter(x4, s2(animalinds{i}),200,cols{i});
+    scatter(x5, d(animalinds{i}),200,cols{i});
+    scatter(x6, d2(animalinds{i}),200,cols{i});
+    scatter(x7, r(animalinds{i}),200,cols{i});
+    scatter(x8, r2(animalinds{i}),200,cols{i});
+end
+legend('mSM63','mSM64','mSM65','mSM66');
+
+%% plot STATE single variable models
+clear h s d r h2 s2 d2 r2
+clim = [0 .9];
+parfor i = 1:length(encodingrecs)
+    h(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlestate.mat');
+    s(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimstate.mat');
+    d(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delaystate.mat');
+    r(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responsestate.mat');
+
+    h2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handlestateshuff.mat');
+    s2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimstateshuff.mat');
+    d2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delaystateshuff.mat');
+    r2(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responsestateshuff.mat');
+end
+
+x = [h;h2;s;s2;d;d2;r;r2]';
+figure;
+set(gca,'FontSize',18);
+hold on;
+cols = {'.r' '.b' '.g' '.c'};
+plot(NaN,NaN,cols{1});
+plot(NaN,NaN,cols{2});
+plot(NaN,NaN,cols{3});
+plot(NaN,NaN,cols{4});
+
+boxplot(x);
+ylim([0,.15]);
+ylabel('cvR^2');
+title('cvR^2 - STATE single variable models');
+xticklabels({'Handle','Handleshuff','Stim','Stimshuff','Delay','Delayshuff','Response','Responseshuff'});
+yline(0);
+animalinds{1} = 1:length(mSM63recs);
+animalinds{2} = animalinds{1}(end)+1 : animalinds{1}(end)+1+length(mSM64recs)-1;
+animalinds{3} = animalinds{2}(end)+1 : animalinds{2}(end)+1+length(mSM65recs)-1;
+animalinds{4} = animalinds{3}(end)+1 : animalinds{3}(end)+1+length(mSM66recs)-1;
+
+for i = 1:4 %iterate thru animals
+    
+    x1 = ones(length(animalinds{i}),1);
+    x2 = x1+1;
+    x3 = x2+1;
+    x4 = x3+1;
+    x5 = x4+1;
+    x6 = x5+1;
+    x7 = x6+1;
+    x8 = x7+1;
+    
+    scatter(x1, h(animalinds{i}),200,cols{i});
+    scatter(x2, h2(animalinds{i}),200,cols{i});
+    scatter(x3, s(animalinds{i}),200,cols{i});
+    scatter(x4, s2(animalinds{i}),200,cols{i});
+    scatter(x5, d(animalinds{i}),200,cols{i});
+    scatter(x6, d2(animalinds{i}),200,cols{i});
+    scatter(x7, r(animalinds{i}),200,cols{i});
+    scatter(x8, r2(animalinds{i}),200,cols{i});
+end
+legend('mSM63','mSM64','mSM65','mSM66');
 %% plot reward full model deltar2
 clear h s d r h2 s2 d2 r2
 clim = [0 .9];
@@ -328,7 +442,7 @@ plot(NaN,NaN,cols{3});
 plot(NaN,NaN,cols{4});
 
 boxplot(x);
-ylim([-.005,.05]);
+ylim([-.005,.005]);
 ylabel('cvR^2');
 title('Pixel-wise deltaR^2 - Full model, shuffle REWARD in different periods');
 xticklabels({'Handle','Stim','Delay','Response'});
@@ -353,11 +467,61 @@ end
 legend('mSM63','mSM64','mSM65','mSM66');
 
 
+%% Do FULL design matrix shuffles for reward
+parfor i = 1:length(animals)
+    animals{i}
+    encodingrecs{i}
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[],[]);
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[],{'handleReward'});
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[],{'stimReward'});
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[],{'delayReward'});
+    ridgeModel_stateEncodingAligned(cPath,animals{i},encodingrecs{i},glmFile,[],{'responseReward'});
+end
+%% plot the deltaRsquared for that 
+clear h s d r h2 s2 d2 r2
+clim = [0 .9];
+parfor i = 1:length(encodingrecs)
+    h(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_.mat') - getRSquaredNew(animals{i},encodingrecs{i},'allaudio_handleRewardshuff.mat');
+    s(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_.mat') - getRSquaredNew(animals{i},encodingrecs{i},'allaudio_stimRewardshuff.mat');
+    d(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_.mat') - getRSquaredNew(animals{i},encodingrecs{i},'allaudio_delayRewardshuff.mat');
+    r(i) = getRSquaredNew(animals{i},encodingrecs{i},'allaudio_.mat') - getRSquaredNew(animals{i},encodingrecs{i},'allaudio_responseRewardshuff.mat');
+end
 
+x = [h;s;d;r]';
+figure;
+set(gca,'FontSize',18);
+hold on;
+cols = {'.r' '.b' '.g' '.c'};
+plot(NaN,NaN,cols{1});
+plot(NaN,NaN,cols{2});
+plot(NaN,NaN,cols{3});
+plot(NaN,NaN,cols{4});
 
+boxplot(x);
+ylim([0,.15]);
+ylabel('deltaR^2');
+title('deltaR^2 - fully shuffle reward in different trial periods');
+xticklabels({'Handle','Handleshuff','Stim','Stimshuff','Delay','Delayshuff','Response','Responseshuff'});
+yline(0);
+animalinds{1} = 1:length(mSM63recs);
+animalinds{2} = animalinds{1}(end)+1 : animalinds{1}(end)+1+length(mSM64recs)-1;
+animalinds{3} = animalinds{2}(end)+1 : animalinds{2}(end)+1+length(mSM65recs)-1;
+animalinds{4} = animalinds{3}(end)+1 : animalinds{3}(end)+1+length(mSM66recs)-1;
 
+for i = 1:4 %iterate thru animals
+    
+    x1 = ones(length(animalinds{i}),1);
+    x2 = x1+1;
+    x3 = x2+1;
+    x4 = x3+1;
 
-
+    
+    scatter(x1, h(animalinds{i}),200,cols{i});
+    scatter(x2, h2(animalinds{i}),200,cols{i});
+    scatter(x3, s(animalinds{i}),200,cols{i});
+    scatter(x4, s2(animalinds{i}),200,cols{i});
+end
+legend('mSM63','mSM64','mSM65','mSM66');
 
 
 
