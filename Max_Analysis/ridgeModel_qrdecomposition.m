@@ -1,4 +1,4 @@
-function ridgeModel_qrdecomposition(cPath,Animal,Rec,glmFile,dType)
+function ridgeModel_qrdecomposition(cPath,Animal,Rec,glmFile,dType,shufflelabels)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019
 %on that same dataset, but adds regressors for neural state (predicted by
@@ -17,7 +17,8 @@ end
 
 if strcmpi(dType,'twoP')
     piezoLine = 5;     % channel in the analog data that contains data from piezo sensor
-    stimLine = 4;      % channel in the analog data that contains stimulus trigger.
+    stimLine = 4;      % channel in the analog data that contains s
+    timulus trigger.
     
 elseif strcmpi(dType,'Widefield')
     piezoLine = 2;     % channel in the analog data that contains data from piezo sensor
@@ -318,6 +319,11 @@ maxSpoutRegs = length(min(round((preStimDur + spoutTime) * sRate)) : frames); %m
 %basic time regressors
 timeR = logical(diag(ones(1,frames)));
 
+handleTimeR = cell(1,trialCnt); %aligned time regressors for qr decomp
+stimTimeR = cell(1,trialCnt);
+delayTimeR = cell(1,trialCnt);
+responseTimeR = cell(1,trialCnt);
+
 lGrabR = cell(1,trialCnt);
 lGrabRelR = cell(1,trialCnt);
 rGrabR = cell(1,trialCnt);
@@ -339,13 +345,20 @@ rAudStimR = cell(1,trialCnt);
 spoutR = cell(1,trialCnt);
 spoutOutR = cell(1,trialCnt);
 
-rewardR = cell(1,trialCnt);
-ChoiceR = cell(1,trialCnt);
-
-handleAttentiveR = cell(1,trialCnt); %attentive state regressor added by max
+handleAttentiveR = cell(1,trialCnt); %attentive state regressors
 stimAttentiveR = cell(1,trialCnt);
 delayAttentiveR = cell(1,trialCnt);
 responseAttentiveR = cell(1,trialCnt);
+
+handleChoiceR = cell(1,trialCnt); %aligned choice regressors
+stimChoiceR = cell(1,trialCnt);
+delayChoiceR = cell(1,trialCnt);
+responseChoiceR = cell(1,trialCnt);
+
+handleRewardR = cell(1,trialCnt); %attentive reward regressors
+stimRewardR = cell(1,trialCnt);
+delayRewardR = cell(1,trialCnt);
+responseRewardR = cell(1,trialCnt);
 
 
 prevRewardR = cell(1,trialCnt);
@@ -503,7 +516,8 @@ for iTrials = 1:trialCnt
         handleSoundR{iTrials}(logical(histcounts(allStims,-preStimDur:1/sRate:postStimDur)),iRegs+1) = 1;
     end
     
-    %% choice and reward
+    %% choice, reward and state
+    %make the stimtemp matrix
     stimTemp = false(frames, frames + maxStimShift);
     stimShift = round(stimTime(iTrials) * sRate); %amount of stimshift compared to possible maximum. move diagonal on x-axis accordingly.
     if (stimShift > maxStimShift) || isnan(stimTime(iTrials))
@@ -512,19 +526,90 @@ for iTrials = 1:trialCnt
         stimTemp(:, end - stimShift - frames + 1 : end - stimShift) = timeR;
     end
     
-    rewardR{iTrials} = false(size(stimTemp));
-    
-    if bhv.Rewarded(iTrials) %rewarded
-        rewardR{iTrials} = stimTemp; %trial was rewarded
+    % get choice as binary design matrix during handle grab
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleChoiceR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleChoiceR{iTrials},2); stimShift = size(handleChoiceR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+        if bhv.ResponseSide(iTrials) == 1
+            handleChoiceR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+        end
     end
     
-    % get L/R choices as binary design matrix
-    ChoiceR{iTrials} = false(size(stimTemp));
-    if bhv.ResponseSide(iTrials) == 1 %IF LEFT CHOICE!!! Left choice is 1, right is 2
-        ChoiceR{iTrials} = stimTemp;
+    % get choice as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimChoiceR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+        if bhv.ResponseSide(iTrials) == 1
+            stimChoiceR{iTrials}(:,1:responseReg-stimReg) = temp;
+        end
     end
     
-    % get attentive state as binary design matrix
+    % get choice as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.ResponseSide(iTrials) == 1
+            delayChoiceR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+        end
+    end
+    
+    % get choice as binary design matrix during response period. 2s max duration
+    responseChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.ResponseSide(iTrials) == 1
+            responseChoiceR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
+    % get reward as binary design matrix during handle grab
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleRewardR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleRewardR{iTrials},2); stimShift = size(handleRewardR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+        if bhv.Rewarded(iTrials)
+            handleRewardR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+        end
+    end
+    
+    % get reward as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimRewardR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+        if bhv.Rewarded(iTrials)
+            stimRewardR{iTrials}(:,1:responseReg-stimReg) = temp;
+        end
+    end
+    
+    % get reward as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayRewardR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.Rewarded(iTrials)
+            delayRewardR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+        end
+    end
+    
+    % get reward as binary design matrix during response period. 2s max duration
+    responseRewardR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.Rewarded(iTrials)
+            responseRewardR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
+    
+    % get attentive state as binary design matrix during handle grab
     handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
     handleAttentiveR{iTrials} = false(size(stimTemp,1),sRate);
     if stimShift > size(handleAttentiveR{iTrials},2); stimShift = size(handleAttentiveR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
@@ -557,13 +642,60 @@ for iTrials = 1:trialCnt
         end
     end
     
-    % get attentive state as binary design matrix during delay period. 2s max duration
+    % get attentive state as binary design matrix during response period. 2s max duration
     responseAttentiveR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
     try
         if trialstates(iTrials) == 1
             responseAttentiveR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
         end
     end
+    
+    
+    
+     % get time as binary design matrix during handle grab
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleTimeR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleTimeR{iTrials},2); stimShift = size(handleTimeR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+
+            handleTimeR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+
+    end
+    
+    % get time as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimTimeR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+
+            stimTimeR{iTrials}(:,1:responseReg-stimReg) = temp;
+
+    end
+    
+    % get time as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayTimeR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+
+            delayTimeR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+
+    end
+    
+    % get time as binary design matrix during response period. 2s max duration
+    responseTimeR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+
+            responseTimeR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+
+    end
+    
+    
+    
+    
     
     
     % previous trial regressors
@@ -843,6 +975,11 @@ clear temp4
 timeR = repmat(logical(diag(ones(1,frames))),trialCnt,1); %time regressor
 timeR = timeR(:,1:end-4);
 
+handleTimeR = cat(1,handleTimeR{:});
+stimTimeR = cat(1,stimTimeR{:});
+delayTimeR = cat(1,delayTimeR{:});
+responseTimeR = cat(1,responseTimeR{:});
+
 lGrabR = cat(1,lGrabR{:});
 lGrabRelR = cat(1,lGrabRelR{:});
 rGrabR = cat(1,rGrabR{:});
@@ -870,16 +1007,24 @@ spoutOutR = cat(1,spoutOutR{:});
 spoutR(:,sum(spoutR) == 0) = [];
 spoutOutR(:,sum(spoutOutR) == 0) = [];
 
-rewardR = cat(1,rewardR{:});
-prevRewardR = cat(1,prevRewardR{:});
 
-ChoiceR = cat(1,ChoiceR{:});
+handleChoiceR = cat(1,handleChoiceR{:});
+stimChoiceR = cat(1,stimChoiceR{:});
+delayChoiceR = cat(1,delayChoiceR{:});
+responseChoiceR = cat(1,responseChoiceR{:});
+
+handleRewardR = cat(1,handleRewardR{:});
+stimRewardR = cat(1,stimRewardR{:});
+delayRewardR = cat(1,delayRewardR{:});
+responseRewardR = cat(1,responseRewardR{:});
 
 handleAttentiveR = cat(1,handleAttentiveR{:});
 stimAttentiveR = cat(1,stimAttentiveR{:});
 delayAttentiveR = cat(1,delayAttentiveR{:});
 responseAttentiveR = cat(1,responseAttentiveR{:});
 
+
+prevRewardR = cat(1,prevRewardR{:});
 prevChoiceR = cat(1,prevChoiceR{:});
 prevStimR = cat(1,prevStimR{:});
 nextChoiceR = cat(1,nextChoiceR{:});
@@ -891,7 +1036,8 @@ slowPupilR = cat(1,slowPupilR{:});
 slowPupilR(~isnan(slowPupilR(:,1)),:) = zscore(slowPupilR(~isnan(slowPupilR(:,1)),:));
 
 %% create full design matrix
-fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
+fullR = [handleTimeR stimTimeR delayTimeR responseTimeR handleChoiceR stimChoiceR delayChoiceR responseChoiceR  ...
+    handleRewardR stimRewardR delayRewardR responseRewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
     lLickR rLickR handleSoundR lfirstTacStimR lTacStimR rfirstTacStimR rTacStimR ...
     lfirstAudStimR lAudStimR rfirstAudStimR rAudStimR prevRewardR prevChoiceR ...
     nextChoiceR waterR piezoR whiskR noseR fastPupilR ...
@@ -899,15 +1045,25 @@ fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
 
 % labels for different regressor sets. It is REALLY important this agrees with the order of regressors in fullR.
 regLabels = {
-    'time' 'Choice' 'reward' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
+    'handleTime' 'stimTime' 'delayTime' 'responseTime' 'handleChoice' 'stimChoice' 'delayChoice' 'responseChoice' 'handleReward' 'stimReward' 'delayReward' 'responseReward' ...
+    'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
     'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' 'rfirstAudStim' 'rAudStim' ...
     'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo' 'handleAttentive' 'stimAttentive' 'delayAttentive' 'responseAttentive'};
 
 %index to reconstruct different response kernels
 regIdx = [
-    ones(1,size(timeR,2))*find(ismember(regLabels,'time')) ...
-    ones(1,size(ChoiceR,2))*find(ismember(regLabels,'Choice')) ...
-    ones(1,size(rewardR,2))*find(ismember(regLabels,'reward')) ...
+    ones(1,size(handleTimeR,2))*find(ismember(regLabels,'handleTime')) ...
+    ones(1,size(stimTimeR,2))*find(ismember(regLabels,'stimTime')) ...
+    ones(1,size(delayTimeR,2))*find(ismember(regLabels,'delayTime')) ...
+    ones(1,size(responseTimeR,2))*find(ismember(regLabels,'responseTime')) ...
+    ones(1,size(handleChoiceR,2))*find(ismember(regLabels,'handleChoice')) ...
+    ones(1,size(stimChoiceR,2))*find(ismember(regLabels,'stimChoice')) ...
+    ones(1,size(delayChoiceR,2))*find(ismember(regLabels,'delayChoice')) ...
+    ones(1,size(responseChoiceR,2))*find(ismember(regLabels,'responseChoice')) ...
+    ones(1,size(handleRewardR,2))*find(ismember(regLabels,'handleReward')) ...
+    ones(1,size(stimRewardR,2))*find(ismember(regLabels,'stimReward')) ...
+    ones(1,size(delayRewardR,2))*find(ismember(regLabels,'delayReward')) ...
+    ones(1,size(responseRewardR,2))*find(ismember(regLabels,'responseReward')) ...
     ones(1,size(lGrabR,2))*find(ismember(regLabels,'lGrab')) ...
     ones(1,size(lGrabRelR,2))*find(ismember(regLabels,'lGrabRel')) ...
     ones(1,size(rGrabR,2))*find(ismember(regLabels,'rGrab')) ...
@@ -951,20 +1107,65 @@ for iRegs = 1 : length(vidIdx)
     fullR(trialIdx,vidIdx(iRegs)) = Q(:,end); % transfer orthogonolized video regressors back to design matrix
 end
 
-% repeat orthogonalization but for reward against time
-vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'})))); %index for video regressors
-trialIdx = ~isnan(mean(fullR(:,vidIdx),2)); %don't use trials that failed to contain behavioral video data
-smallR = [timeR];
+% orthogonalize cognitive regressors against time - handle period
+vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'handleChoice' 'handleReward' 'handleState'})))); %index for time regressors
+trialIdx = ~isnan(mean(fullR(:,vidIdx),2));
+smallR = handleTimeR; % time regressor to orthogonalize against
 
 for iRegs = 1 : length(vidIdx)
     Q = qr([smallR(trialIdx,:) fullR(trialIdx,vidIdx(iRegs))],0); %orthogonalize video against other regressors
     fullR(trialIdx,vidIdx(iRegs)) = Q(:,end); % transfer orthogonolized video regressors back to design matrix
 end
 
+% orthogonalize cognitive regressors against time - stim period
+vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'stimChoice' 'stimReward' 'stimState'})))); %index for time regressors
+trialIdx = ~isnan(mean(fullR(:,vidIdx),2));
+smallR = stimTimeR; % time regressor to orthogonalize against
+
+for iRegs = 1 : length(vidIdx)
+    Q = qr([smallR(trialIdx,:) fullR(trialIdx,vidIdx(iRegs))],0); %orthogonalize video against other regressors
+    fullR(trialIdx,vidIdx(iRegs)) = Q(:,end); % transfer orthogonolized video regressors back to design matrix
+end
+
+% orthogonalize cognitive regressors against time - delay period
+vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'delayChoice' 'delayReward' 'delayState'})))); %index for time regressors
+trialIdx = ~isnan(mean(fullR(:,vidIdx),2));
+smallR = delayTimeR; % time regressor to orthogonalize against
+
+for iRegs = 1 : length(vidIdx)
+    Q = qr([smallR(trialIdx,:) fullR(trialIdx,vidIdx(iRegs))],0); %orthogonalize video against other regressors
+    fullR(trialIdx,vidIdx(iRegs)) = Q(:,end); % transfer orthogonolized video regressors back to design matrix
+end
+
+% orthogonalize cognitive regressors against time - response period
+vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'responseChoice' 'responseReward' 'responseState'})))); %index for time regressors
+trialIdx = ~isnan(mean(fullR(:,vidIdx),2));
+smallR = responseTimeR; % time regressor to orthogonalize against
+
+for iRegs = 1 : length(vidIdx)
+    Q = qr([smallR(trialIdx,:) fullR(trialIdx,vidIdx(iRegs))],0); %orthogonalize video against other regressors
+    fullR(trialIdx,vidIdx(iRegs)) = Q(:,end); % transfer orthogonolized video regressors back to design matrix
+end
+
+
+
 % reject trials with broken regressors that contain NaNs
 trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to contain behavioral video data
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
+
+
+%% do the shuffling, if indicated
+if ~isempty(shufflelabels)
+    shufflelabels = regLabels(sort(find(ismember(regLabels,shufflelabels)))); %make sure  in the right order
+    shuffleinds = find(ismember(regLabels,shufflelabels));
+    shuffleregs = ismember(regIdx,shuffleinds);
+    for i = find(shuffleregs)
+        onecol = fullR(:,i);
+        permuted = onecol(randperm(length(onecol)));
+        fullR(:,i) = permuted;
+    end
+end
 
 saveLabels = regLabels;
 saveR = fullR;
@@ -980,23 +1181,7 @@ elseif strcmpi(dType,'twoP')
     save([cPath 'interpVc.mat'], 'Vc', 'DS', 'frames', 'preStimDur', 'postStimDur', 'bTrials');
 end
 
-%% apply gaussian filter to design matrix if using sub-sampling
-% if gaussShift > 1
-%     [a,b] = size(fullR);
-%
-%     % find non-continous regressors (contain values different from -1, 0 or 1)
-%     temp = false(size(fullR));
-%     temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
-%     regIdx = nanmean(temp) == 0; %index for non-continous regressors
-%
-%     % do gaussian convolution. perform trialwise to avoid overlap across trials.
-%     trialCnt = a/frames;
-%     fullR = reshape(fullR,frames,trialCnt,b);
-%     for iTrials = 1:trialCnt
-%         fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
-%     end
-%     fullR = reshape(fullR,a,b);
-% end
+
 
 %% clear individual regressors
 clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
@@ -1004,6 +1189,12 @@ clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
     prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
 
 glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
+if ~isempty(shufflelabels)
+    string = char(shufflelabels); %change this eventually
+    glmFile = [glmFile string 'QRshuff'];
+else
+    glmFile = [glmFile 'QRfull'];
+end
 
 %% run ridge regression in low-D, with state this time
 %run model. Zero-mean without intercept. only video qr.
@@ -1012,32 +1203,96 @@ glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
 % [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(saveLabels);
 % save([cPath glmFile 'allvarsaligned.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
-%% Run with state ONLY
+%% Run full model
 
-labels = {'handleAttentive'};
+labels = saveLabels;
 labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
 
 [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'handlestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'stimAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'stimstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'delayAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'delaystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+save([cPath glmFile '.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
 
 
-labels = {'responseAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% %% Run state single variables
+% 
+% labels = {'handleAttentive'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delaystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% %% Run reward single variables
+% 
+% labels = {'handleReward'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delayreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% %% Run choice single variables
+% 
+% labels = {'handleChoice'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimchoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delaychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
 
 %% nested functions
@@ -1053,7 +1308,6 @@ save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fu
         %figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
         if sum(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1))) < size(cR,2) %check if design matrix is full rank
             temp = ~(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1)));
-            fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
             rejIdx(~rejIdx) = temp; %reject regressors that cause rank-defficint matrix
         end
         
@@ -1076,7 +1330,7 @@ save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fu
         
         if length(discardLabels) > 0
             fprintf('\nFully discarded regressor: %s because of NaN''s or emptiness \n', discardLabels{:});
-        else 
+        else
             fprintf('\nNo regressors were FULLY discarded\n');
         end
         
