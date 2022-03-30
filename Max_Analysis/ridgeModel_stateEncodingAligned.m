@@ -1,4 +1,4 @@
-function ridgeModel_stateEncodingAligned(cPath,Animal,Rec,glmFile,dType)
+function ridgeModel_stateEncodingAligned(cPath,Animal,Rec,glmFile,dType,shufflelabels)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019
 %on that same dataset, but adds regressors for neural state (predicted by
@@ -17,7 +17,8 @@ end
 
 if strcmpi(dType,'twoP')
     piezoLine = 5;     % channel in the analog data that contains data from piezo sensor
-    stimLine = 4;      % channel in the analog data that contains stimulus trigger.
+    stimLine = 4;      % channel in the analog data that contains s
+    timulus trigger.
     
 elseif strcmpi(dType,'Widefield')
     piezoLine = 2;     % channel in the analog data that contains data from piezo sensor
@@ -1051,6 +1052,19 @@ trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
 
+
+%% do the shuffling
+if ~isempty(shufflelabels)
+    shufflelabels = regLabels(sort(find(ismember(regLabels,shufflelabels)))); %make sure  in the right order
+    shuffleinds = find(ismember(regLabels,shufflelabels));
+    shuffleregs = ismember(regIdx,shuffleinds);
+    for i = find(shuffleregs)
+        onecol = fullR(:,i);
+        permuted = onecol(randperm(length(onecol)));
+        fullR(:,i) = permuted;
+    end
+end
+
 saveLabels = regLabels;
 saveR = fullR;
 
@@ -1065,23 +1079,7 @@ elseif strcmpi(dType,'twoP')
     save([cPath 'interpVc.mat'], 'Vc', 'DS', 'frames', 'preStimDur', 'postStimDur', 'bTrials');
 end
 
-%% apply gaussian filter to design matrix if using sub-sampling
-% if gaussShift > 1
-%     [a,b] = size(fullR);
-%
-%     % find non-continous regressors (contain values different from -1, 0 or 1)
-%     temp = false(size(fullR));
-%     temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
-%     regIdx = nanmean(temp) == 0; %index for non-continous regressors
-%
-%     % do gaussian convolution. perform trialwise to avoid overlap across trials.
-%     trialCnt = a/frames;
-%     fullR = reshape(fullR,frames,trialCnt,b);
-%     for iTrials = 1:trialCnt
-%         fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
-%     end
-%     fullR = reshape(fullR,a,b);
-% end
+
 
 %% clear individual regressors
 clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
@@ -1089,6 +1087,12 @@ clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
     prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
 
 glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
+if ~isempty(shufflelabels)
+    string = char(shufflelabels); %change this eventually
+    glmFile = [glmFile string 'shuff'];
+else
+    glmFile = [glmFile 'full'];
+end
 
 %% run ridge regression in low-D, with state this time
 %run model. Zero-mean without intercept. only video qr.
@@ -1103,88 +1107,89 @@ labels = saveLabels;
 labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
 
 [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'cogvarsaligned.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-%% Run state single variables
-
-labels = {'handleAttentive'};
-labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'handlestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'stimAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'stimstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'delayAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'delaystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+save([cPath glmFile '.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
 
 
-labels = {'responseAttentive'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-%% Run reward single variables
-
-labels = {'handleReward'};
-labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'handlereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'stimReward'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'stimreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'delayReward'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'delayreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-
-labels = {'responseReward'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'responsereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-%% Run choice single variables
-
-labels = {'handleChoice'};
-labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'handlechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'stimChoice'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'stimchoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-labels = {'delayChoice'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'delaychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
-
-
-labels = {'responseChoice'};
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile 'responsechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% %% Run state single variables
+% 
+% labels = {'handleAttentive'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimstate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delaystate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseAttentive'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsestate.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% %% Run reward single variables
+% 
+% labels = {'handleReward'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delayreward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseReward'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsereward.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% %% Run choice single variables
+% 
+% labels = {'handleChoice'};
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'handlechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'stimChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'stimchoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% labels = {'delayChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'delaychoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
+% 
+% 
+% labels = {'responseChoice'};
+% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile 'responsechoice.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on state only
 
 
 
