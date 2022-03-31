@@ -2,12 +2,12 @@ function [Mdl,cvAcc,betas_aligned,Vc] = logisticModel_sepByState(cPath,Animal,Re
 addpath('C:\Data\churchland\ridgeModel\rateDisc');
 [inds,Ainds,Binds,Y] = getModalitybyStateInds(cPath,Animal,Rec,glmFile,state,modality); %This gets us the trials we want to use for training the model.
 
-if length(inds) < 150
+if length(inds) < 100
     Mdl = [];
     cvAcc = [];
     betas_aligned = [];
     Vc = [];
-    fprintf('\nthere are less than 150 trials, skipping this session\n');
+    fprintf('\nthere are less than 100 trials, skipping this session\n');
     return;
 end
 

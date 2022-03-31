@@ -7,6 +7,9 @@ if modality == "State"
 elseif modality == "Choice"
     [inds,Ainds,Binds] = getChoiceInds(cPath,Animal,Rec);
     Y = ismember(inds,Binds); %right choice Y = 1
+elseif modality == "Reward"
+    [inds,Ainds,Binds] = getRewardInds(cPath,Animal,Rec);
+    Y = ismember(inds,Ainds); %rewarded Y = 1
 end
 
 if length(inds) < 200

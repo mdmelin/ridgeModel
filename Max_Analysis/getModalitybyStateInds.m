@@ -47,11 +47,16 @@ if modality == "Choice"
     Ainds = inds(choices == 2); %right choices
     Binds = inds(choices == 1); %left choices
     Y = choices == 2; %right choices Y=1
-elseif modality == "Stimulus"
-    inds = find(rateDisc_equalizeTrials(useIdx, bhv.StimulusSide == 1, bhv.ResponseSide == 1, inf, true)); %equalize stimulus side with secondary L/R choice equalization
+elseif modality == "Stimulus" %need to finish this
+    inds = find(rateDisc_equalizeTrials(useIdx, bhv.CorrectSide == 2, bhv.ResponseSide == 1, inf, true)); %equalize stimulus side with secondary L/R choice equalization
+    Ainds = inds(bhv.CorrectSide(inds) == 2); %right stim
+	Binds = inds(bhv.CorrectSide(inds) == 1); %left stim
+    Y = bhv.CorrectSide(inds) == 2;
+elseif modality == "Reward" %need to finish this
+    inds = find(rateDisc_equalizeTrials(useIdx, bhv.Rewarded, bhv.ResponseSide == 1, inf, true)); %equalize stimulus side with secondary L/R choice equalization
+    Ainds = inds(bhv.Rewarded(inds) == 1); %rewarded trials
+	Binds = inds(bhv.Rewarded(inds) == 0); %nonrewarded trials
+    Y = bhv.Rewarded(inds);
 end
-
-
-
 
 end
