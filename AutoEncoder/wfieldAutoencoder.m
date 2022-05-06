@@ -19,7 +19,7 @@ transParams = alVc.transParams;
 
 %%
 X = movie(:,45:75,:); %grab STIMULUS window
-X = double(reshape(X,33401,[]));
+X = double(reshape(X,size(X,1),[]));
 
 Xnew = [];
 
