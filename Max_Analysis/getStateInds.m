@@ -1,4 +1,4 @@
-function [inds, attendinds,biasinds] = getStateInds(cPath,Animal,Rec,glmFile)
+function [inds, attendinds,biasinds] = getStateInds(cPath,Animal,Rec,glmFile,dualCase)
 Paradigm = 'SpatialDisc';
 glmfile = [cPath filesep Animal filesep 'glm_hmm_models' filesep glmFile]; %Widefield data path
 
@@ -31,8 +31,13 @@ postprobs_sorted = postprobs(stateinds,:); %permute the states so theyre in the 
 [~,state1hot] = max(postprobs_sorted,[],1);
 
 useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
-inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.Rewarded == 1, inf, true));  %equalize to rewarded vs unrewarded
-%inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.ResponseSide == 1, inf, true)); %equalize state and L/R choices, should also do reward. 
+if dualCase
+    %inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.ResponseSide == 1, inf, true)); %equalize state and L/R choices, should also do reward.
+    inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.Rewarded == 1, inf, true));  %equalize to state AND rewarded vs unrewarded
+else
+    inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, [], inf, []));  %equalize to state only
+end
+
 attendinds = inds(state1hot(inds) == 1);
 biasinds = inds(state1hot(inds) ~= 1);
 end

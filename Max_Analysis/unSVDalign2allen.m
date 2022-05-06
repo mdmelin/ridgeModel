@@ -18,7 +18,7 @@ if ~isempty(selectRegion)
 else
     alignU(edgemap == 1) = NaN; %apply allen edge map for visualization
 end
-%figure;imagesc(alignU(:,:,1));title(['Plot of regions that will be extracted for analysis: ',num2str(selectRegion)]);
+figure;imagesc(alignU(:,:,1));title(['Plot of regions that will be extracted for analysis: ',num2str(selectRegion)]);
 Vreshape = reshape(Vc,200,[]);
 nFrames = size(Vc,2); %Frames per trial
 nTrials = size(Vc,3); %total trials
