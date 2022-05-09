@@ -1051,8 +1051,6 @@ end
 trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to contain behavioral video data
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
-
-
 %% do the shuffling
 if ~isempty(shufflelabels)
     shufflelabels = regLabels(sort(find(ismember(regLabels,shufflelabels)))); %make sure  in the right order
@@ -1102,14 +1100,22 @@ end
 % [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(saveLabels);
 % save([cPath glmFile 'allvarsaligned.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
-%% Run full model
+% %% Run full model
+% 
+% labels = saveLabels;
+% labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+% 
+% [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
+% save([cPath glmFile '.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
 
-labels = saveLabels;
+%% export design matrix for chaoqun
+
+labels = saveLabels(~ismember(saveLabels,{'handleAttentive' 'stimAttentive' 'delayAttentive' 'responseAttentive'}));
 labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
 
 [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(labels);
-save([cPath glmFile '.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
-
+%save([cPath glmFile '.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
+f = 2;
 
 % %% Run state single variables
 % 

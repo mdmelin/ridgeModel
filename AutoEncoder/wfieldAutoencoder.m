@@ -1,4 +1,10 @@
-function [autoenc,mseError,R] = wfieldAutoencoder(cPath,Animal,Rec,region,hiddenSize,stateEqual)
+%function [autoenc,X,Xreconstructed,mseError,R] = wfieldAutoencoder(cPath,Animal,Rec,region,hiddenSize,stateEqual)
+
+cPath = 'X:/Widefield'; % change this to server path
+Animal = 'mSM66';
+Rec = '16-Jul-2018';
+stateEqual = 1; region = [5 6]; hiddenSize = 100;
+
 addpath(genpath('C:\Data\churchland\ridgeModel'));
 
 inds = 1:900; %these are the trial indices to grab. I just set it to 1:900 so that it grabs every trial from the session.
@@ -39,4 +45,10 @@ mseError = immse(X,XReconstructed);
 
 [R,P] = corrcoef(X,XReconstructed);
 R = R(1,2);
-end
+
+%% run encoding
+
+a_enc = encode(autoenc,Xnew);
+b_enc
+
+%end

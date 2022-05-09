@@ -6,3 +6,4 @@ Rec = '16-Jul-2018';
 
 
 [autoenc,msError,R] = wfieldAutoencoder(cPath,Animal,Rec,[5 6],100,true);
+
