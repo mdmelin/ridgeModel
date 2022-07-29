@@ -1,4 +1,4 @@
-function [movie,mask] = unSVDalign2allen(Vc,U,transParams,selectRegion,shrinkArray)
+function [movie,mask] = unSVD(Vc,U,transParams,selectRegion,shrinkArray)
 %Takes temporal components, spatial components, and alignment parameters to
 %undo SVD and align to allen atlas. If selectRegion is not empty, the
 %function will also trim the data so that only the desired allen aligned
@@ -18,7 +18,6 @@ if ~isempty(selectRegion)
 else
     alignU(edgemap == 1) = NaN; %apply allen edge map for visualization
 end
-%figure;imagesc(alignU(:,:,1));title(['Plot of regions that will be extracted for analysis: ',num2str(selectRegion)]);
 Vreshape = reshape(Vc,200,[]);
 nFrames = size(Vc,2); %Frames per trial
 nTrials = size(Vc,3); %total trials

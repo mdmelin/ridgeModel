@@ -5,9 +5,32 @@ addpath('C:\Data\churchland\ridgeModel\smallstuff');
 
 %%
 datapath = ['X:\Widefield' filesep mouse filesep 'SpatialDisc' filesep rec filesep];
-load([datapath modelfile]);
-load([datapath 'rsVc.mat']); %to get spatial components
-load([datapath 'opts3.mat']); %to get alignment opts
+
+try
+    load([datapath modelfile]);
+catch
+    fprintf('\nThe encoding model file does not exist!');
+    out = NaN;
+return
+end
+
+try
+    load([datapath 'rsVc.mat']); %to get spatial components
+catch
+    load([datapath 'Vc.mat']); %to get spatial components
+end
+
+try
+    load([datapath 'opts3.mat']); %to get alignment opts
+catch
+    try
+        load([datapath 'opts2.mat']); %to get alignment opts
+        opts3 = opts;
+    catch
+        load([datapath 'opts.mat']); %to get alignment opts
+        opts3 = opts;
+    end
+end
 
 
 %%

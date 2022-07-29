@@ -1,4 +1,4 @@
-function [alignVc,bhv] = align2behavior(cPath,Animal,Rec,trialInds)
+function [alignVc,bhv,goodtrials] = align2behavior(cPath,Animal,Rec,trialInds)
 %where trialInds is the desired trials to select for alignment
 %pass trialinds based on the sessiondata file, this function will work out
 %the imaging data itself and discard requested trials that dont have imaging data.
@@ -14,7 +14,18 @@ SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trails
 nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
 sRate = 30;
 load([cPath 'Vc.mat'],'Vc','U','trials','bTrials'); %just need trials variable here. Vs is [dims of temporal components,frames,trials]
-load([cPath 'opts2.mat'],'opts');
+
+try
+    load([cPath 'opts3.mat']);
+    opts = opts3;clear opts3;
+catch
+    try
+        load([cPath 'opts2.mat']);
+    catch
+        load([cPath 'opts.mat']);
+    end
+end
+
 nRequested = length(trialInds);
 
 %% get proper trials from Vc and SessionData
@@ -24,11 +35,13 @@ trials(ind) = [];
 bTrials(ind) = []; %btrials gives the indices of bpod trial numbers that have imaging data
 Vc(:,:,ind) = [];
 
+
 temp = trialInds(ismember(trialInds,bTrials)); %use only trial indices to grab that are in the Vc dataset. contains only bpod trial numbers that have imaging data.
 bhv = selectBehaviorTrials(SessionData,temp); %this grabs trials that are in the requested indices AND the Vc dataset
 bTrials = find(ismember(bTrials,trialInds)); %gets the indices of trialInds that have their bpod trial number contained in bTrials
 Vc = Vc(:,:,bTrials);
 nTrials = length(bTrials);
+goodtrials = temp;
 
 fprintf('Requested %i trials. Using %i trials (Vc dataset usually has a few missing trials).\n',nRequested,nTrials);
 
@@ -37,12 +50,16 @@ b = length(bhv.CorrectSide);
 if a~=b
     error('Size of data is not consistent!!!')
 end
-segIdx = [1 0.5 1.00 0.75 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds
-segFrames = cumsum(floor(segIdx * sRate));  
+%segIdx = [2 0.75 1.25 0.75 1]; %what simon sent me.
+if sum(ismember(Animal,'mSM')) == 3 %mSM Mice
+    segIdx = [1 0.5 1.00 0.75 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for EMX mice
+elseif sum(ismember(Animal,'CSP')) == 3 %CSP Mice
+    segIdx = [1 0.2 .5 0.15 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for CSP mice
+end
+segFrames = cumsum(floor(segIdx * sRate));
 alignVc.all = rateDisc_getBhvRealignment(Vc, bhv, segFrames, opts);
 alignVc.segIdx = segIdx;
 alignVc.segFrames = segFrames;
-load([cPath 'opts3.mat']); %get allen stuff while were here
-alignVc.transParams = opts3.transParams;
+alignVc.transParams = opts.transParams;
 alignVc.U = U;
 end

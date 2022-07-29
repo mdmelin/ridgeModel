@@ -1,1 +1,3 @@
 matlab qr() function behavior changed from 2021 => 2022. Will need to update code to retain 2022 compatibility.
+
+Need to move all library functions into a seperate folder that gets added to the path. there are some path conflicts right now. 

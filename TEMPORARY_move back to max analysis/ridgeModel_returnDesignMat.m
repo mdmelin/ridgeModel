@@ -1,4 +1,8 @@
-function ridgeModel_stateEncodingAligned(cPath,Animal,Rec,glmFile,dType)
+function [out,out2] = ridgeModel_returnDesignMat(cPath,Animal,Rec,glmFile,dType)
+
+% Return design matrix (without state) and the corresponding state
+% probabilties. 
+
 addpath('C:\Data\churchland\ridgeModel\widefield');
 addpath('C:\Data\churchland\ridgeModel\rateDisc');
 addpath('C:\Data\churchland\ridgeModel\smallStuff');
@@ -10,35 +14,30 @@ if ~exist('dType', 'var') || isempty(dType)
     dType = 'Widefield'; %default is widefield data
 end
 
-Paradigm = 'SpatialDisc';
-cPath = [cPath Animal filesep Paradigm filesep Rec filesep]; %Widefield data path
-if ispc
-    sPath = ['\\grid-hs\churchland_nlsas_data\data\BpodImager\Animals\' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
-else
-    sPath = ['/sonas-hs/churchland/nlsas/data/data/BpodImager/Animals/' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
-end
-
-% define trigger lines and opts
 if strcmpi(dType,'twoP')
     piezoLine = 5;     % channel in the analog data that contains data from piezo sensor
-    stimLine = 4;      % channel in the analog data that contains stimulus trigger.
-    msPerFrame =  32.363833;
-    opts.preStim = 3;
-    opts.postStim = 4;
-    opts.frameRate = round(1000/msPerFrame);
+    stimLine = 4;      % channel in the analog data that contains s
+    timulus trigger.
+    
 elseif strcmpi(dType,'Widefield')
     piezoLine = 2;     % channel in the analog data that contains data from piezo sensor
     stimLine = 6;      % channel in the analog data that contains stimulus trigger.
-    load([cPath 'opts.mat'], 'opts'); % get some options from imaging data
 end
 
+Paradigm = 'SpatialDisc';
+glmPath = [cPath Animal filesep 'glm_hmm_models'];
+cPath = [cPath Animal filesep Paradigm filesep Rec filesep]; %Widefield data path
+sPath = ['\\grid-hs\churchland_nlsas_data\data\BpodImager\Animals\' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
+% sPath = ['/sonas-hs/churchland/hpc/home/space_managed_data/BpodImager/Animals/' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
+
 %% general variables
-sRate=opts.frameRate;
-if opts.frameRate == 15
+load([cPath 'opts.mat'], 'opts');         % get some options from imaging data
+sRate = opts.frameRate;           % Sampling rate of imaging in Hz
+if sRate == 30
+    vcFile = 'rsVc.mat'; %use downsampled data here and change sampling frequency
+    sRate = 15;
+else
     vcFile = 'Vc.mat';
-elseif opts.frameRate == 30 && strcmpi(dType,'Widefield') %if data was acquired at 30Hz, there should be a resampled Vc (to 15Hz)
-    vcFile = 'rsVc.mat';
-    sRate = 15; % Sampling rate of imaging in Hz
 end
 
 preStimDur = floor(2 * sRate) / sRate; % Duration of trial before lever grab in seconds
@@ -47,33 +46,72 @@ frames = round((preStimDur + postStimDur) * sRate); %nr of frames per trial
 trialDur = (frames * (1/sRate)); %duration of trial in seconds
 
 %other variables
-mPreTime = ceil(1 * sRate);  % precede motor events to capture preparatory activity in frames
-mPostTime = ceil(2 * sRate);   % follow motor events for mPostStim in frames
-fsPreTime = ceil(1 * sRate);   % preceed first stim event for fsPreTime in frames
-fsPostTime = ceil(4 * sRate);   % follow first stim event for fsPostStim in frames
-fsPostTime = fsPreTime + fsPostTime; %total time for stimulus kernel
+mPreTime = ceil(0.5 * sRate);  % precede motor events to capture preparatory activity in frames
+mPostTime = ceil(5 * sRate);   % follow motor events for mPostStim in frames
+fsPostTime = ceil(5 * sRate);   % follow first stim event for fsPostStim in frames
 sPostTime = ceil(2 * sRate);   % follow stim events for sPostStim in frames
 motorIdx = [-(mPreTime: -1 : 1) 0 (1:mPostTime)]; %index for design matrix to cover pre- and post motor action
 tapDur = 0.1;      % minimum time of lever contact, required to count as a proper grab.
 leverMoveDur = 0.3; %duration of lever movement. this is used to orthogonalize video against lever movement.
 leverMoveDur = ceil(leverMoveDur * sRate); %convert to frames
-ridgeFolds = 10;    %number of cross-validations for motor/task models
+ridgeFolds = 10; %number of cross-validations for motor/task models
+opMotorLabels = {'lLick' 'rLick' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel'}; %operant motor regressors
 shVal = sRate * opts.preStim  + 1; %expected position of stimulus onset in the imaging data (s).
 maxStimShift = 1 * sRate; % maximal stimulus onset after handle grab. (default is 1s - this means that stimulus onset should not be more than 1s after handle grab. Cognitive regressors will have up to 1s of baseline because of stim jitter.)
 bhvDimCnt = 200;    % number of dimensions from behavioral videos that are used as regressors.
 gaussShift = 1;     % inter-frame interval between regressors. Will use only every 'gaussShift' regressor and convolve with gaussian of according FHWM to reduce total number of used regressors.
-[~, motorLabels] = rateDiscRecordings; %get motor labels for motor-only model
-opMotorLabels = {'lLick' 'rLick' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel'}; %operant motor regressors
+%[~, motorLabels] = rateDiscRecordings; %get motor labels for motor-only model
 dims = 200; %number of dims in Vc that are used in the model
+
+
+
 
 %% load data
 bhvFile = dir([cPath filesep Animal '_' Paradigm '*.mat']);
 load([cPath bhvFile(1).name],'SessionData'); %load behavior data
+load([glmPath filesep glmFile],'glmhmm_params','choices','posterior_probs','model_training_sessions','state_label_indices'); %load latent states and model info
 SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trailstart timestamps to seconds
+nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
+
+model_training_sessions = cellstr(model_training_sessions); %convert to cell
+sessionidx = find(strcmp(Rec,model_training_sessions)); %find the index of the session we want to pull latent states for
+postprob_nonan = posterior_probs{sessionidx}; %get latent states for desired session
+counterind = 1;
+for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice.
+    if ~nochoice(i) %if a choice was made
+        postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
+        counterind = counterind + 1;
+    else %if no choice was made
+        postprob_withnan(i,:) = NaN; %insert a NaN to new array
+    end
+end
+postprobs = postprob_withnan;
+postprobs = postprobs(:,str2num(state_label_indices)); %permute the states to the correct indices
+clear postprob_withnan postprob_nonan;
+glmweights = squeeze(glmhmm_params.observations.Wk);
+glmweights = glmweights(str2num(state_label_indices),:);
+fprintf('\nGLM weights:\n');
+disp(glmweights);
+
+% figure;
+% plot(glmweights','LineWidth',2);%plot states to make sure predicted labels are reasonable
+% y = 5;
+% line([1,2],[0,0],'LineStyle','--','Color','black');
+% title('Latent state weights - Verify that these labels look correct');
+% legend('Attentive','Lbias','Rbias');
+% drawnow;
+%
+% figure;
+% plot(postprobs,'LineWidth',2);%plot states to make sure predicted labels are reasonable
+% y = 5;
+% title('Posterior probabilities');
+% legend('Attentive','Lbias','Rbias');
+% drawnow;
 
 if strcmpi(dType,'Widefield')
     if exist([cPath vcFile],'file') ~= 2 %check if data file exists and get from server otherwise
         copyfile([sPath vcFile],[cPath vcFile]);
+        copyfile([sPath 'mask.mat'],[cPath 'mask.mat']);
         bhvFile = dir([sPath filesep Animal '_' Paradigm '*.mat']);
         copyfile([sPath bhvFile.name],[cPath bhvFile.name]);
     end
@@ -86,41 +124,39 @@ if strcmpi(dType,'Widefield')
     trials(ind) = [];
     bTrials(ind) = [];
     Vc(:,:,ind) = [];
-
+    
 elseif strcmpi(dType,'twoP')
     
     load([cPath 'data'], 'data'); %load 2p data
     % ensure there are not too many trials in the dataset
     bTrials = data.trialNumbers;
-    
-    if ~isfield(data,'bhvTrials')
-        data.bhvTrials=bTrials;
-    end
-    
     trials = bTrials;
     bTrials(~ismember(data.trialNumbers,data.bhvTrials)) = []; %don't use trials that have problems with trial onset times
     bTrials(SessionData.DidNotChoose(bTrials) | SessionData.DidNotLever(bTrials) | ~SessionData.Assisted(bTrials)) = []; %don't use unperformed/assisted trials
     
-%     data.dFOF(:,:,~ismember(data.trialNumbers,bTrials)) = [];
-	data.neural(:,:,~ismember(data.trialNumbers,bTrials)) = [];
+    data.dFOF(:,:,~ismember(data.trialNumbers,bTrials)) = [];
     data.DS(:,:,~ismember(data.trialNumbers,bTrials)) = [];
     data.analog(:,:,~ismember(data.trialNumbers,bTrials)) = [];
     
-    Vc = data.neural; %Vc is now neurons x frames x trials
-    dims = size(data.neural,1); %dims is now # of neurons instead
+    Vc = data.dFOF; %Vc is now neurons x frames x trials
+    dims = size(data.dFOF,1); %dims is now # of neurons instead
 end
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
+postprobs = postprobs(bTrials,:); %trim to sessions with good imaging
+[~,inds] = max(postprobs,[],2);
+attentiveind = inds == 1; %get attentive trials
 
 %equalize L/R choices
 useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
 choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
+choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', bhv.Rewarded, inf, []); %equalize attentive and inattentive state
 trials = trials(choiceIdx);
 bTrials = bTrials(choiceIdx);
 Vc = Vc(:,:,choiceIdx);
-
-bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset   
+postprobs = postprobs(choiceIdx,:);
+bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 trialCnt = length(bTrials);
-
+[~,trialstates] = max(postprobs,[],2);
 %% load behavior data
 if exist([cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],'file') ~= 2 || ... %check if svd behavior exists on hdd and pull from server otherwise
         exist([cPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat'],'file') ~= 2
@@ -128,7 +164,7 @@ if exist([cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],'file') ~= 2
     if ~exist([cPath 'BehaviorVideo' filesep], 'dir')
         mkdir([cPath 'BehaviorVideo' filesep]);
     end
-    copyfile([sPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat']);
+    copyfile([sPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments']);
     copyfile([sPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat'],[cPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat']);
     copyfile([sPath 'BehaviorVideo' filesep 'FilteredPupil.mat'],[cPath 'BehaviorVideo' filesep 'FilteredPupil.mat']);
     copyfile([sPath 'BehaviorVideo' filesep 'segInd1.mat'],[cPath 'BehaviorVideo' filesep 'segInd1.mat']);
@@ -190,6 +226,7 @@ if any(bTrials > length(pTime))
     trialCnt = length(bTrials);
 end
 
+
 %% find events in BPod time - All timestamps are relative to stimulus onset event to synchronize to imaging data later
 % pre-allocate vectors
 lickL = cell(1,trialCnt);
@@ -217,10 +254,9 @@ for iTrials = 1:trialCnt
         stimGrab(iTrials) = leverTimes(find(leverTimes == bhv.RawEvents.Trial{iTrials}.States.WaitForCam(1))-1); %find start of lever state that triggered stimulus onset
         handleSounds{iTrials} = leverTimes(1:2:end) - stimGrab(iTrials); %track indicator sound when animal is grabing both handles
         stimTime(iTrials) = bhv.RawEvents.Trial{iTrials}.Events.Wire3High - stimGrab(iTrials); %time of stimulus onset - measured from soundcard
-        stimEndTime(iTrials) = bhv.RawEvents.Trial{iTrials}.States.DecisionWait(1) - stimGrab(iTrials); %end of stimulus period, relative to handle grab
+        stimEndTime(iTrials) = bhv.RawEvents.Trial{iTrials}.States.DecisionWait(1) - stimGrab(iTrials); %end of stimulus period, relative to handle grab, from simons email
     catch
         stimTime(iTrials) = NaN;
-        stimEndTime(iTrials) = NaN;
         stimGrab(iTrials) = 0;
     end
     
@@ -303,15 +339,21 @@ rAudStimR = cell(1,trialCnt);
 spoutR = cell(1,trialCnt);
 spoutOutR = cell(1,trialCnt);
 
-rewardR = cell(1,trialCnt);
-lhandleChoiceR = cell(1,trialCnt);
-rhandleChoiceR = cell(1,trialCnt);
-lstimChoiceR = cell(1,trialCnt);
-rstimChoiceR = cell(1,trialCnt);
-ldelayChoiceR = cell(1,trialCnt);
-rdelayChoiceR = cell(1,trialCnt);
-lresponseChoiceR = cell(1,trialCnt);
-rresponseChoiceR = cell(1,trialCnt);
+handleAttentiveR = cell(1,trialCnt); %attentive state regressors
+stimAttentiveR = cell(1,trialCnt);
+delayAttentiveR = cell(1,trialCnt);
+responseAttentiveR = cell(1,trialCnt);
+
+handleChoiceR = cell(1,trialCnt); %aligned choice regressors
+stimChoiceR = cell(1,trialCnt);
+delayChoiceR = cell(1,trialCnt);
+responseChoiceR = cell(1,trialCnt);
+
+handleRewardR = cell(1,trialCnt); %attentive reward regressors
+stimRewardR = cell(1,trialCnt);
+delayRewardR = cell(1,trialCnt);
+responseRewardR = cell(1,trialCnt);
+
 
 prevRewardR = cell(1,trialCnt);
 prevChoiceR = cell(1,trialCnt);
@@ -344,12 +386,12 @@ for iTrials = 1:trialCnt
     firstStim = NaN;
     if bhv.StimType(iTrials) == 2 || bhv.StimType(iTrials) == 6 %auditory or mixed stimulus
         if ~isempty(audStimL{iTrials}(~isnan(audStimL{iTrials})))
-            firstStim = round((audStimL{iTrials}(1) + preStimDur) * sRate) - fsPreTime;
+            firstStim = round((audStimL{iTrials}(1) + preStimDur) * sRate);
             stimEnd = firstStim - 1 + fsPostTime; stimEnd = min([frames stimEnd]);
             lfirstAudStimR{iTrials}(:,1 : stimEnd - firstStim + 1)  = timeR(:, firstStim : stimEnd);
         end
         if ~isempty(audStimR{iTrials}(~isnan(audStimR{iTrials})))
-            firstStim = round((audStimR{iTrials}(1) + preStimDur) * sRate) - fsPreTime;
+            firstStim = round((audStimR{iTrials}(1) + preStimDur) * sRate);
             stimEnd = firstStim - 1 + fsPostTime; stimEnd = min([frames stimEnd]);
             rfirstAudStimR{iTrials}(:,1 : stimEnd - firstStim + 1) = timeR(:, firstStim : stimEnd);
         end
@@ -357,12 +399,12 @@ for iTrials = 1:trialCnt
     
     if bhv.StimType(iTrials) == 4 || bhv.StimType(iTrials) == 6 %tactile or mixed stimulus
         if ~isempty(tacStimL{iTrials}(~isnan(tacStimL{iTrials})))
-            firstStim = round((tacStimL{iTrials}(1) + preStimDur) * sRate) - fsPreTime;
+            firstStim = round((tacStimL{iTrials}(1) + preStimDur) * sRate);
             stimEnd = firstStim - 1 + fsPostTime; stimEnd = min([frames stimEnd]);
             lfirstTacStimR{iTrials}(:,1 : stimEnd - firstStim + 1) = timeR(:, firstStim : stimEnd);
         end
         if ~isempty(tacStimR{iTrials}(~isnan(tacStimR{iTrials})))
-            firstStim = round((tacStimR{iTrials}(1) + preStimDur) * sRate) - fsPreTime;
+            firstStim = round((tacStimR{iTrials}(1) + preStimDur) * sRate);
             stimEnd = firstStim - 1 + fsPostTime; stimEnd = min([frames stimEnd]);
             rfirstTacStimR{iTrials}(:,1 : stimEnd - firstStim + 1) = timeR(:, firstStim : stimEnd);
         end
@@ -468,72 +510,140 @@ for iTrials = 1:trialCnt
         handleSoundR{iTrials}(logical(histcounts(allStims,-preStimDur:1/sRate:postStimDur)),iRegs+1) = 1;
     end
     
-    %% choice and reward - use four different episodes for choice: handle, stim, delay and response
+    %% choice, reward and state
+    %make the stimtemp matrix
     stimTemp = false(frames, frames + maxStimShift);
-    stimShift = round(stimTime(iTrials) * sRate); %amount of stimshift. move diagonal on x-axis accordingly.
+    stimShift = round(stimTime(iTrials) * sRate); %amount of stimshift compared to possible maximum. move diagonal on x-axis accordingly.
     if (stimShift > maxStimShift) || isnan(stimTime(iTrials))
         stimTemp = NaN(frames, frames + maxStimShift); %don't use trial if stim onset is too late
     else
         stimTemp(:, end - stimShift - frames + 1 : end - stimShift) = timeR;
     end
     
-    rewardR{iTrials} = false(size(stimTemp));
-    if bhv.Rewarded(iTrials) %rewarded
-        rewardR{iTrials} = stimTemp; %trial was rewarded
-    end
-    
-    % get L/R choices as binary design matrix. This includes 4 choice regressors before handle grab and subsequent regressors until stimulus onset
+    % get choice as binary design matrix during handle grab
     handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
-    lhandleChoiceR{iTrials} = false(size(stimTemp,1),sRate);
-    rhandleChoiceR{iTrials} = false(size(stimTemp,1),sRate);
-    if stimShift > size(lhandleChoiceR{iTrials},2); stimShift = size(lhandleChoiceR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    handleChoiceR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleChoiceR{iTrials},2); stimShift = size(handleChoiceR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
     try
         if bhv.ResponseSide(iTrials) == 1
-            lhandleChoiceR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
-        elseif bhv.ResponseSide(iTrials) == 2
-            rhandleChoiceR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+            handleChoiceR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
         end
     end
     
-    % get L/R choices as binary design matrix during stimulus period. 2s max duration.
+    % get choice as binary design matrix during stimulus period. 2s max duration.
     stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
     delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
     responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
-
-    lstimChoiceR{iTrials} = false(size(timeR,1),(2*sRate)+1);
-    rstimChoiceR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    
+    stimChoiceR{iTrials} = false(size(timeR,1),(2*sRate)+1);
     try
         temp = timeR(:,stimReg:responseReg-1);
         if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
         if bhv.ResponseSide(iTrials) == 1
-            lstimChoiceR{iTrials}(:,1:responseReg-stimReg) = temp;
-        elseif bhv.ResponseSide(iTrials) == 2
-            rstimChoiceR{iTrials}(:,1:responseReg-stimReg) = temp;
+            stimChoiceR{iTrials}(:,1:responseReg-stimReg) = temp;
         end
     end
     
-    % get L/R choices as binary design matrix during delay period. 2s max duration
+    % get choice as binary design matrix during delay period. 2s max duration
     responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
-    ldelayChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
-    rdelayChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
-%     try
-%         if bhv.ResponseSide(iTrials) == 1
-%             ldelayChoiceR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
-%         elseif bhv.ResponseSide(iTrials) == 2
-%             rdelayChoiceR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
-%         end
-%     end
-    
-    % get L/R choices as binary design matrix during delay period. 2s max duration
-    lresponseChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
-    rresponseChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    delayChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
     try
         if bhv.ResponseSide(iTrials) == 1
-            lresponseChoiceR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
-        elseif bhv.ResponseSide(iTrials) == 2
-            rresponseChoiceR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+            delayChoiceR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
         end
     end
+    
+    % get choice as binary design matrix during response period. 2s max duration
+    responseChoiceR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.ResponseSide(iTrials) == 1
+            responseChoiceR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
+    % get reward as binary design matrix during handle grab
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleRewardR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleRewardR{iTrials},2); stimShift = size(handleRewardR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+        if bhv.Rewarded(iTrials)
+            handleRewardR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+        end
+    end
+    
+    % get reward as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimRewardR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+        if bhv.Rewarded(iTrials)
+            stimRewardR{iTrials}(:,1:responseReg-stimReg) = temp;
+        end
+    end
+    
+    % get reward as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayRewardR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.Rewarded(iTrials)
+            delayRewardR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+        end
+    end
+    
+    % get reward as binary design matrix during response period. 2s max duration
+    responseRewardR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if bhv.Rewarded(iTrials)
+            responseRewardR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
+    
+    % get attentive state as binary design matrix during handle grab
+    handleReg = preStimDur*sRate; %regressor that is aligned with handle grab
+    handleAttentiveR{iTrials} = false(size(stimTemp,1),sRate);
+    if stimShift > size(handleAttentiveR{iTrials},2); stimShift = size(handleAttentiveR{iTrials},2); end %make sure stimshift is not beyond size of design matrix
+    try
+        if trialstates(iTrials) == 1
+            handleAttentiveR{iTrials}(:,1:stimShift) = timeR(:,handleReg:handleReg+stimShift-1);
+        end
+    end
+    
+    % get attentive state as binary design matrix during stimulus period. 2s max duration.
+    stimReg = round((preStimDur + stimTime(iTrials)) * sRate); %frame that is aligned with stimulus onset
+    delayReg = floor((preStimDur + stimEndTime(iTrials)) * sRate); %onset of delay period. round down to ensure there is at least one frame for the delay.
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    
+    stimAttentiveR{iTrials} = false(size(timeR,1),(2*sRate)+1);
+    try
+        temp = timeR(:,stimReg:responseReg-1);
+        if size(temp,2) > (2*sRate)+1; temp = temp(:,1:(2*sRate)+1); end %make sure stimduration is not longer than 2s by accident.
+        if trialstates(iTrials) == 1
+            stimAttentiveR{iTrials}(:,1:responseReg-stimReg) = temp;
+        end
+    end
+    
+    % get attentive state as binary design matrix during delay period. 2s max duration
+    responseReg = ceil((preStimDur + spoutTime(iTrials)) * sRate);
+    delayAttentiveR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if trialstates(iTrials) == 1
+            delayAttentiveR{iTrials}(:,1:responseReg-delayReg) = timeR(:,delayReg:responseReg-1);
+        end
+    end
+    
+    % get attentive state as binary design matrix during response period. 2s max duration
+    responseAttentiveR{iTrials} = false(size(stimTemp,1),(2*sRate)+1);
+    try
+        if trialstates(iTrials) == 1
+            responseAttentiveR{iTrials}(:,1:frames-responseReg+1) = timeR(:,responseReg:end);
+        end
+    end
+    
     
     % previous trial regressors
     if iTrials == 1 %don't use first trial
@@ -580,18 +690,11 @@ for iTrials = 1:trialCnt
         % subsample regressors
         rewardR{iTrials} = rewardR{iTrials}(:,1:gaussShift:end);
         prevRewardR{iTrials} = prevRewardR{iTrials}(:,1:gaussShift:end);
-        lstimChoiceR{iTrials} = lstimChoiceR{iTrials}(:,1:gaussShift:end);
-        rstimChoiceR{iTrials} = rstimChoiceR{iTrials}(:,1:gaussShift:end);
-        lhandleChoiceR{iTrials} = lhandleChoiceR{iTrials}(:,1:gaussShift:end);
-        rhandleChoiceR{iTrials} = rhandleChoiceR{iTrials}(:,1:gaussShift:end);
-        ldelayChoiceR{iTrials} = ldelayChoiceR{iTrials}(:,1:gaussShift:end);
-        rdelayChoiceR{iTrials} = rdelayChoiceR{iTrials}(:,1:gaussShift:end);
-        lresponseChoiceR{iTrials} = lresponseChoiceR{iTrials}(:,1:gaussShift:end);
-        rresponseChoiceR{iTrials} = rresponseChoiceR{iTrials}(:,1:gaussShift:end);
+        ChoiceR{iTrials} = ChoiceR{iTrials}(:,1:gaussShift:end);
         prevChoiceR{iTrials} = prevChoiceR{iTrials}(:,1:gaussShift:end);
         prevStimR{iTrials} = prevStimR{iTrials}(:,1:Shift:end);
-        nextChoiceR{iTrials} = nextChoiceR{iTrials}(:,1:gaussShift:end);        
-        repeatChoiceR{iTrials} = repeatChoiceR{iTrials}(:,1:gaussShift:end);        
+        nextChoiceR{iTrials} = nextChoiceR{iTrials}(:,1:gaussShift:end);
+        repeatChoiceR{iTrials} = repeatChoiceR{iTrials}(:,1:gaussShift:end);
     end
     
     %determine timepoint of reward given
@@ -641,20 +744,21 @@ for iTrials = 1:trialCnt
             trialTime = [trialTime' addTime];
         end
         
-        fastPupilR{iTrials} = rateDisc_vidResamp(fPupil{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        fastPupilR{iTrials} = Behavior_vidResamp(fPupil{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         fastPupilR{iTrials} = smooth(fastPupilR{iTrials}(end - frames + 1 : end), 'rlowess');
         
-        slowPupilR{iTrials} = rateDisc_vidResamp(sPupil{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        slowPupilR{iTrials} = Behavior_vidResamp(sPupil{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         slowPupilR{iTrials} =  smooth(slowPupilR{iTrials}(end - frames + 1 : end), 'rlowess');
         
-        whiskR{iTrials} = rateDisc_vidResamp(whisker{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        whiskR{iTrials} = Behavior_vidResamp(whisker{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         whiskR{iTrials} = smooth(whiskR{iTrials}(end - frames + 1 : end), 'rlowess');
         
-        noseR{iTrials} = rateDisc_vidResamp(nose{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        noseR{iTrials} = Behavior_vidResamp(nose{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         noseR{iTrials} = smooth(noseR{iTrials}(end - frames + 1 : end), 'rlowess');
         
-        faceR{iTrials} = rateDisc_vidResamp(faceM{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        faceR{iTrials} = Behavior_vidResamp(faceM{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         faceR{iTrials} = smooth(faceR{iTrials}(end - frames + 1 : end), 'rlowess');
+        
         
         % body regressors
         bhvFrameRate = round(1/mean(diff(bTime{bTrials(iTrials)}))); %framerate of body camera
@@ -668,13 +772,14 @@ for iTrials = 1:trialCnt
             trialTime = [trialTime' addTime];
         end
         
-        bodyR{iTrials} = rateDisc_vidResamp(bodyM{bTrials(iTrials)}(rejIdx), trialTime, sRate);
+        bodyR{iTrials} = Behavior_vidResamp(bodyM{bTrials(iTrials)}(rejIdx), trialTime, sRate);
         bodyR{iTrials} = smooth(bodyR{iTrials}(end - frames + 1 : end), 'rlowess');
     end
     
     %% piezo sensor information
     if strcmpi(dType,'Widefield')
         if exist([cPath 'Analog_'  num2str(trials(iTrials)) '.dat'],'file') ~= 2  %check if files exists on hdd and pull from server otherwise
+            cFile = dir([sPath 'Analog_'  num2str(trials(iTrials)) '.dat']);
             copyfile([sPath 'Analog_'  num2str(trials(iTrials)) '.dat'],[cPath 'Analog_'  num2str(trials(iTrials)) '.dat']);
         end
         [~,Analog] = Widefield_LoadData([cPath 'Analog_'  num2str(trials(iTrials)) '.dat'],'Analog'); %load analog data
@@ -715,44 +820,44 @@ end
 
 %% get proper design matrices for handle grab
 lGrabR = cat(1,lGrabR{:});
-lGrabR = rateDisc_analogToDesign(lGrabR, 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift); %get design matrix
+lGrabR = Widefield_analogToDesign(lGrabR, 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift); %get design matrix
 
 rGrabR = cat(1,rGrabR{:});
-rGrabR = rateDisc_analogToDesign(rGrabR, 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift); %get design matrix
+rGrabR = Widefield_analogToDesign(rGrabR, 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift); %get design matrix
 
 %% rebuild analog motor regressors to get proper design matrices
 temp = double(cat(1,fastPupilR{:}));
 temp = (temp - prctile(temp,1))./ nanstd(temp); %minimum values are at 0, signal in standard deviation units
-[dMat, traceOut] = rateDisc_analogToDesign(temp, median(temp), trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(temp, median(temp), trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [single(traceOut) cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(traceOut, prctile(traceOut,75), trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(traceOut, prctile(traceOut,75), trialCnt, sRate, sRate, motorIdx, gaussShift);
 fastPupilR = [temp cat(1,dMat{:})]; %add high amplitude movements separately
 
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,whiskR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,whiskR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [single(traceOut) cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(double(cat(1,whiskR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(double(cat(1,whiskR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 whiskR = [temp cat(1,dMat{:})]; %add high amplitude movements separately
 
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,noseR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,noseR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [single(traceOut) cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(double(cat(1,noseR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(double(cat(1,noseR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 noseR = [temp cat(1,dMat{:})]; %add high amplitude movements separately
 
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,piezoR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,piezoR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 piezoR1 = [traceOut cat(1,dMat{:})]; %rebuild continuous format
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,piezoMoveR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,piezoMoveR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [traceOut cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(double(cat(1,piezoMoveR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(double(cat(1,piezoMoveR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 piezoR = [piezoR1 temp cat(1,dMat{:})]; %add high amplitude movements separately
 
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,faceR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,faceR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [single(traceOut) cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(double(cat(1,faceR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(double(cat(1,faceR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 faceR = [temp cat(1,dMat{:})]; %add high amplitude movements separately
 
-[dMat, traceOut] = rateDisc_analogToDesign(double(cat(1,bodyR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, traceOut] = Widefield_analogToDesign(double(cat(1,bodyR{:})), 0.5, trialCnt, sRate, sRate, motorIdx, gaussShift);
 temp = [single(traceOut) cat(1,dMat{:})]; %rebuild continuous format
-[dMat, ~] = rateDisc_analogToDesign(double(cat(1,bodyR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
+[dMat, ~] = Widefield_analogToDesign(double(cat(1,bodyR{:})), 2, trialCnt, sRate, sRate, motorIdx, gaussShift);
 bodyR = [temp cat(1,dMat{:})]; %add high amplitude movements separately
 clear piezoR1 piezoR2 dMat traceOut temp
 
@@ -774,11 +879,11 @@ if bhvOpts.targRate ~= sRate
         temp1 = squeeze(V1(:,bTrials(iTrials),:));
         if ~any(isnan(temp1(:)))
             trialTime = 1/bhvRate : 1/bhvRate : size(Vc,2)/sRate;
-            vidR(:, iTrials, :) = rateDisc_vidResamp(double(temp1), trialTime, sRate);
+            vidR(:, iTrials, :) = Behavior_vidResamp(double(temp1), trialTime, sRate);
             
             temp2 = squeeze(V2(:,bTrials(iTrials),:));
             trialTime = 1/bhvRate : 1/bhvRate : size(Vc,2)/sRate;
-            moveR(:, iTrials, :) = rateDisc_vidResamp(double(temp2), trialTime, sRate);
+            moveR(:, iTrials, :) = Behavior_vidResamp(double(temp2), trialTime, sRate);
         end
     end
 else
@@ -791,7 +896,7 @@ temp1 = NaN(dims,frames,trialCnt);
 temp2 = NaN(frames,trialCnt,bhvDimCnt);
 temp3 = NaN(frames,trialCnt,bhvDimCnt);
 temp4 = NaN(2,frames,trialCnt);
-for x = 1 : size(vidR,2)
+for x = 1 : size(vidR,2) %iterate thru trials
     try
         temp1(:,:,x) = Vc(:,(shVal - ceil(stimTime(x) / (1/sRate))) - (preStimDur * sRate) : (shVal - ceil(stimTime(x) / (1/sRate))) + (postStimDur * sRate) - 1,x);
         temp2(:,x,:) = vidR((shVal - ceil(stimTime(x) / (1/sRate))) - (preStimDur * sRate) : (shVal - ceil(stimTime(x) / (1/sRate))) + (postStimDur * sRate) - 1,x,:);
@@ -811,6 +916,7 @@ if strcmpi(dType,'twoP')
     DS = reshape(temp4,2,[]); %keep image motion trace for 2p imaging
 end
 clear temp4
+
 
 %% reshape regressors, make design matrix and indices for regressors that are used for the model
 timeR = repmat(logical(diag(ones(1,frames))),trialCnt,1); %time regressor
@@ -843,45 +949,60 @@ spoutOutR = cat(1,spoutOutR{:});
 spoutR(:,sum(spoutR) == 0) = [];
 spoutOutR(:,sum(spoutOutR) == 0) = [];
 
-rewardR = cat(1,rewardR{:});
-prevRewardR = cat(1,prevRewardR{:});
 
-lstimChoiceR = cat(1,lstimChoiceR{:});
-rstimChoiceR = cat(1,rstimChoiceR{:});
-lhandleChoiceR = cat(1,lhandleChoiceR{:});
-rhandleChoiceR = cat(1,rhandleChoiceR{:});
-ldelayChoiceR = cat(1,ldelayChoiceR{:});
-rdelayChoiceR = cat(1,rdelayChoiceR{:});
-lresponseChoiceR = cat(1,lresponseChoiceR{:});
-rresponseChoiceR = cat(1,rresponseChoiceR{:});
+handleChoiceR = cat(1,handleChoiceR{:});
+stimChoiceR = cat(1,stimChoiceR{:});
+delayChoiceR = cat(1,delayChoiceR{:});
+responseChoiceR = cat(1,responseChoiceR{:});
+
+handleRewardR = cat(1,handleRewardR{:});
+stimRewardR = cat(1,stimRewardR{:});
+delayRewardR = cat(1,delayRewardR{:});
+responseRewardR = cat(1,responseRewardR{:});
+
+handleAttentiveR = cat(1,handleAttentiveR{:});
+stimAttentiveR = cat(1,stimAttentiveR{:});
+delayAttentiveR = cat(1,delayAttentiveR{:});
+responseAttentiveR = cat(1,responseAttentiveR{:});
+
+
+prevRewardR = cat(1,prevRewardR{:});
 prevChoiceR = cat(1,prevChoiceR{:});
+prevStimR = cat(1,prevStimR{:});
+nextChoiceR = cat(1,nextChoiceR{:});
+repeatChoiceR = cat(1,repeatChoiceR{:});
+
 waterR = cat(1,waterR{:});
 
+slowPupilR = cat(1,slowPupilR{:});
+slowPupilR(~isnan(slowPupilR(:,1)),:) = zscore(slowPupilR(~isnan(slowPupilR(:,1)),:));
+
 %% create full design matrix
-fullR = [lhandleChoiceR rhandleChoiceR lstimChoiceR rstimChoiceR ldelayChoiceR rdelayChoiceR ...
-    lresponseChoiceR rresponseChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
+fullR = [timeR handleChoiceR stimChoiceR delayChoiceR responseChoiceR  ...
+    handleRewardR stimRewardR delayRewardR responseRewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
     lLickR rLickR handleSoundR lfirstTacStimR lTacStimR rfirstTacStimR rTacStimR ...
     lfirstAudStimR lAudStimR rfirstAudStimR rAudStimR prevRewardR prevChoiceR ...
-    waterR piezoR whiskR noseR fastPupilR bodyR moveR vidR];
+    nextChoiceR waterR piezoR whiskR noseR fastPupilR ...
+    slowPupilR faceR bodyR moveR vidR];
 
 % labels for different regressor sets. It is REALLY important this agrees with the order of regressors in fullR.
 regLabels = {
-    'lhandleChoice' 'rhandleChoice' 'lstimChoice' 'rstimChoice' 'ldelayChoice' 'rdelayChoice' ...
-    'lresponseChoice' 'rresponseChoice' 'reward' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' ...
-    'handleSound' 'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' ...
-    'rfirstAudStim' 'rAudStim' 'prevReward' 'prevChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'body' 'Move' 'bhvVideo'};
+    'time' 'handleChoice' 'stimChoice' 'delayChoice' 'responseChoice' 'handleReward' 'stimReward' 'delayReward' 'responseReward' ...
+    'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
+    'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' 'rfirstAudStim' 'rAudStim' ...
+    'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezo' 'whisk' 'nose' 'fastPupil' 'slowPupil' 'face' 'body' 'Move' 'bhvVideo'};
 
 %index to reconstruct different response kernels
 regIdx = [
-    ones(1,size(lhandleChoiceR,2))*find(ismember(regLabels,'lhandleChoice')) ...
-    ones(1,size(rhandleChoiceR,2))*find(ismember(regLabels,'rhandleChoice')) ...
-    ones(1,size(lstimChoiceR,2))*find(ismember(regLabels,'lstimChoice')) ...
-    ones(1,size(rstimChoiceR,2))*find(ismember(regLabels,'rstimChoice')) ...
-    ones(1,size(ldelayChoiceR,2))*find(ismember(regLabels,'ldelayChoice')) ...
-    ones(1,size(rdelayChoiceR,2))*find(ismember(regLabels,'rdelayChoice')) ...
-    ones(1,size(lresponseChoiceR,2))*find(ismember(regLabels,'lresponseChoice')) ...
-    ones(1,size(rresponseChoiceR,2))*find(ismember(regLabels,'rresponseChoice')) ...
-    ones(1,size(rewardR,2))*find(ismember(regLabels,'reward')) ...
+    ones(1,size(timeR,2))*find(ismember(regLabels,'time')) ...
+    ones(1,size(handleChoiceR,2))*find(ismember(regLabels,'handleChoice')) ...
+    ones(1,size(stimChoiceR,2))*find(ismember(regLabels,'stimChoice')) ...
+    ones(1,size(delayChoiceR,2))*find(ismember(regLabels,'delayChoice')) ...
+    ones(1,size(responseChoiceR,2))*find(ismember(regLabels,'responseChoice')) ...
+    ones(1,size(handleRewardR,2))*find(ismember(regLabels,'handleReward')) ...
+    ones(1,size(stimRewardR,2))*find(ismember(regLabels,'stimReward')) ...
+    ones(1,size(delayRewardR,2))*find(ismember(regLabels,'delayReward')) ...
+    ones(1,size(responseRewardR,2))*find(ismember(regLabels,'responseReward')) ...
     ones(1,size(lGrabR,2))*find(ismember(regLabels,'lGrab')) ...
     ones(1,size(lGrabRelR,2))*find(ismember(regLabels,'lGrabRel')) ...
     ones(1,size(rGrabR,2))*find(ismember(regLabels,'rGrab')) ...
@@ -899,11 +1020,14 @@ regIdx = [
     ones(1,size(rAudStimR,2))*find(ismember(regLabels,'rAudStim')) ...
     ones(1,size(prevRewardR,2))*find(ismember(regLabels,'prevReward')) ...
     ones(1,size(prevChoiceR,2))*find(ismember(regLabels,'prevChoice')) ...
+    ones(1,size(nextChoiceR,2))*find(ismember(regLabels,'nextChoice')) ...
     ones(1,size(waterR,2))*find(ismember(regLabels,'water')) ...
     ones(1,size(piezoR,2))*find(ismember(regLabels,'piezo')) ...
     ones(1,size(whiskR,2))*find(ismember(regLabels,'whisk')) ...
     ones(1,size(noseR,2))*find(ismember(regLabels,'nose')) ...
     ones(1,size(fastPupilR,2))*find(ismember(regLabels,'fastPupil')) ...
+    ones(1,size(slowPupilR,2))*find(ismember(regLabels,'slowPupil')) ...
+    ones(1,size(faceR,2))*find(ismember(regLabels,'face')) ...
     ones(1,size(bodyR,2))*find(ismember(regLabels,'body')) ...
     ones(1,size(moveR,2))*find(ismember(regLabels,'Move')) ...
     ones(1,size(vidR,2))*find(ismember(regLabels,'bhvVideo'))];
@@ -923,272 +1047,23 @@ trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
 
-%% run QR and check for rank-defficiency
-rejIdx = nansum(abs(fullR)) < 10;
-[~, fullQRR] = qr(bsxfun(@rdivide,fullR(:,~rejIdx),sqrt(sum(fullR(:,~rejIdx).^2))),0); %orthogonalize design matrix
-if ispc
-% figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
+out = [];
+nTrials = size(fullR,1)/75;
+for i = 1:nTrials
+    inds = i*75-74:i*75;
+    onetrial = fullR(inds,:);
+    onetrial = reshape(onetrial,[],1);
+    out = [out,onetrial];
 end
-if sum(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1))) < size(fullR,2) %check if design matrix is full rank
-    temp = ~(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1)));
-    fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
-    rejIdx(~rejIdx) = temp; %reject regressors that cause rank-defficint matrix
+alltrials = [];
+for i = 1:length(trialIdx)/75
+    inds = i*75-74:i*75;
+    onetrial = trialIdx(inds);
+    alltrials = [alltrials, onetrial];
 end
-
-% reject regressors that are too sparse or rank-defficient
-fullR(:,rejIdx) = []; %clear empty regressors
-fprintf(1, 'Rejected %d/%d empty regressors\n', sum(rejIdx),length(rejIdx));
-
-%% save modified Vc
-Vc(:,trialIdx) = []; %clear bad trials
-Vc = bsxfun(@minus, Vc, mean(Vc,2)); %should be zero-mean
-
-if strcmpi(dType,'Widefield')
-    save([cPath 'interpVc.mat'], 'Vc', 'frames', 'preStimDur', 'postStimDur');
-elseif strcmpi(dType,'twoP')
-    DS(:,trialIdx) = []; %clear bad trials
-    save([cPath 'interpVc.mat'], 'Vc', 'DS', 'frames', 'preStimDur', 'postStimDur');
+take = mean(alltrials,1) == 0;
+out2 = postprobs(take,:);
 end
 
-%% apply gaussian filter to design matrix if using sub-sampling
-if gaussShift > 1
-    [a,b] = size(fullR);
-    
-    % find non-continous regressors (contain values different from -1, 0 or 1)
-    temp = false(size(fullR));
-    temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
-    regIdx = nanmean(temp) == 0; %index for non-continous regressors
-    
-    % do gaussian convolution. perform trialwise to avoid overlap across trials.
-    trialCnt = a/frames;
-    fullR = reshape(fullR,frames,trialCnt,b);
-    for iTrials = 1:trialCnt
-        fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
-    end
-    fullR = reshape(fullR,a,b);
-end
 
-%% clear individual regressors
-clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
-    lAudStimR rAudStimR rewardR prevRewardR lstimChoiceR rstimChoiceR lhandleChoiceR rhandleChoiceR ...
-    prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR
 
-%% run ridge regression in low-D
-% run model. Zero-mean without intercept. only video qr.
-[ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-fprintf('Mean ridge penalty for original video, zero-mean model: %f\n', mean(ridgeVals));
-save([cPath 'orgorgdimBeta.mat'], 'dimBeta', 'ridgeVals');
-save([cPath filesep 'orgorgregData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
-% [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-% save([cPath 'orgorgfullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
-
-% mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels)));
-% motorR = fullR(:, mInd);
-% [motorRidge, motorBeta] = ridgeMML(Vc', motorR, true); %get ridge penalties and beta weights.
-% fprintf('Mean ridge penalty for original video, motor only model: %f\n', mean(motorRidge));
-% Vm = (motorR * motorBeta)';
-% save([cPath 'orgVMotor.mat'], 'Vm', 'frames'); %save predicted data based on motor model
-% 
-% mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels(~ismember(motorLabels,opMotorLabels)))));
-% spontMotorR = fullR(:, mInd);
-% [spontMotorRidge, spontMotorBeta] = ridgeMML(Vc', spontMotorR, true); %get ridge penalties and beta weights.
-% fprintf('Mean ridge penalty for original video, spont-motor only model: %f\n', mean(spontMotorRidge));
-% Vm = (spontMotorR * spontMotorBeta)';
-% save([cPath 'orgVspontMotor.mat'], 'Vm', 'frames'); %save predicted data based on spont motor model
-
-%% run motor/task/opMotor and spontMotor only models. Zero-mean without intercept.
-% cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,motorLabels))); %get index for motor regressors
-% motorLabels = regLabels(sort(find(ismember(regLabels,motorLabels)))); %make sure motorLabels is in the right order
-% 
-% [Vmotor, motorBeta, motorR, motorIdx, motorRidge, motorLabels, motorMap, motorMovie] = crossValModel(motorLabels);
-% fprintf('Mean ridge penalty for motor-only, zero-mean model: %f\n', mean(motorRidge));
-% save([cPath 'interpVmotor.mat'], 'Vmotor', 'frames'); %save predicted data based on motor model
-% save([cPath 'motorBeta.mat'], 'motorBeta', 'motorRidge');
-% save([cPath filesep 'motorregData.mat'], 'motorR','trialIdx', 'motorIdx', 'motorLabels', 'motorMap', 'motorMovie', 'gaussShift','-v7.3');
-% 
-% [Vtask, taskBeta, taskR, taskIdx, taskRidge, taskLabels, taskMap, taskMovie] = crossValModel(regLabels(~ismember(regLabels,motorLabels)));
-% fprintf('Mean ridge penalty for task-only, zero-mean model: %f\n', mean(taskRidge));
-% save([cPath 'interpVtask.mat'], 'Vtask', 'frames'); %save predicted data based on task model
-% save([cPath 'taskBeta.mat'], 'taskBeta', 'taskRidge');
-% save([cPath filesep 'taskregData.mat'], 'taskR','trialIdx', 'taskIdx', 'taskLabels', 'taskMap', 'taskMovie', 'gaussShift','-v7.3');
-% 
-% [VtaskOpMotor, taskOpMotorBeta, taskOpMotorR, taskOpMotorIdx, taskOpMotorRidge, taskOpMotorLabels, taskOpMotorMap, taskOpMotorMovie] = crossValModel([regLabels(~ismember(regLabels,motorLabels)) opMotorLabels]);
-% fprintf('Mean ridge penalty for task+opMotor, zero-mean model: %f\n', mean(taskOpMotorRidge));
-% save([cPath 'interpVtaskOpMotor.mat'], 'VtaskOpMotor', 'frames'); %save predicted data based on taskOpMotor model
-% save([cPath 'taskOpMotorBeta.mat'], 'taskOpMotorBeta', 'taskOpMotorRidge');
-% save([cPath filesep 'taskOpMotorregData.mat'], 'taskOpMotorR','trialIdx', 'taskOpMotorIdx', 'taskOpMotorLabels', 'taskOpMotorMap', 'taskOpMotorMovie', 'gaussShift','-v7.3');
-% 
-% [VtaskSpMotor, taskSpMotorBeta, taskSpMotorR, taskSpMotorIdx, taskSpMotorRidge, taskSpMotorLabels, taskSpMotorMap, taskSpMotorMovie] = crossValModel(regLabels(~ismember(regLabels,opMotorLabels)));
-% fprintf('Mean ridge penalty for task+opMotor, zero-mean model: %f\n', mean(taskSpMotorRidge));
-% save([cPath 'interpVtaskSpMotor.mat'], 'VtaskSpMotor', 'frames'); %save predicted data based on taskSpMotor model
-% save([cPath 'taskSpMotorBeta.mat'], 'taskSpMotorBeta', 'taskSpMotorRidge');
-% save([cPath filesep 'taskSpMotorregData.mat'], 'taskSpMotorR','trialIdx', 'taskSpMotorIdx', 'taskSpMotorLabels', 'taskSpMotorMap', 'taskSpMotorMovie', 'gaussShift','-v7.3');
-% 
-% [VopMotor, opMotorBeta, opMotorR, opMotorIdx, opMotorRidge, opMotorLabels, opMotorMap, opMotorMovie] = crossValModel(opMotorLabels);
-% fprintf('Mean ridge penalty for opMotor-only, zero-mean model: %f\n', mean(opMotorRidge));
-% save([cPath 'interpVopMotor.mat'], 'VopMotor', 'frames'); %save predicted data based on operant motor model
-% save([cPath 'opMotorBeta.mat'], 'opMotorBeta', 'opMotorRidge');
-% save([cPath filesep 'opMotorregData.mat'], 'opMotorR','trialIdx', 'opMotorIdx', 'opMotorLabels', 'opMotorMap', 'opMotorMovie', 'gaussShift','-v7.3');
-% 
-% [VspontMotor, spontMotorBeta, spontMotorR, spontMotorIdx, spontMotorRidge, spontMotorLabels, spontMotorMap, spontMotorMovie] = crossValModel(motorLabels(~ismember(motorLabels,opMotorLabels)));
-% fprintf('Mean ridge penalty for spontMotor-only, zero-mean model: %f\n', mean(spontMotorRidge));
-% save([cPath 'interpVspontMotor.mat'], 'VspontMotor', 'frames'); %save predicted data based on spontaneous motor model
-% save([cPath 'spontMotorBeta.mat'], 'spontMotorBeta', 'spontMotorRidge');
-% save([cPath filesep 'spontMotorregData.mat'], 'spontMotorR','trialIdx', 'spontMotorIdx', 'spontMotorLabels', 'spontMotorMap', 'spontMotorMovie', 'gaussShift','-v7.3');
-% 
-% %% subtract mean from Vc and run model again
-% Vc = reshape(Vc, size(Vc,1), frames, []);
-% meanV = mean(Vc,3);
-% for iTrials = 1 : size(Vc,3)
-%     Vc(:,:,iTrials) = bsxfun(@minus,Vc(:,:,iTrials),meanV); %subtract trial-average
-% end
-% Vc = reshape(Vc, size(Vc,1), []);
-% Vc = bsxfun(@minus, Vc, mean(Vc,2)); %should be zero-mean
-% 
-% if strcmpi(dType,'Widefield')
-%     save([cPath 'nomeanVc.mat'], 'Vc', 'meanV', 'frames', 'preStimDur', 'postStimDur');
-% elseif strcmpi(dType,'twoP')
-%     save([cPath 'nomeanVc.mat'], 'Vc', 'DS', 'frames', 'preStimDur', 'postStimDur');
-% end
-% 
-% % re-run model. Zero-mean without intercept.
-% [ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-% fprintf('Mean ridge penalty for mean-subtracted Vc with zero-mean model: %f\n', mean(ridgeVals));
-% save([cPath 'nomeandimBeta.mat'], 'dimBeta', 'ridgeVals');
-% save([cPath filesep 'nomeanregData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','fullQRR','-v7.3');
-% [~, ~, ~, ~, ~, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-% save([cPath 'nomeanfullcorr.mat'], 'fullLabels', 'fullMap', 'fullMovie','-v7.3');
-% 
-% [~, ~, ~, ~, motorRidge, motorLabels, motorMap, motorMovie] = crossValModel(motorLabels);
-% fprintf('Mean ridge penalty for motor-only, zero-mean model: %f\n', mean(motorRidge));
-% save([cPath filesep 'nomeanmotorregData.mat'], 'motorLabels', 'motorMap', 'motorMovie','-v7.3');
-% 
-% [~, ~, ~, ~, taskRidge, taskLabels, taskMap, taskMovie] = crossValModel(regLabels(~ismember(regLabels,motorLabels)));
-% fprintf('Mean ridge penalty for task-only, zero-mean model: %f\n', mean(taskRidge));
-% save([cPath filesep 'nomeantaskregData.mat'], 'taskLabels', 'taskMap', 'taskMovie', '-v7.3');
-
-% %% orthogonalize some regressors for clarity
-% % orthogonalize spontaneous from operant movement regressors
-% lInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'lLick', 'rLick'})));
-% hInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel'})));
-% pInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,{'fastPupil', 'slowPupil'})));
-% wInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'whisk')));
-% nInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'nose')));
-% piInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'piezo')));
-% fInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'face')));
-% bInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'body')));
-% mInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'Move')));
-% vInd = ismember(regIdx(~rejIdx), find(ismember(regLabels,'bhvVideo')));
-% 
-% smallR = [fullR(:,lInd) fullR(:,hInd) fullR(:,pInd) fullR(:,wInd) fullR(:,nInd) fullR(:,piInd) fullR(:,fInd)  fullR(:,bInd)  fullR(:,mInd) fullR(:,vInd)];
-% [Q, redQRR] = qr(smallR,0); clear smallR %orthogonalize spont. from operant movement
-% 
-% % replace original with orthogonalized regressors (only for spont. movements)
-% fullR(:,pInd) = Q(:,sum(lInd | hInd) + 1 : sum(lInd | hInd | pInd)); %pupil
-% fullR(:,wInd) = Q(:,sum(lInd | hInd | pInd) + 1 : sum(lInd | hInd | pInd | wInd)); %whisk
-% fullR(:,nInd) = Q(:,sum(lInd | hInd | pInd | wInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd)); %nose
-% fullR(:,piInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd)); %piezo
-% fullR(:,fInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd)); %face
-% fullR(:,bInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd)); %body
-% fullR(:,mInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd)); %motion energy
-% fullR(:,vInd) = Q(:,sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd) + 1 : sum(lInd | hInd | pInd | wInd | nInd | piInd | fInd | bInd | mInd | vInd)); %video
-% 
-% %% run model with orthogonalized spontaneous movement regressors. Zero-mean without intercept.
-% [ridgeVals, dimBeta] = ridgeMML(Vc', fullR, true); %get ridge penalties and beta weights.
-% fprintf('Mean ridge penalty for zero-mean model: %f\n', mean(ridgeVals));
-% save([cPath 'dimBeta.mat'], 'dimBeta', 'ridgeVals');
-% save([cPath 'regData.mat'], 'fullR', 'spoutR', 'leverInR', 'rejIdx' ,'trialIdx', 'regIdx', 'regLabels','gaussShift','redQRR','-v7.3');
-% [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-% save([cPath 'fullcorr.mat'], 'Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
-% % rateDisc_videoRebuild(cPath); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
-% 
-% %% run video only model. Zero-mean without intercept.
-% rejIdx = false(1,size(vidR,2));
-% regLabels = {'bhvVideo'};
-% regIdx = ones(1,size(vidR,2));
-% [ridgeVals, dimBeta] = ridgeMML(Vc', vidR(~trialIdx,:), true); %get ridge penalties and beta weights.
-% fprintf('Mean ridge penalty for video-only zero-mean model: %f\n', mean(ridgeVals));
-% save([cPath 'vidOnlydimBeta.mat'], 'dimBeta', 'ridgeVals');
-% save([cPath filesep 'vidOnlyregData.mat'], 'vidR', 'rejIdx', 'trialIdx', 'regIdx', 'regLabels','gaussShift','-v7.3');
-% % rateDisc_videoRebuild(cPath, 'vidOnly'); % rebuild video regressors by projecting beta weights for each wiedfield dimensions back on the behavioral video data
-
-%% nested functions
-    function [Vm, cBeta, cR, subIdx, cRidge, cLabels, cMap, cMovie] =  crossValModel(cLabels)
-        
-        cIdx = ismember(regIdx(~rejIdx), find(ismember(regLabels,cLabels))); %get index for task regressors
-        cLabels = regLabels(sort(find(ismember(regLabels,cLabels)))); %make sure motorLabels is in the right order
-        
-        %create new regressor index that matches motor labels
-        subIdx = regIdx(~rejIdx);
-        subIdx = subIdx(cIdx);
-        temp = unique(subIdx);
-        for x = 1 : length(temp)
-            subIdx(subIdx == temp(x)) = x;
-        end
-        cR = fullR(:,cIdx);
-        
-        Vm = zeros(size(Vc),'single'); %pre-allocate motor-reconstructed V
-        randIdx = randperm(size(Vc,2)); %generate randum number index
-        foldCnt = floor(size(Vc,2) / ridgeFolds);
-        cBeta = cell(1,ridgeFolds);
-        
-        for iFolds = 1:ridgeFolds
-            dataIdx = true(1,size(Vc,2));
-            
-            if ridgeFolds > 1
-                dataIdx(randIdx(((iFolds - 1)*foldCnt) + (1:foldCnt))) = false; %index for training data
-                if iFolds == 1
-                    [cRidge, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx)', cR(dataIdx,:), true); %get beta weights and ridge penalty for task only model
-                else
-                    [~, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx)', cR(dataIdx,:), true, cRidge); %get beta weights for task only model. ridge value should be the same as in the first run.
-                end
-                Vm(:,~dataIdx) = (cR(~dataIdx,:) * cBeta{iFolds})'; %predict remaining data
-                
-                if rem(iFolds,ridgeFolds/5) == 0
-                    fprintf(1, 'Current fold is %d out of %d\n', iFolds, ridgeFolds);
-                end
-            else
-                [cRidge, cBeta{iFolds}] = ridgeMML(Vc', cR, true); %get beta weights for task-only model.
-                Vm = (cR * cBeta{iFolds})'; %predict remaining data
-                disp('Ridgefold is <= 1, fit to complete dataset instead');
-            end
-        end
-        
-        % computed all predicted variance
-        Vc = reshape(Vc,size(Vc,1),[]);
-        Vm = reshape(Vm,size(Vm,1),[]);
-        if length(size(U)) == 3
-            U = arrayShrink(U, squeeze(isnan(U(:,:,1))));
-        end
-        covVc = cov(Vc');  % S x S
-        covVm = cov(Vm');  % S x S
-        cCovV = bsxfun(@minus, Vm, mean(Vm,2)) * Vc' / (size(Vc, 2) - 1);  % S x S
-        covP = sum((U * cCovV) .* U, 2)';  % 1 x P
-        varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
-        varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
-        stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-        cMap = gather((covP ./ stdPxPy)');
-        
-        % movie for predicted variance
-        cMovie = zeros(size(U,1),frames, 'single');
-        for iFrames = 1:frames
-            
-            frameIdx = iFrames:frames:size(Vc,2); %index for the same frame in each trial
-            cData = bsxfun(@minus, Vc(:,frameIdx), mean(Vc(:,frameIdx),2));
-            cModel = bsxfun(@minus, Vm(:,frameIdx), mean(Vm(:,frameIdx),2));
-            covVc = cov(cData');  % S x S
-            covVm = cov(cModel');  % S x S
-            cCovV = cModel * cData' / (length(frameIdx) - 1);  % S x S
-            covP = sum((U * cCovV) .* U, 2)';  % 1 x P
-            varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
-            varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
-            stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-            cMovie(:,iFrames) = gather(covP ./ stdPxPy)';
-            clear cData cModel
-            
-        end
-        fprintf('Run finished. RMSE: %f\n', median(cMovie(:).^2));
-        
-        
-    end
-end

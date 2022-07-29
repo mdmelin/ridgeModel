@@ -1,14 +1,28 @@
-function ridgeModel_vanillaAligned(cPath,Animal,Rec,dType,shufflelabels)
+function ridgeModel_vanillaAligned(cPath,Animal,Rec,dType,shufflelabels,ignoreflags)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019
 %on that same dataset. No state/glmhmm stuff. 
+fprintf('\nTraining model for %s on %s.\n\n',Animal,Rec);
+if ~strcmpi(cPath(end),filesep)
+    cPath = [cPath filesep];
+end
+Paradigm = 'SpatialDisc';
+cPath = [cPath Animal filesep Paradigm filesep Rec filesep]; %Widefield data path
+sPath = ['V:\GoogleDriveRclone' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
+
+%First, check if we need to run the model for this session, look for flag
+%file
+expectedflag = [mfilename '_hasrun.flag'];
+fnames = {dir(cPath).name};
+if ismember(expectedflag,fnames) && ~ignoreflags %if the flag file is found and we're not ignoring flag files
+    fprintf('\nThere is already a model trained for this session. Skipping...\n\n');
+    return %abort the model training
+end
 
 addpath('C:\Data\churchland\ridgeModel\widefield');
 addpath('C:\Data\churchland\ridgeModel\rateDisc');
 addpath('C:\Data\churchland\ridgeModel\smallStuff');
-if ~strcmpi(cPath(end),filesep)
-    cPath = [cPath filesep];
-end
+
 
 if ~exist('dType', 'var') || isempty(dType)
     dType = 'Widefield'; %default is widefield data
@@ -24,11 +38,6 @@ elseif strcmpi(dType,'Widefield')
     stimLine = 6;      % channel in the analog data that contains stimulus trigger.
 end
 
-Paradigm = 'SpatialDisc';
-glmPath = [cPath Animal filesep 'glm_hmm_models'];
-cPath = [cPath Animal filesep Paradigm filesep Rec filesep]; %Widefield data path
-sPath = ['\\grid-hs\churchland_nlsas_data\data\BpodImager\Animals\' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
-% sPath = ['/sonas-hs/churchland/hpc/home/space_managed_data/BpodImager/Animals/' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
 
 %% general variables
 load([cPath 'opts.mat'], 'opts');         % get some options from imaging data
@@ -1020,6 +1029,30 @@ labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the
 [Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
 save([cPath 'taskvars.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
 
+%% Now run the model with task variable groups knocked out (for deltaR2 calculation)
+labels = saveLabels(~ismember(saveLabels,spontMotorLabels));
+labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath 'nospontmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
+
+labels = saveLabels(~ismember(saveLabels,opMotorLabels));
+labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath 'noopmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
+
+labels = saveLabels(~ismember(saveLabels,taskVarLabels));
+labels = saveLabels(sort(find(ismember(saveLabels,labels)))); %make sure  in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath 'notaskvars.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'R', 'fullLabels', 'fullLabelInds','fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3');
+
+
+%% create a flag file to log that this version of the model was run
+flag = [cPath mfilename '_hasrun.flag'];
+command = ['fsutil file createnew ' flag ' 1'];
+system(command);
 
 %% nested functions
 

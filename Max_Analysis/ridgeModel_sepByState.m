@@ -9,6 +9,9 @@ function ridgeModel_sepByState(cPath,Animal,Rec,glmFile,desiredstate,dType)
 % of multiple
 
 addpath('C:\Data\churchland\ridgeModel\widefield');
+addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
+addpath('C:\Data\churchland\ridgeModel\smallStuff');
+addpath('C:\Data\churchland\ridgeModel\rateDisc');
 
 if ~strcmpi(cPath(end),filesep)
     cPath = [cPath filesep];
@@ -63,7 +66,6 @@ shVal = sRate * opts.preStim  + 1; %expected position of stimulus onset in the i
 maxStimShift = 1 * sRate; % maximal stimulus onset after handle grab. (default is 1s - this means that stimulus onset should not be more than 1s after handle grab. Cognitive regressors will have up to 1s of baseline because of stim jitter.)
 bhvDimCnt = 200;    % number of dimensions from behavioral videos that are used as regressors.
 gaussShift = 1;     % inter-frame interval between regressors. Will use only every 'gaussShift' regressor and convolve with gaussian of according FHWM to reduce total number of used regressors.
-[~, motorLabels] = rateDiscRecordings; %get motor labels for motor-only model
 dims = 200; %number of dims in Vc that are used in the model
 
 
@@ -170,6 +172,12 @@ postprobs = postprobs(choiceIdx,:);
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset   
 trialCnt = length(bTrials);
 [~,trialstates] = max(postprobs,[],2);
+
+mintrials = 50;
+if trialCnt < mintrials
+    fprintf('\there are less than %i trials, aborting for this session.\n',mintrials);
+    return 
+end
 %% load behavior data
 if exist([cPath 'BehaviorVideo' filesep 'SVD_CombinedSegments.mat'],'file') ~= 2 || ... %check if svd behavior exists on hdd and pull from server otherwise
         exist([cPath 'BehaviorVideo' filesep 'motionSVD_CombinedSegments.mat'],'file') ~= 2
@@ -961,163 +969,62 @@ spontmotorlabels = {'piezo','whisk','nose','fastPupil','slowPupil','face','body'
 %% run ridge regression in low-D, with state this time
 %run model. Zero-mean without intercept. only video qr.
 
-% [Vm, fullBeta, fullR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(regLabels);
-% save([cPath desiredstate '_' glmFile 'fullmodel.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'fullR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
+labels = regLabels;
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'fullmodel.mat'], 'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
 
 %% Run WITHOUT task variables 
 
 labels = regLabels(~ismember(regLabels, taskvarlabels)); %get all regressors except task vars
 labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
 
-[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath desiredstate '_' glmFile 'notaskvars.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'notaskvars.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 %% Run WITHOUT operant motor labels
 
-% labels = regLabels(~ismember(regLabels, opmotorlabels)); %get all regressors except task vars
-% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-% 
-% [Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-% save([cPath desiredstate '_' glmFile 'noopmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+labels = regLabels(~ismember(regLabels, opmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'noopmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 
 %% Run WITHOUT spontaneous motor labels
 
-% labels = regLabels(~ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
-% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-% 
-% [Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-% save([cPath desiredstate '_' glmFile 'nospontmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+labels = regLabels(~ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'nospontmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 
 %% Run WITH ONLY task variables 
 
 labels = regLabels(ismember(regLabels, taskvarlabels)); %get all regressors except task vars
 labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
 
-[Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-save([cPath desiredstate '_' glmFile 'onlytaskvars.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'onlytaskvars.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 %% Run WITH ONLY operant motor labels
 
-% labels = regLabels(ismember(regLabels, opmotorlabels)); %get all regressors except task vars
-% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-% 
-% [Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-% save([cPath desiredstate '_' glmFile 'onlyopmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+labels = regLabels(ismember(regLabels, opmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'onlyopmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 
 %% Run WITH ONLY spontaneous motor labels
 
-% labels = regLabels(ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
-% labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-% 
-% [Vm, fullBeta, nostateR, fullIdx, fullRidge, fullLabels, fullMap, fullMovie] = crossValModel(labels);
-% save([cPath desiredstate '_' glmFile 'onlyspontmotor.mat'],'regIdx','rejIdx','Vm', 'fullBeta', 'fullIdx', 'nostateR', 'fullLabels', 'fullRidge', 'regLabels', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
+labels = regLabels(ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
+labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
+
+[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
+save([cPath desiredstate '_' glmFile 'onlyspontmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
 
 
 
 
 
 %% nested functions
-%% nested functions
-function [Vm, cBeta, cR, subIdx, cRidge, keptLabels, cLabelInds, cMap, cMovie] =  crossValModel(cLabels)
-        
-        regs2grab = ismember(regIdx,find(ismember(regLabels,cLabels))); %these are just the regressors chosen by labels, no rejection yet
-        cR = fullR(:,regs2grab); %grab desired labels from design matrix
-        %reject regressors
-        rejIdx = nansum(abs(cR)) < 10;
-        [~, fullQRR] = qr(bsxfun(@rdivide,cR(:,~rejIdx),sqrt(sum(cR(:,~rejIdx).^2))),0); %orthogonalize design matrix
-        %figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
-        if sum(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1))) < size(cR,2) %check if design matrix is full rank
-            temp = ~(abs(diag(fullQRR)) > max(size(cR)) * eps(fullQRR(1)));
-            fprintf('Design matrix is rank-defficient. Removing %d/%d additional regressors.\n', sum(temp), sum(~rejIdx));
-            rejIdx(~rejIdx) = temp; %reject regressors that cause rank-defficint matrix
-        end
-        
-        cR = cR(:,~rejIdx); % reject regressors that are too sparse or rank-defficient
-        
-        regs2grab = regIdx(regs2grab); %get indices that have our desired labels
-        
-        temporary = unique(regs2grab);
-        keptLabels = regLabels(temporary);
-        for x = 1 : length(temporary)
-            cLabelInds(regs2grab == temporary(x)) = x; %make it so that cLabelInds doesn't skip any integers when we move past a label we don't want
-        end
-        
-        cLabelInds = cLabelInds(~rejIdx); %now reject the regressors (from our subselection of labels) that had NaN's or were rank deficient
-        subIdx = cLabelInds; %get rid of this redundant variable later
-        
-        fprintf(1, 'Rejected %d/%d empty or rank deficient regressors\n', sum(rejIdx),length(rejIdx));
-        
-        discardLabels = cLabels(~ismember(cLabels,keptLabels));
-        
-        if length(discardLabels) > 0
-            fprintf('\nFully discarded regressor: %s because of NaN''s or emptiness \n', discardLabels{:});
-        else 
-            fprintf('\nNo regressors were FULLY discarded\n');
-        end
-        
-        %now move on to the regression
-        Vm = zeros(size(Vc),'single'); %pre-allocate motor-reconstructed V
-        randIdx = randperm(size(Vc,2)); %generate randum number index
-        foldCnt = floor(size(Vc,2) / ridgeFolds);
-        cBeta = cell(1,ridgeFolds);
-        
-        for iFolds = 1:ridgeFolds
-            dataIdx = true(1,size(Vc,2));
-            
-            if ridgeFolds > 1
-                dataIdx(randIdx(((iFolds - 1)*foldCnt) + (1:foldCnt))) = false; %index for training data
-                if iFolds == 1
-                    [cRidge, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx)', cR(dataIdx,:), true); %get beta weights and ridge penalty for task only model
-                else
-                    [~, cBeta{iFolds}] = ridgeMML(Vc(:,dataIdx)', cR(dataIdx,:), true, cRidge); %get beta weights for task only model. ridge value should be the same as in the first run.
-                end
-                Vm(:,~dataIdx) = (cR(~dataIdx,:) * cBeta{iFolds})'; %predict remaining data
-                
-                if rem(iFolds,ridgeFolds/5) == 0
-                    fprintf(1, 'Current fold is %d out of %d\n', iFolds, ridgeFolds);
-                end
-            else
-                [cRidge, cBeta{iFolds}] = ridgeMML(Vc', cR, true); %get beta weights for task-only model.
-                Vm = (cR * cBeta{iFolds})'; %predict remaining data
-                disp('Ridgefold is <= 1, fit to complete dataset instead');
-            end
-        end
-        
-        % computed all predicted variance
-        Vc = reshape(Vc,size(Vc,1),[]);
-        Vm = reshape(Vm,size(Vm,1),[]);
-        if length(size(U)) == 3
-            U = arrayShrink(U, squeeze(isnan(U(:,:,1))));
-        end
-        covVc = cov(Vc');  % S x S
-        covVm = cov(Vm');  % S x S
-        cCovV = bsxfun(@minus, Vm, mean(Vm,2)) * Vc' / (size(Vc, 2) - 1);  % S x S
-        covP = sum((U * cCovV) .* U, 2)';  % 1 x P
-        varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
-        varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
-        stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-        cMap = gather((covP ./ stdPxPy)');
-        
-        % movie for predicted variance
-        cMovie = zeros(size(U,1),frames, 'single');
-        for iFrames = 1:frames
-            
-            frameIdx = iFrames:frames:size(Vc,2); %index for the same frame in each trial
-            cData = bsxfun(@minus, Vc(:,frameIdx), mean(Vc(:,frameIdx),2));
-            cModel = bsxfun(@minus, Vm(:,frameIdx), mean(Vm(:,frameIdx),2));
-            covVc = cov(cData');  % S x S
-            covVm = cov(cModel');  % S x S
-            cCovV = cModel * cData' / (length(frameIdx) - 1);  % S x S
-            covP = sum((U * cCovV) .* U, 2)';  % 1 x P
-            varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
-            varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
-            stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-            cMovie(:,iFrames) = gather(covP ./ stdPxPy)';
-            clear cData cModel
-            
-        end
-        fprintf('Run finished. Mean Rsquared: %f... Median Rsquared: %f\n', mean(cMap(:).^2), median(cMap(:).^2));
-        
-        
-    end
+%theyre gone now
 
 end
 
