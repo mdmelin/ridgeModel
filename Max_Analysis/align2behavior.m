@@ -62,4 +62,5 @@ alignVc.segIdx = segIdx;
 alignVc.segFrames = segFrames;
 alignVc.transParams = opts.transParams;
 alignVc.U = U;
+alignVc.fs = opts.frameRate;
 end

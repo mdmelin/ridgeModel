@@ -1,4 +1,3 @@
-% Code for exploring choice/stimulus in early learning vs late learning
 addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 addpath('C:\Data\churchland\ridgeModel\smallStuff');
 clc;clear all;close all;

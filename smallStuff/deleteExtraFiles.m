@@ -1,12 +1,15 @@
 % This code deletes unnecessary files from simon's data structure. This
 % helps keep data size small enought to keep locally
 
-disk = 'V:\StateProjectCentralRepo\Widefield_Sessions';
-mice = {'Fez73','Fez74','Fez75','mSM61','mSM62','mSM63','mSM64','mSM65','mSM66','Plex01','CSP22','CSP22a','CSP23',...
+%disk = 'V:\StateProjectCentralRepo\Widefield_Sessions';
+%mice = {'Fez73','Fez74','Fez75','mSM61','mSM62','mSM63','mSM64','mSM65','mSM66','Plex01','CSP22','CSP22a','CSP23',...
     'CSP22','CSP22a','CSP23','CSP31','CSP32','CSP38','CSP39','CSP40','CSP41','CSP44','Fez7','Fez8','Fez10','Fez71','Fez72'}; 
 
 %disk = 'X:\Widefield';
 %mice = {'mSM62','mSM63','mSM64','mSM65','mSM66','CSP22','CSP22a','CSP23','CSP31','CSP32','CSP38','CSP39','CSP40','CSP41','CSP44','Fez7','Fez8','Fez10','Fez71'};
+
+disk = 'X:\Widefield';
+%mice = {'mSM64copy'};
 
 for i = 1:length(mice)
 

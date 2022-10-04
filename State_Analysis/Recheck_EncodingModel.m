@@ -14,7 +14,7 @@ animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
 
 
 method = 'cutoff';
-mintrialnum = 25; %the minimum number of trials per state to be included in plotting
+mintrialnum = 20; %the minimum number of trials per state to be included in plotting
 dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 %clims = {[-.01 .01],[-.005 .005]};
@@ -24,9 +24,7 @@ inds = {NaN,NaN};
 for i = 1:length(animals) %try a few different sessions
     fprintf('\nrunning %s\n',animals{i});
     for j = 1:length(sessiondates{i})
-        Rec = sessionda
-
-        tes{i}{j};
+        Rec = sessiondates{i}{j};
         [~,a,b] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase);
         nt = num2str(length(a));
         if length(a) < mintrialnum %skip if too few trials
@@ -176,7 +174,6 @@ fprintf('\nRegion to extract: %s',zname);
 close
 
 %% plot PSTHs
-mintrials = 15; %min trials per state
 A = []; B = [];
 for i = 1:length(z)
     for j = 1:length(animals)
@@ -247,28 +244,71 @@ for i = 1:length(animals)
         nospontb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_nospontmotor.mat');
         noopb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_noopmotor.mat');
         notaskvarb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_notaskvars.mat');
-    
+
         counter = counter + 1;
         fprintf('\ncounter is %i\n',counter);
     end
 end
 
-    dsponta = fulla-nosponta;
-    dspontb = fullb-nospontb;
-    dtaska = fulla-notaskvara;
-    dtaskb = fullb-notaskvarb;
-    dopa = fulla-noopa;
-    dopb = fullb-noopb;
+dsponta = fulla-nosponta;
+dspontb = fullb-nospontb;
+dtaska = fulla-notaskvara;
+dtaskb = fullb-notaskvarb;
+dopa = fulla-noopa;
+dopb = fullb-noopb;
 
-    [a,b] = ttest(fulla,fullb)
+[a,b] = ttest(fulla,fullb)
 
-    [a,b] = ttest(taskvara,taskvarb) %maybe?
-    [a,b] = ttest(sponta,spontb)
-    [a,b] = ttest(dopa,dopb)
+[a,b] = ttest(taskvara,taskvarb) %maybe?
+[a,b] = ttest(sponta,spontb)
+[a,b] = ttest(opa,opb)
 
-    [a,b] = ttest(dtaska,dtaskb)
-    [a,b] = ttest(dsponta,dspontb) %maybe?
-    [a,b] = ttest(dopa,dopb)
+[a,b] = ttest(dtaska,dtaskb)
+[a,b] = ttest(dsponta,dspontb) %maybe?
+[a,b] = ttest(dopa,dopb)
+
+%% figures
+figure;
+t1 = ones(length(dopa),1);
+t2 = t1*2;
+
+subplot(2,3,1); hold on;
+scatter(t1,taskvara);
+scatter(t2,taskvarb);
+title('cvR2 - task variables');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+subplot(2,3,2); hold on;
+scatter(t1,opa);
+scatter(t2,opb);
+title('cvR2 - operant movements');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+subplot(2,3,3); hold on;
+scatter(t1,sponta);
+scatter(t2,spontb);
+title('cvR2 - task independent movements');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+subplot(2,3,4); hold on;
+scatter(t1,dtaska);
+scatter(t2,dtaskb);
+title('deltaR2 - task variables');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+subplot(2,3,5); hold on;
+scatter(t1,dopa);
+scatter(t2,dopb);
+title('deltaR2 - operant movements');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+subplot(2,3,6); hold on;
+scatter(t1,dsponta);
+scatter(t2,dspontb);
+title('deltaR2 - task independent movements');xlim([0 3]);
+xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+
+
 
 
 

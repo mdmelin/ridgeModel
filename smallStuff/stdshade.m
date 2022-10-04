@@ -1,4 +1,4 @@
-% function cLine = stdshade(amatrix,acolor,F,alpha,smth,varargin)
+% function cLine = stdshade(x, amatrix,acolor,F,alpha,smth,varargin)
 function stdshade(amatrix,alpha,acolor,F,smth,naninds,varargin)
 % usage: stdshade(amatrix,acolor,F,alpha,smth)
 % plot mean and sem/std coming from a matrix of data, at which each row is an
