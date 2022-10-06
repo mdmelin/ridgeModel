@@ -5,6 +5,7 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 %cPath = 'V:\StateProjectCentralRepo\Widefield_Sessions';
 
 animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
+
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; cPath = 'Y:\Widefield'%32 not working for some reason
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
 %animals = {'CSP22'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
@@ -35,6 +36,7 @@ for i = 1:length(sessiondates)
 
         segFrames = [1 vidA.segFrames];
         clim1 = [0 20]; clim2 = [-10 10];figure;
+        sgtitle([num2str(animals{i}) ', ' num2str(sessiondates{i}{j}) ': ' num2str(length(a)) ' trials per state.']);
         for trialperiod = 1:5
             print(num2str(trialperiod))
             A = vidA.cam(:,:,segFrames(trialperiod):segFrames(trialperiod+1)-1,:); % [x,y,frames,trials]
@@ -68,11 +70,12 @@ for i = 1:length(sessiondates)
             colormap(gca,'colormap_blueblackred')
             colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
 
-            Amean(:,:,i,count) = A1avg;
-            Bmean(:,:,i,count) = B1avg;
-            count = count + 1;
+            Amean(:,:,trialperiod,count) = A1avg;
+            Bmean(:,:,trialperiod,count) = B1avg;
+
 
         end
+        count = count + 1;
     end
 end
 
@@ -81,27 +84,23 @@ Amean2 = mean(Amean,4);
 Bmean2 = mean(Bmean,4);
 diffmean = mean(diff,4);
 
-clim1 = [0 20]; clim2 = [-10 10];figure;
+clim1 = [0 20]; clim2 = [-10 10];figure; sgtitle('Average')
 for trialperiod = 1:5
 
     subplot(3,5,trialperiod); title('Engaged trials')
-    imagesc(Amean2(:,:,i),clim1);
+    imagesc(Amean2(:,:,trialperiod),clim1);
     colormap(gca,'inferno')
     colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
 
     subplot(3,5,trialperiod + 5); title('Biased trials')
-    imagesc(Bmean2(:,:,i),clim1);
+    imagesc(Bmean2(:,:,trialperiod),clim1);
     colormap(gca,'inferno')
     colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
 
     subplot(3,5,trialperiod + 10); title('Difference')
-    imagesc(diffmean(:,:,i),clim2);
+    imagesc(diffmean(:,:,trialperiod),clim2);
     colormap(gca,'colormap_blueblackred')
     colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
-
-    Amean(:,:,i,count) = A1avg;
-    Bmean(:,:,i,count) = B1avg;
-    count = count + 1;
 
 end
 %%

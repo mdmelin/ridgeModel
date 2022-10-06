@@ -1,4 +1,4 @@
-function [inds, attendinds,biasinds,Y] = getStateInds(cPath,Animal,Rec,method,glmFile,dualCase)
+function [inds, attendinds,biasinds,Y, postprobs_sorted] = getStateInds(cPath,Animal,Rec,method,glmFile,dualCase)
 Paradigm = 'SpatialDisc';
 addpath('C:\Data\churchland\ridgeModel\rateDisc');
 glmfile = [cPath filesep Animal filesep 'glm_hmm_models' filesep glmFile]; %Widefield data path

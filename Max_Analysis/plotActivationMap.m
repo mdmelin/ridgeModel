@@ -1,6 +1,6 @@
 %This function plots an average activation map for the desired trial periods
 function out = plotActivationMap(cPath,Animal,Rec,inds,plttitle,pltlegend,clims,suppress)
-addpath('C:\Data\churchland\ridgeModel\rateDisc');
+addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 for i = 1:length(inds) %will iterate thru each trial set and calculate a PSTH for those
     [alVc,~] = align2behavior(cPath,Animal,Rec,inds{i}); %pass trialinds based on the sessiondata file, this function will work out the imaging data
     
