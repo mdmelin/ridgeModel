@@ -2,6 +2,7 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 clc;clear all;close all;
 %% get sessions for mice - parallel
 cPath = 'X:\Widefield';animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
+%animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'alldisc.mat';
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield';%CSP32 missing transparams
 modality = 'Choice';
 
@@ -26,7 +27,7 @@ toc
 
 %% plot accuracy
 count = 1;
-clear beta accuracy accuracyB betaA betaB
+clear beta accuracy accuracyB
 for i = 1:length(acc)
     if ~isempty(acc{i})
         accuracy(count,:) = acc{i};
@@ -45,40 +46,40 @@ for i = 1:length(accB)
 end
 
 segframes = Vc.segFrames;
-
+segframes = [1 segframes];
 cols = {'r','b','g'};
 
 figure
-stdshade(accuracy,.2,cols{1},[],6,segframes,[]); %plot average accuracy
-stdshade(accuracyB,.2,cols{2},[],6,segframes,[]); %plot average accuracyxline(segframes);
+stdshade(accuracy,.2,cols{1},[],6,[1],[]); %plot average accuracy
+stdshade(accuracyB,.2,cols{2},[],6,[1],[]); %plot average accuracyxline(segframes);
 
 ylim([.4 1]);
 yline(.5);
-ylabel('Cross Validated Accuracy')
-xlabel('Frames')
 title([modality ' decoder accuracy']);
-legend('','','','','','Engaged trials','','','','','','Disengaged trials');
-%% plot betas
-segframes = [1 segframes]
-
-clims = [-.001 .001]; trialperiod = 5; % plot from one trial epoch
+legend('',[modality ' engaged'],'',[modality ' disengaged']);
+%% plot beta videos
+clims = [-.001 .001];
 %clims = [-.0007 .0007]; trialperiod = 4;
 fsize = 9;
+framerate = 30;
+savepath = 'C:\Data\churchland\ridgeModel\beta';
+trialmeanA = mean(betaA,4,'omitnan'); %average over trials
+trialmeanB = mean(betaB,4,'omitnan'); %average over trials
 
-avginds = segframes(trialperiod):segframes(trialperiod+1);
-subbetaA = betaA(:,:,avginds,:);
-subbetaB = betaB(:,:,avginds,:);
+v = VideoWriter(savepath);
+v.FrameRate = framerate; open(v);
+for i = 1:size(trialmeanA,3)
+    figure('units','normalized','outerposition',[0 0 1 1])
+    subplot(1,3,1);
+    plotHeatmap(trialmeanA(:,:,i), clims,[modality ' decode - engaged'],'Beta weight',[], fsize);
+    text(15,15,0,['i = ' num2str(i)],'Color','red','FontSize',15);
+    subplot(1,3,2)
+    plotHeatmap(trialmeanB(:,:,i), clims,[modality ' decode - disengaged'],'Beta weight',[], fsize);
+    subplot(1,3,3);
+    plotHeatmap(trialmeanA(:,:,i) - trialmeanB(:,:,i), clims,[modality ' decode - delta'],'Beta weight',[], fsize);
+    frame = getframe(gcf);
+    writeVideo(v,frame);
+    close(gcf)
+end
 
-trialmeanA = mean(subbetaA,4,'omitnan'); %average over trials
-finalmeanA = mean(trialmeanA,3,'omitnan'); %average over time
-trialmeanB = mean(subbetaB,4,'omitnan'); %average over trials
-finalmeanB = mean(trialmeanB,3,'omitnan'); %average over time
-
-figure;
-subplot(1,3,1);
-plotHeatmap(finalmeanA, clims,['Engaged trials'],'Beta weight',[], fsize);
-subplot(1,3,2)
-plotHeatmap(finalmeanB, clims,['Disengaged trials'],'Beta weight',[], fsize);
-subplot(1,3,3);
-plotHeatmap(finalmeanA - finalmeanB, clims,['Difference'],'Beta weight',[], fsize);
-
+v.close

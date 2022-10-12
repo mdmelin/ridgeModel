@@ -1,4 +1,4 @@
-function [Mdl,cvAcc,betas_aligned,Vc] = logisticModel(cPath,Animal,Rec,glmFile,window,modality,shuffle,ignoreflags)
+function [Mdl,cvAcc,betas_aligned,Vc] = logisticModel(cPath,Animal,Rec,glmFile,mintrials, window,modality,shuffle,ignoreflags)
 fprintf('\nTraining logistic decoder for %s, %s.\n',Animal,Rec);
 %First, check if we need to run the model for this session, look for flag
 %file
@@ -39,7 +39,7 @@ elseif modality == "Choice"
     inds = find(rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true)); %equalize correct L/R choices and balance correct/incorrects.
     Ainds = inds(bhv.ResponseSide(inds) == 1);
     Binds = inds(bhv.ResponseSide(inds) == 2);
-    [Vc,bhv] = align2behavior(cPath,Animal,Rec,inds); %align imaging data to behavior
+    [Vc,bhv,goodtrials] = align2behavior(cPath,Animal,Rec,inds); %align imaging data to behavior
     [dims,frames,trials] = size(Vc.all);
     Y = bhv.ResponseSide == 2; %right choice Y = 1
 
@@ -53,7 +53,7 @@ elseif modality == "Stimside"
     inds = find(rateDisc_equalizeTrials(useIdx, bhv.CorrectSide == 1, bhv.ResponseSide == 1, inf, true)); %equalize correct side and balance choice
     Ainds = inds(bhv.CorrectSide(inds) == 1);
     Binds = inds(bhv.CorrectSide(inds) == 2);
-    [Vc,bhv] = align2behavior(cPath,Animal,Rec,inds); %align imaging data to behavior
+    [Vc,bhv,goodtrials] = align2behavior(cPath,Animal,Rec,inds); %align imaging data to behavior
     [dims,frames,trials] = size(Vc.all);
     Y = bhv.CorrectSide == 2; %right side Y = 1
 
@@ -63,17 +63,27 @@ elseif modality == "Reward" % THIS NEEDS TO BE REWORKED, SEE "CHOICE"
     Y = ismember(inds,Ainds); %rewarded Y = 1
 end
 
+MINTRIALS = mintrials;
 
-
-mintrials = 40; % was previously 150, then 50
-if length(inds) < mintrials
+if length(inds) < MINTRIALS
     Mdl = [];
     cvAcc = [];
     betas_aligned = [];
     Vc = [];
-    fprintf('\nthere are less than %i trials, skipping this session\n',mintrials);
+    fprintf('\nthere are less than %i trials, skipping this session\n',MINTRIALS);
     return;
 end
+
+%++++++++
+temp = ismember(inds,goodtrials); %align2behavior can sometimes return less than requested number of trials if there is no imaging data for a trial
+
+% inds2grab = randperm(length(Y),MINTRIALS); % need to subsample so that decoders have balanced trial numbers
+% Y = Y(inds2grab);
+% Vc.all = Vc.all(:,:,inds2grab);
+
+[dims,frames,trials] = size(Vc.all);
+
+%++++++
 
 if shuffle
     Y = Y(randperm(length(Y)));

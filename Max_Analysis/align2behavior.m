@@ -53,9 +53,11 @@ end
 %segIdx = [2 0.75 1.25 0.75 1]; %what simon sent me.
 if sum(ismember(Animal,'mSM')) == 3 %mSM Mice
     segIdx = [1 0.5 1.00 0.75 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for EMX mice
+    segIdx = [1 0.5 1.00 0.4 .75] %testing, used for decoder to keep shuffled decoder distribution to chance
 elseif sum(ismember(Animal,'CSP')) == 3 %CSP Mice
     segIdx = [1 0.2 .5 0.15 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for CSP mice
 end
+
 segFrames = cumsum(floor(segIdx * sRate));
 alignVc.all = rateDisc_getBhvRealignment(Vc, bhv, segFrames, opts);
 alignVc.segIdx = segIdx;

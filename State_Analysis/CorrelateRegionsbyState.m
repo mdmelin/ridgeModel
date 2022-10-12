@@ -8,14 +8,14 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 %% Get the animals and sessions
 cPath = 'X:\Widefield';
 
-animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
-%animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; %32 not working for some reason
-%animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
+%animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
+animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield'; %CSP32 missing transparams
+%animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; cPath = 'Y:\Widefield'; %CSP32 missing transparams
 
 
 method = 'signal';
 dualCase = true
-mintrialnum = 25; %the minimum number of trials per state to be included in plotting
+mintrialnum = 20; %the minimum number of trials per state to be included in plotting
 dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 cmin = 0;

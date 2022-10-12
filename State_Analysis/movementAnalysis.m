@@ -4,11 +4,11 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 %% Get the animals and sessions
 %cPath = 'V:\StateProjectCentralRepo\Widefield_Sessions';
 
-animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
+%animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
 
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; cPath = 'Y:\Widefield'%32 not working for some reason
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
-%animals = {'CSP22'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
+animals = {'CSP22','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
 
 method = 'cutoff';
 mintrialnum = 25; %the minimum number of trials per state to be included in plotting

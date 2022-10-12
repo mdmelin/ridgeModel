@@ -174,8 +174,9 @@ fprintf('\nRegion to extract: %s',zname);
 close
 
 %% plot PSTHs
-A = []; B = [];
+
 for i = 1:length(z)
+    A = []; B = [];
     for j = 1:length(animals)
         for k = 1:length(sessiondates{j})
             [~,inds{1},inds{2}] = getStateInds(cPath,animals{j},sessiondates{j}{k},method,glmFile,dualcase);
