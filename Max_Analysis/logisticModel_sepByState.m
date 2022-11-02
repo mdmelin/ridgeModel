@@ -20,7 +20,7 @@ if ismember(expectedflag,fnames) && ~ignoreflags %if the flag file is found and 
 end
 
 
-[inds,Ainds,Binds,Y] = getModalitybyStateInds(cPath,Animal,Rec,glmFile,state,modality); %This gets us the trials we want to use for training the model.
+[inds,Ainds,Binds,Y] = getModalitybyStateInds(cPath,Animal,Rec,glmFile,state,modality,0); %This gets us the trials we want to use for training the model.
 
 MINTRIALS = 50;
 

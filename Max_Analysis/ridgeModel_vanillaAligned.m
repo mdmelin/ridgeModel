@@ -1,7 +1,7 @@
 function ridgeModel_vanillaAligned(cPath,Animal,Rec,dType,shufflelabels,ignoreflags)
 
 %Mods by Max Melin. Trains the ridge regression model described in Musall 2019
-%on that same dataset. No state/glmhmm stuff. 
+%on that same datased. Added improved alignment. No state/glmhmm stuff. 
 fprintf('\nTraining model for %s on %s.\n\n',Animal,Rec);
 if ~strcmpi(cPath(end),filesep)
     cPath = [cPath filesep];
@@ -20,7 +20,6 @@ if ismember(expectedflag,fnames) && ~ignoreflags %if the flag file is found and 
 end
 
 addpath('C:\Data\churchland\ridgeModel\widefield');
-addpath('C:\Data\churchland\ridgeModel\rateDisc');
 addpath('C:\Data\churchland\ridgeModel\smallStuff');
 
 

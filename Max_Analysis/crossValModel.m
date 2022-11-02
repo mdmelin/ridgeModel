@@ -95,5 +95,5 @@ function [Vm, cBeta, cR, subIdx, cRidge, keptLabels, cLabelInds, cMap, cMovie] =
             clear cData cModel
             
         end
-        fprintf('Run finished. Mean Rsquared: %f... Median Rsquared: %f\n', mean(cMap(:).^2), median(cMap(:).^2));
+        fprintf('Run finished. Mean Rsquared: %f... Median Rsquared: %f\n', mean(cMap(:)), median(cMap(:)));
     end

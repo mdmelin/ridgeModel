@@ -47,22 +47,27 @@ end
 segframes = Vc.segFrames;
 
 cols = {'r','b','g'};
-
+time = (0:1:size(accuracy,2)-1) ./ 30; %IMPORTANT, FS IS 15 FOR CSTR MICE
 figure
-stdshade(accuracy,.2,cols{1},[],6,segframes,[]); %plot average accuracy
-stdshade(accuracyB,.2,cols{2},[],6,segframes,[]); %plot average accuracyxline(segframes);
+stdshade(accuracy,.2,cols{1},time,6,segframes,[]); %plot average accuracy
+stdshade(accuracyB,.2,cols{2},time,6,segframes,[]); %plot average accuracyxline(segframes);
 
 ylim([.4 1]);
 yline(.5);
 ylabel('Cross Validated Accuracy')
-xlabel('Frames')
+set(gca,'TickDir','out')
+ylabel('Accuracy');
+xlabel('Time (s)');
 title([modality ' decoder accuracy']);
 legend('','','','','','Engaged trials','','','','','','Disengaged trials');
 %% plot betas
+segframes = Vc.segFrames;
 segframes = [1 segframes]
+mycmap = load('CustomColormap2.mat');
+mycmap = mycmap.CustomColormap2;
 
-clims = [-.001 .001]; trialperiod = 5; % plot from one trial epoch
-%clims = [-.0007 .0007]; trialperiod = 4;
+%clims = [-.001 .001]; trialperiod = 5; % plot from one trial epoch
+clims = [-.0007 .0007]; trialperiod = 4;
 fsize = 9;
 
 avginds = segframes(trialperiod):segframes(trialperiod+1);
@@ -80,5 +85,5 @@ plotHeatmap(finalmeanA, clims,['Engaged trials'],'Beta weight',[], fsize);
 subplot(1,3,2)
 plotHeatmap(finalmeanB, clims,['Disengaged trials'],'Beta weight',[], fsize);
 subplot(1,3,3);
-plotHeatmap(finalmeanA - finalmeanB, clims,['Difference'],'Beta weight',[], fsize);
+plotHeatmap(finalmeanA - finalmeanB, clims,['Difference'],'Beta weight',mycmap, fsize);
 

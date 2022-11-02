@@ -10,9 +10,7 @@ dims = 200; %number of dims of widefield SVD
 %% Load data
 bhvFile = dir([cPath filesep Animal '_' Paradigm '*.mat']);
 load([cPath bhvFile(1).name],'SessionData'); %load behavior data
-SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trailstart timestamps to seconds
-nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
-sRate = 30;
+
 load([cPath 'Vc.mat'],'Vc','U','trials','bTrials'); %just need trials variable here. Vs is [dims of temporal components,frames,trials]
 
 try
@@ -25,7 +23,7 @@ catch
         load([cPath 'opts.mat']);
     end
 end
-
+sRate = opts.frameRate;
 nRequested = length(trialInds);
 
 %% get proper trials from Vc and SessionData
@@ -56,6 +54,7 @@ if sum(ismember(Animal,'mSM')) == 3 %mSM Mice
     segIdx = [1 0.5 1.00 0.4 .75] %testing, used for decoder to keep shuffled decoder distribution to chance
 elseif sum(ismember(Animal,'CSP')) == 3 %CSP Mice
     segIdx = [1 0.2 .5 0.15 .75]; %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for CSP mice
+    segIdx = [1 0.5 1.00 0.4 .75] %testing
 end
 
 segFrames = cumsum(floor(segIdx * sRate));

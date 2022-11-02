@@ -4,13 +4,13 @@
 clc;clear all;close all;
 addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 %% Get the animals and sessions
-cPath = 'X:\Widefield';
+
 
 %Need to fix the trial lengths for CSP mice!!!!!
 
-animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
-%animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; %32 not working for some reason
-%animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
+cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
+%cPath = 'X:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; %32 not working for some reason
+%cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
 
 
 method = 'cutoff';
@@ -54,7 +54,7 @@ attendmean = squeeze(mean(attend,1,'omitnan')); %average over animals/sessions
 biasmean = squeeze(mean(bias,1,'omitnan')); %average over animals/sessions
 combo = cat(4,attendmean,biasmean);
 
-% plotting
+%% plotting
 pltlegend = {'Engaged trials','Bias trials'};
 fsize = 29;
 set(gca,'FontSize',fsize)
@@ -116,10 +116,12 @@ for i = 1:2
     hcb.Position = hcb.Position + [0.02 0 0 0];
     hcb.FontSize = fsize;
 end
+mycmap = load('CustomColormap2.mat');
+mycmap = mycmap.CustomColormap2;
 
 subplot(3,5,11);
 mapImg = imshow(squeeze(combo(1,:,:,1) - combo(1,:,:,2)), clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; %title('Baseline');
+colormap(mapImg.Parent,mycmap); axis image; %title('Baseline');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 %hcb = colorbar;
 %hcb.Title.String = 'dF/F';
@@ -127,31 +129,31 @@ ylabel('Difference','FontSize',fsize);
 
 subplot(3,5,12);
 mapImg = imshow(squeeze(combo(2,:,:,1) - combo(2,:,:,2)), clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; %title('Trial Initiation');
+colormap(mapImg.Parent,mycmap); axis image; %title('Trial Initiation');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 %hcb = colorbar;
 %hcb.Title.String = 'dF/F';
 
 subplot(3,5,13);
 mapImg = imshow(squeeze(combo(3,:,:,1) - combo(3,:,:,2)), clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; %title('Stimulus');
+colormap(mapImg.Parent,mycmap); axis image; %title('Stimulus');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 %hcb = colorbar;
 %hcb.Title.String = 'dF/F';
 
 subplot(3,5,14);
 mapImg = imshow(squeeze(combo(4,:,:,1) - combo(4,:,:,2)), clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; %title('Delay');
+colormap(mapImg.Parent,mycmap); axis image; %title('Delay');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 %hcb = colorbar;
 %hcb.Title.String = 'dF/F';
 
 subplot(3,5,15);
 mapImg = imshow(squeeze(combo(5,:,:,1) - combo(5,:,:,2)), clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; %title('Response');
+colormap(mapImg.Parent,mycmap); axis image; %title('Response');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
-hcb.Title.String = 'dF/F';
+hcb.Title.String = 'dF/F Difference';
 hcb.Position = hcb.Position + [0.01 0 0 0];
 hcb.FontSize = fsize;
 sgtitle(plttitle);
@@ -179,6 +181,7 @@ for i = 1:length(z)
     A = []; B = [];
     for j = 1:length(animals)
         for k = 1:length(sessiondates{j})
+            fprintf('\n%s, %s',animals{j},sessiondates{j}{k})
             [~,inds{1},inds{2}] = getStateInds(cPath,animals{j},sessiondates{j}{k},method,glmFile,dualcase);
 
             if length(inds{1}) < mintrialnum
@@ -191,30 +194,15 @@ for i = 1:length(z)
         end
     end
     figure;hold on; title(zname(i))
-    stdshade(A',.2,'red',[],6,eventframes,[]);
-    stdshade(B',.2,'blue',[],6,eventframes,[]);
+    time = (0:1:size(A,1)-1) ./ 30; %IMPORTANT, FS IS 15 FOR CSTR MICE
+    stdshade(A',.2,'red',time,6,eventframes,[]);
+    stdshade(B',.2,'blue',time,6,eventframes,[]);
     legend('','','','','','Engaged trials','','','','','','Biased trials');
+    xlabel('Time (s)')
+    ylabel('dF/F')
+    set(gca,'TickDir','out')
+    
 end
-
-%% rerun encoding models
-
-for i = 1:length(animals) %try a few different sessions
-    parfor j = 1:length(sessiondates{i})
-        ridgeModel_stateEncodingAligned(cPath,animals{i},sessiondates{i}{j},glmFile,[],[],true)
-    end
-end
-
-%% Generate figure: "state is collinear with something"
-counter = 1;
-clim = [0 .2];
-for i = 1:length(animals) %try a few different sessions
-    for j = 1:length(sessiondates{i})
-        state(counter,:,:) = plotRSquared(animals{i},sessiondates{i}{j},'allaudio_detection_full.mat',[],clim,true);
-        stateshuffle(counter,:,:) = plotRSquared(animals{i},sessiondates{i}{j},'allaudio_detection_fullnostate.mat',[],clim,true);
-        counter = counter+1;
-    end
-end
-statediff = nanmean(state - stateshuffle,[2 3]);
 
 %% rerun encoding model - sepbystate
 for i = 1:length(animals)

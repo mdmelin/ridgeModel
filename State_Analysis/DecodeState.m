@@ -16,7 +16,7 @@ c = 1;
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
         [~, acc{i}{j}, betas{i}{j}, Vc] = logisticModel(cPath,animals{i},sessiondates{i}{j},glmFile,50,10,modality,false,true); %train the model
-        %[~, acc_shuff{i}{j}, ~, ~] = logisticModel(cPath,animals{i},sessiondates{i}{j},glmFile,50,10,modality,true,true); %train the shuffled model
+        [~, acc_shuff{i}{j}, ~, ~] = logisticModel(cPath,animals{i},sessiondates{i}{j},glmFile,50,10,modality,true,true); %train the shuffled model
         c = c + 1;
         if ~isempty(Vc)
             Vcsave = Vc;
@@ -26,14 +26,15 @@ end
 c = 1;
 toc
 
-%% plot individual mice
+%% plot 
 load('C:\Data\churchland\ridgeModel\segFrames.mat');
-
+cols = {'r','b','g'};
 for i = 1:length(animals) %plot individual animals
     count = 1; clear betas_out
     for j = 1:length(sessiondates{i}) % remove empty data here for better averaging
         if ~isempty(acc{i}{j})
             accuracy(count,:) = acc{i}{j};
+            accuracyshuff(count,:) = acc_shuff{i}{j};
             betas_out(:,:,:,count) = betas{i}{j}; %betas are [xpix,ypix,frames,animals]
             count = count + 1;
         end
@@ -48,7 +49,7 @@ for i = 1:length(animals) %plot individual animals
 
     figure
     stdshade(accuracy,.2,cols{1},[],6,[1],[]); %plot average accuracy
-    %stdshade(accuracyshuff,.2,cols{2},[],6,[1],[]); %plot average accuracy
+    stdshade(accuracyshuff,.2,cols{2},[],6,[1],[]); %plot average accuracy
 
     xline(segframes);
     ylim([.4 1]);
@@ -74,7 +75,7 @@ for i = 1:length(animals)
     for j = 1:length(sessiondates{i}) % remove empty data here for better averaging
         if ~isempty(acc{i}{j})
             accuracy(count,:) = acc{i}{j};
-            %accuracyshuff(count,:) = acc_shuff{i}{j};
+            accuracyshuff(count,:) = acc_shuff{i}{j};
             betas_out(:,:,:,count) = betas{i}{j}; %betas are [xpix,ypix,frames,animals]
             count = count + 1;
         end
@@ -85,7 +86,7 @@ segframes = Vcsave(1).segFrames;
 
 figure
 stdshade(accuracy,.2,cols{1},[],6,segframes,[]); %plot average accuracy
-%stdshade(accuracyshuff,.2,cols{2},[],6,segframes,[]); %plot average accuracy
+stdshade(accuracyshuff,.2,cols{2},[],6,segframes,[]); %plot average accuracy
 
 xline(segframes);
 ylim([.4 1]);
