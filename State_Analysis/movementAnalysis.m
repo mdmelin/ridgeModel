@@ -4,14 +4,14 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 %% Get the animals and sessions
 %cPath = 'V:\StateProjectCentralRepo\Widefield_Sessions';
 
-%animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
+animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat'; cPath = 'X:\Widefield';
 
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; cPath = 'Y:\Widefield'%32 not working for some reason
 %animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
-animals = {'CSP22','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
+%animals = {'CSP22','CSP38'}; glmFile = 'alldisc.mat'; cPath = 'Y:\Widefield' %CSP32 missing transparams
 
 method = 'cutoff';
-mintrialnum = 25; %the minimum number of trials per state to be included in plotting
+mintrials = 20; %the minimum number of trials per state to be included in plotting
 dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 
@@ -21,7 +21,7 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 
 
 %% Now let's look at states
-mintrials = 20; count = 1;
+count = 1;
 for i = 1:length(sessiondates)
     for j = 1:length(sessiondates{i})
         [inds,a,b,~] = getStateInds(cPath,animals{i},sessiondates{i}{j},'cutoff',glmFile,dualcase);
@@ -37,6 +37,8 @@ for i = 1:length(sessiondates)
         segFrames = [1 vidA.segFrames];
         clim1 = [0 20]; clim2 = [-10 10];figure;
         sgtitle([num2str(animals{i}) ', ' num2str(sessiondates{i}{j}) ': ' num2str(length(a)) ' trials per state.']);
+        titles = {'Baseline','Initiation','Stimulus','Delay','Response'};
+
         for trialperiod = 1:5
             print(num2str(trialperiod))
             A = vidA.cam(:,:,segFrames(trialperiod):segFrames(trialperiod+1)-1,:); % [x,y,frames,trials]
@@ -58,20 +60,45 @@ for i = 1:length(sessiondates)
             subplot(3,5,trialperiod); title('Engaged trials')
             imagesc(A1avg,clim1);
             colormap(gca,'inferno')
-            colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
+            title(titles(trialperiod));
+            axis('square');set(gca,'XTick',[], 'YTick', [])
+            if trialperiod == 1
+                ylabel('Engaged')
+            end
+            if trialperiod == 5
+                cb=colorbar;
+                cb.Position = cb.Position + [.07,-.03, .002, .06];
+            end
+
 
             subplot(3,5,trialperiod + 5); title('Biased trials')
             imagesc(B1avg,clim1);
             colormap(gca,'inferno')
-            colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
+            axis('square');set(gca,'XTick',[], 'YTick', [])
+            if trialperiod == 1
+                ylabel('Biased')
+            end
+            if trialperiod == 5
+                cb=colorbar;
+                cb.Position = cb.Position + [.07,-.03, .002, .06];
+            end
 
             subplot(3,5,trialperiod + 10); title('Difference')
             imagesc(A1avg - B1avg,clim2);
             colormap(gca,'colormap_blueblackred')
-            colorbar;axis('square');set(gca,'XTick',[], 'YTick', [])
+            axis('square');set(gca,'XTick',[], 'YTick', [])
+            if trialperiod == 1
+                ylabel('Difference')
+            end
+            if trialperiod == 5
+                cb=colorbar;
+                cb.Position = cb.Position + [.07,-.03, .002, .06];
+            end
 
             Amean(:,:,trialperiod,count) = A1avg;
             Bmean(:,:,trialperiod,count) = B1avg;
+
+            
 
 
         end
