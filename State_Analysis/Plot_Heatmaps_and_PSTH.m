@@ -8,9 +8,8 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 
 %Need to fix the trial lengths for CSP mice!!!!!
 
-cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
-%cPath = 'X:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'allaudio_detection.mat'; %32 not working for some reason
-%cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
+%cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
+cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
 
 
 method = 'cutoff';
@@ -22,15 +21,15 @@ clims = {[-.01 .01],[-.01 .01]};
 %% Plot avg activity map
 inds = {NaN,NaN};
 for i = 1:length(animals) %try a few different sessions
-    fprintf('\nrunning %s\n',animals{i});
     for j = 1:length(sessiondates{i})
         Rec = sessiondates{i}{j};
+        fprintf('\nrunning %s on %s\n',animals{i},Rec);
         [~,a,b] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase);
         nt = num2str(length(a));
         if length(a) < mintrialnum %skip if too few trials
             out{i,j,:,:} = [];
         else
-            out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,true);
+            out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,false);
         end
     end
 end
@@ -54,7 +53,7 @@ attendmean = squeeze(mean(attend,1,'omitnan')); %average over animals/sessions
 biasmean = squeeze(mean(bias,1,'omitnan')); %average over animals/sessions
 combo = cat(4,attendmean,biasmean);
 
-%% plotting
+%% plotting the average
 pltlegend = {'Engaged trials','Bias trials'};
 fsize = 29;
 set(gca,'FontSize',fsize)
@@ -203,102 +202,6 @@ for i = 1:length(z)
     set(gca,'TickDir','out')
     
 end
-
-%% rerun encoding model - sepbystate
-for i = 1:length(animals)
-    for j = 1:length(sessiondates{i})
-        animals{i}
-        sessiondates{i}{j}
-        ridgeModel_sepByState(cPath,animals{i},sessiondates{i}{j},glmFile,"attentive",[]);
-        ridgeModel_sepByState(cPath,animals{i},sessiondates{i}{j},glmFile,"biased",[]);
-    end
-end
-
-%%
-counter = 1;
-for i = 1:length(animals)
-    for j = 1:length(sessiondates{i})
-        fulla(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_fullmodel.mat');
-        sponta(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_onlyspontmotor.mat');
-        opa(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_onlyopmotor.mat');
-        taskvara(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_onlytaskvars.mat');
-        nosponta(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_nospontmotor.mat');
-        noopa(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_noopmotor.mat');
-        notaskvara(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'attentive_allaudio_detection_notaskvars.mat');
-
-        fullb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_fullmodel.mat');
-        spontb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_onlyspontmotor.mat');
-        opb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_onlyopmotor.mat');
-        taskvarb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_onlytaskvars.mat');
-        nospontb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_nospontmotor.mat');
-        noopb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_noopmotor.mat');
-        notaskvarb(counter) = getRSquaredNew(animals{i},sessiondates{i}{j},'biased_allaudio_detection_notaskvars.mat');
-
-        counter = counter + 1;
-        fprintf('\ncounter is %i\n',counter);
-    end
-end
-
-dsponta = fulla-nosponta;
-dspontb = fullb-nospontb;
-dtaska = fulla-notaskvara;
-dtaskb = fullb-notaskvarb;
-dopa = fulla-noopa;
-dopb = fullb-noopb;
-
-[a,b] = ttest(fulla,fullb)
-
-[a,b] = ttest(taskvara,taskvarb) %maybe?
-[a,b] = ttest(sponta,spontb)
-[a,b] = ttest(opa,opb)
-
-[a,b] = ttest(dtaska,dtaskb)
-[a,b] = ttest(dsponta,dspontb) %maybe?
-[a,b] = ttest(dopa,dopb)
-
-%% figures
-figure;
-t1 = ones(length(dopa),1);
-t2 = t1*2;
-
-subplot(2,3,1); hold on;
-scatter(t1,taskvara);
-scatter(t2,taskvarb);
-title('cvR2 - task variables');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-subplot(2,3,2); hold on;
-scatter(t1,opa);
-scatter(t2,opb);
-title('cvR2 - operant movements');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-subplot(2,3,3); hold on;
-scatter(t1,sponta);
-scatter(t2,spontb);
-title('cvR2 - task independent movements');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-subplot(2,3,4); hold on;
-scatter(t1,dtaska);
-scatter(t2,dtaskb);
-title('deltaR2 - task variables');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-subplot(2,3,5); hold on;
-scatter(t1,dopa);
-scatter(t2,dopb);
-title('deltaR2 - operant movements');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-subplot(2,3,6); hold on;
-scatter(t1,dsponta);
-scatter(t2,dspontb);
-title('deltaR2 - task independent movements');xlim([0 3]);
-xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-
-
-
 
 
 

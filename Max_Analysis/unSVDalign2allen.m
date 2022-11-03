@@ -4,12 +4,12 @@ function [movie,mask] = unSVDalign2allen(Vc,U,transParams,selectRegion,shrinkArr
 %function will also trim the data so that only the desired allen aligned
 %region is kept. The output is arrayShrunk to remove NaN's for
 %computational efficiency.
-load('C:\Data\churchland\ridgeModel\allenDorsalMapSM.mat');
+load('C:\Data\churchland\ridgeModel\allenDorsalMapMM.mat');
 allenMask = dorsalMaps.allenMask;
 
 alignU = alignAllenTransIm(double(U),transParams); %align to allen atlas
 alignU = alignU(:, 1:size(allenMask,2),:);
-edgemap = dorsalMaps.edgeMapScaled(1:size(alignU,1),:); %allen edge map
+edgemap = dorsalMaps.edgeMapScaledMax(1:size(alignU,1),:); %allen edge map
 alignU(allenMask == 1) = NaN;
 if ~isempty(selectRegion)
     areaMap = dorsalMaps.areaMap(1:size(alignU,1),:);
