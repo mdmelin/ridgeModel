@@ -1,4 +1,4 @@
-function [dMat, traceOut] = Widefield_analogToDesign(traceIn, stdThresh, trialCnt, sourceRate, targRate, motorIdx, gaussShift)
+function [dMat, traceOut, smallTrace] = Widefield_analogToDesign(traceIn, stdThresh, trialCnt, sourceRate, targRate, motorIdx, gaussShift)
 % code to create a peri-event design matrix based on an analog trace. Trace
 % should be continous and will be reshaped into a trial structure to create
 % a design matrix for every trial individually.
@@ -19,10 +19,11 @@ traceIn = reshape(traceIn,[],trialCnt); %reshape to trial structure
 frames = size(traceIn,1) / (sourceRate/targRate); %second dimension is trials so first should be frames per trial when taking differences in sampling rate into account
 
 dMat = cell(1,trialCnt);
+%smallTrace = {};
 for iTrials = 1:trialCnt
     
     trace = logical(histcounts(find(traceIn(:,iTrials)), 0: sourceRate/targRate : (sourceRate/targRate)*frames))'; %resample to imaging frame rate. This is the zero lag regressor.    
-    
+    smallTrace(iTrials,:) = trace;
     % create full design matrix
     cIdx = bsxfun(@plus,find(trace),motorIdx);
     cIdx(cIdx < 1) = 0;

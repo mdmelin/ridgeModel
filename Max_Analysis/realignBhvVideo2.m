@@ -11,13 +11,6 @@ function [newFrames,segFrames1] = realignBhvVideo2(cPath, Animal, Rec, goodtrial
 %% check if we already have alignment done
 vidPath  = [cPath filesep Animal filesep 'video' filesep Rec filesep];
 savepath = [vidPath filesep 'alignedvideo_' num2str(camnum) '.mat'];
-% try
-%     clear newFrames segFrames1
-%     load(savepath);
-%     return
-% catch
-%     fprintf('\nNo aligned video data found, running alignment now...');
-% end
 
 Behavior_alignVideoFrames(cPath, Animal, Rec,opts.preStim);
 f = dir([vidPath filesep '*cameraTimes.mat']);
@@ -39,7 +32,7 @@ for iTrials = 1 : length(goodtrials) %get number of trials in full session
     fs1 = v1.FrameRate;
     v1 = read(v1);
     for i = 1:size(v1,4)
-        v2(:,:,i) = rgb2gray(v1(:,:,:,i));
+        v2(:,:,i) = rgb2gray(v1(:,:,:,i))';
     end
     v1 = v2; clear v2;
 

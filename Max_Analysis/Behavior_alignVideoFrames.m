@@ -38,7 +38,7 @@ for iTrials = 1:size(SessionData.RawEvents.Trial,2)
     catch
         stimTime(iTrials) = NaN;
     end
-    stimEndTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.DecisionWait(1);
+    stimEndTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.DecisionWait(1); %time of delay onset
     handleTime(iTrials) = min(SessionData.RawEvents.Trial{iTrials}.States.Reset(:)); %first reset state causes handles to move in
     spoutTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.MoveSpout(1); % time when spouts move in
         
@@ -52,7 +52,7 @@ for iTrials = 1:size(SessionData.RawEvents.Trial,2)
         elseif SessionData.optoType(iTrials) == 3
             optoTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.MoveSpout(1); %time of response onset
         elseif SessionData.optoType(iTrials) == 4
-            optoTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.DecisionWait(1) - (SessionData.optoDur(1) + 0.2); %time of delay onset
+            optoTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.States.DecisionWait(1) - (SessionData.optoDur(1) + 0.2); %time of onset
         elseif SessionData.optoType(iTrials) == 5
             optoTime(iTrials) = SessionData.RawEvents.Trial{iTrials}.Events.Wire3High; %baseline
         end
