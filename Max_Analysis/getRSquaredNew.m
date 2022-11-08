@@ -37,7 +37,7 @@ end
 mask = squeeze(isnan(U(:,:,1)));
 allenMask = dorsalMaps.allenMask;
 
-shrunkMap = arrayShrink(double(fullMap).^2, mask,'split'); %recreate full frame by restoring 2D from 1D and mask
+shrunkMap = arrayShrink(double(fullMap), mask,'split'); %recreate full frame by restoring 2D from 1D and mask
 alignedmat = alignAllenTransIm(double(shrunkMap),opts3.transParams); %align to allen atlas
 alignedmat = alignedmat(:, 1:size(allenMask,2),:);
 edgemap = dorsalMaps.edgeMapScaled(1:size(alignedmat,1),:); %allen edge map
