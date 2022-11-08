@@ -8,8 +8,8 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 
 %Need to fix the trial lengths for CSP mice!!!!!
 
-%cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
-cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
+cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
+%cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP38'}; glmFile = 'alldisc.mat'; %CSP32 missing transparams
 
 
 method = 'cutoff';

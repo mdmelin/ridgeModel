@@ -64,10 +64,13 @@ for i = 1:2
     hcb = colorbar;
     hcb.Title.String = 'SDU activity';
 end
+mycmap = load('CustomColormap2.mat');
+mycmap = mycmap.CustomColormap2;
+
 
 subplot(3,5,11);
 mapImg = imshow(out{1,1} - out{2,1}, clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Baseline');
+colormap(mapImg.Parent,mycmap); axis image; title('Baseline');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
 hcb.Title.String = 'SDU activity';
@@ -75,28 +78,28 @@ ylabel('Difference');
 
 subplot(3,5,12);
 mapImg = imshow(out{1,2} - out{2,2}, clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Handles');
+colormap(mapImg.Parent,mycmap); axis image; title('Handles');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
 hcb.Title.String = 'SDU activity';
 
 subplot(3,5,13);
 mapImg = imshow(out{1,3} - out{2,3}, clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Stimulus');
+colormap(mapImg.Parent,mycmap); axis image; title('Stimulus');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
 hcb.Title.String = 'SDU activity';
 
 subplot(3,5,14);
 mapImg = imshow(out{1,4} - out{2,4}, clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Delay');
+colormap(mapImg.Parent,mycmap); axis image; title('Delay');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
 hcb.Title.String = 'SDU activity';
 
 subplot(3,5,15);
 mapImg = imshow(out{1,5} - out{2,5}, clims{2});
-colormap(mapImg.Parent,'colormap_blueblackred'); axis image; title('Response');
+colormap(mapImg.Parent,mycmap); axis image; title('Response');
 set(mapImg,'AlphaData',~isnan(mapImg.CData)); %make NaNs transparent.
 hcb = colorbar;
 hcb.Title.String = 'SDU activity';
