@@ -82,6 +82,7 @@ model_training_sessions = cellstr(model_training_sessions); %convert to cell
 sessionidx = find(strcmp(Rec,model_training_sessions)); %find the index of the session we want to pull latent states for
 postprob_nonan = posterior_probs{sessionidx}; %get latent states for desired session
 counterind = 1;
+postprob_withnan = NaN([1,3]);
 for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice. 
     if ~nochoice(i) %if a choice was made
         postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
