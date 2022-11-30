@@ -1,8 +1,6 @@
 % Look at delay period movements
 clc;clear all;close all;
 addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
-addpath('C:\Data\churchland\ridgeModel\widefield');
-addpath('C:\Data\churchland\ridgeModel\smallstuff');
 %% Get the animals and sessions
 %cPath = 'V:\StateProjectCentralRepo\Widefield_Sessions';
 
@@ -18,20 +16,20 @@ dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 
 %% check alignment
-[vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{1},sessiondates{1}{1},10:14,1); %[x,y,z,frames,trials]
-generateVideo('C:\Data\churchland\temp1',vidA.cam,2);
+% [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{1},sessiondates{1}{1},10:14); %[x,y,z,frames,trials]
+% generateVideo('C:\Data\churchland\temp1',vidA.cam1,2);
 
 
 %% Now let's look at states
 count = 1;
-for i = 1:length(animals)
+for i = 1:length(sessiondates)
     for j = 1:length(sessiondates{i})
-        [inds,a,b,~] = getStateInds(cPath,animals{i},sessiondates{i}{j},'cutoff',glmFile,dualcase);
-
-        if length(a) >= mintrials
+        [inds,a,b,~,postprobs] = getStateInds(cPath,animals{i},sessiondates{i}{j},'cutoff',glmFile,dualcase);
+        [~,maxstate] = max(postprobs,[],1);
+        if length(a) > mintrials
             fprintf('\nRunning %s, %s\n',animals{i},sessiondates{i}{j});
-            [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},a,1); %[x,y,z,frames,trials]
-            [vidB,bhvB,goodtrialsB] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},b,1); %[x,y,z,frames,trials]
+            [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},find(maxstate == 1),1); %[x,y,z,frames,trials]
+            [vidB,bhvB,goodtrialsB] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},find(maxstate ~= 1),1); %[x,y,z,frames,trials]
         else
             continue
         end
@@ -99,7 +97,7 @@ for i = 1:length(animals)
                 cb.Position = cb.Position + [.07,-.03, .002, .06];
                 cb.Label.String = 'Motion Energy Difference';
             end
-            exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\MotionEnergy_visualization\' num2str(count) '.pdf']);
+            %exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\MotionEnergy_visualization\' num2str(count) '.pdf']);
             Amean(:,:,trialperiod,count) = A1avg;
             Bmean(:,:,trialperiod,count) = B1avg;
 
@@ -124,7 +122,6 @@ for trialperiod = 1:5
     imagesc(Amean2(:,:,trialperiod),clim1);
     colormap(gca,'inferno')
     axis('square');set(gca,'XTick',[], 'YTick', [])
-    title(titles(trialperiod));
     if trialperiod == 1
         ylabel('Biased')
     end
@@ -159,19 +156,19 @@ for trialperiod = 1:5
         cb.Position = cb.Position + [.07,-.03, .002, .06];
         cb.Label.String = 'Motion Energy Difference';
     end
-    exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\MotionEnergy_visualization\avg.pdf']);
+    %exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\MotionEnergy_visualization\avg.pdf']);
 end
 %%
 framerate = 30;
-% generateVideo('C:\Data\churchland\temp1',vidA.cam1,framerate);
-% generateVideo('C:\Data\churchland\temp2',vidB.cam1,framerate);
-% generateVideo('C:\Data\churchland\temp3',vidA.cam2,framerate);
-% generateVideo('C:\Data\churchland\temp4',vidB.cam2,framerate);
-% generateVideo('C:\Data\churchland\temp5',Avar,framerate);
-% generateVideo('C:\Data\churchland\temp6',Bvar,framerate);
-% generateVideo('C:\Data\churchland\temp7',Aavg,framerate);
-% generateVideo('C:\Data\churchland\temp8',Bavg,framerate);
-% generateVideo('C:\Data\churchland\temp9',A1m,framerate);
-% generateVideo('C:\Data\churchland\temp10',B1m,framerate);
+generateVideo('C:\Data\churchland\temp1',vidA.cam1,framerate);
+generateVideo('C:\Data\churchland\temp2',vidB.cam1,framerate);
+generateVideo('C:\Data\churchland\temp3',vidA.cam2,framerate);
+generateVideo('C:\Data\churchland\temp4',vidB.cam2,framerate);
+generateVideo('C:\Data\churchland\temp5',Avar,framerate);
+generateVideo('C:\Data\churchland\temp6',Bvar,framerate);
+generateVideo('C:\Data\churchland\temp7',Aavg,framerate);
+generateVideo('C:\Data\churchland\temp8',Bavg,framerate);
+generateVideo('C:\Data\churchland\temp9',A1m,framerate);
+generateVideo('C:\Data\churchland\temp10',B1m,framerate);
 
 

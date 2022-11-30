@@ -4,14 +4,14 @@ clc;clear all;close all;
 recs = {'03-Jul-2018','04-Jul-2018','06-Jul-2018'};
 filenames = {'X:\mSM63_DLC_Jul03_2018.mat','X:\mSM63_DLC_Jul04_2018.mat','X:\mSM63_DLC_Jul06_2018.mat'};
 epoch = 'delay';
+smooth = false;
+shuffle = false;
 
-%[me_out,state_out,A,B,R,P] = get_motion_energy(recs{1},filenames{1}, epoch);
-%[me_out,state_out,A,B,R,P] = get_motion_energy(recs{2},filenames{2}, epoch);
-%[me_out,state_out,A,B,R,P] = get_motion_energy(recs{3},filenames{3}, epoch);
+
 
 allme = []; allstate = [];
 for i = 1:length(recs)
-    [me,state,A,B,Rs,Ps] = get_motion_energy(recs{i},filenames{i}, epoch, true, false);
+    [me,state,A,B,Rs,Ps] = get_motion_energy(recs{i},filenames{i}, epoch, smooth, shuffle);
     allme = [allme; me];
     allstate = [allstate, state];
 end
@@ -25,7 +25,9 @@ load('X:\labelNames.mat')
 
 %%
 function [me_out,state_out,A,B,R,P] = get_motion_energy(rec, filename, epoch, smooth, shuffle)
-[inds, attendinds,biasinds,~, postprobs_sorted] = getStateInds('X:/Widefield','mSM63',rec,'cutoff','allaudio_detection.mat',true);
+[inds, attendinds,biasinds,~, postprobs_sorted,correct] = getStateInds('X:/Widefield','mSM63',rec,'cutoff','allaudio_detection.mat',true);
+
+
 load('X:\labelNames.mat')
 load(filename)
 delaylabels = DLC_Lateral.(epoch);
@@ -38,12 +40,17 @@ for i = 1:size(delaylabels,1)
         x_me = abs(diff(x));
         y_me = abs(diff(y));
         me = sqrt(x_me.^2 + y_me.^2);
-        mean_me(i,(j+1) / 2) = median(me,'omitnan');
+        mean_me(i,(j+1) / 2) = mean(me,'omitnan');
     end
 end
 
 p_eng = postprobs_sorted(1,:);
 p_eng = p_eng(1:size(mean_me,1));
+
+correct = correct(1:length(p_eng));
+correct = smoothdata(correct,2,'movmean',40);
+
+
 if shuffle
     p_eng = p_eng(randperm(length(p_eng)));
 end
@@ -67,14 +74,19 @@ for i = 1:size(mean_me,2) %the separation way
     %histogram(b,'BinWidth',.1);
 
 
-    figure; hold on;xlim([0 3]);
-    xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-    ylabel('Average ME in trial epoch');
-    title([Laterl_labels{i} '. P = ' num2str(P(i))]);
-    aa = ones(length(a));
-    bb = ones(length(b));
-    scatter(aa,a);
-    scatter(bb.*2,b);
+%     figure; hold on;xlim([0 3]);
+%     xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+%     ylabel('Average ME in trial epoch');
+%     title([Laterl_labels{i} '. P = ' num2str(P(i))]);
+%     aa = ones(length(a));
+%     bb = ones(length(b));
+%     scatter(aa,a);
+%     scatter(bb.*2,b);
+
+    figure;hold on
+    scatter(part_me, correct)
+    title([Laterl_labels{i} ' mean ME vs performance: ' epoch ' window']);
+
     %exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\FridayUpdate\DLC_Motionenergy' filesep epoch filesep rec '_' Laterl_labels{i} '.pdf'],'ContentType','vector')
 
     [A(i),B(i)] = ttest2(a,b);
