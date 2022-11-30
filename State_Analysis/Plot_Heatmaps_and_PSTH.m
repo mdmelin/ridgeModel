@@ -15,9 +15,11 @@ cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = '
 method = 'cutoff';
 mintrialnum = 20; %the minimum number of trials per state to be included in plotting
 dualcase = true;
+fsize = 29;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 %clims = {[-.01 .01],[-.005 .005]};
-clims = {[-.01 .01],[-.01 .01]};
+%clims = {[-.01 .01],[-.01 .01]}; %for df/f
+clims = {[-.0001 .0001],[-.00001 .00001]}; %for variance
 %% Plot avg activity map
 inds = {NaN,NaN};
 for i = 1:length(animals) %try a few different sessions
@@ -25,11 +27,13 @@ for i = 1:length(animals) %try a few different sessions
         Rec = sessiondates{i}{j};
         fprintf('\nrunning %s on %s\n',animals{i},Rec);
         [~,a,b] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase);
+        [inds, attendinds,biasinds,Y, postprobs_sorted] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase); %deleteme
         nt = num2str(length(a));
         if length(a) < mintrialnum %skip if too few trials
             out{i,j,:,:} = [];
         else
-            out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,false);
+            %out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
+            out{i,j,:,:} = plotVarianceMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
         end
     end
 end
@@ -188,7 +192,9 @@ for i = 1:length(z)
                 continue
             end
 
-            [temp,eventframes] = plotRegionPSTH(cPath,animals{j},sessiondates{j}{k},inds,z(i),zname(i),'pltlegend',false,true);
+            [temp,eventframes] = plotRegionPSTH(cPath,animals{j},sessiondates{j}{k},inds,z(i),zname(i),{'','','','','','','Engaged trials','','','','','','','Biased trials'},false,false);
+            exportgraphics(gcf,strjoin(['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\EMX_individual_psth\' animals{j} sessiondates{j}{k}  zname(i) '.pdf']));
+            close gcf;
             A = [A,temp{1}]; B = [B,temp{2}]; %[nframes, ntrials]
         end
     end

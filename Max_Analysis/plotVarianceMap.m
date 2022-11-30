@@ -1,5 +1,5 @@
 %This function plots an average activation map for the desired trial periods
-function out = plotActivationMap(cPath,Animal,Rec,inds,plttitle,pltlegend,clims,fsize,suppress)
+function out = plotVarianceMap(cPath,Animal,Rec,inds,plttitle,pltlegend,clims,fsize,suppress)
 addpath('C:\Data\churchland\ridgeModel\Max_Analysis');
 for i = 1:length(inds) %will iterate thru each trial set and calculate a PSTH for those
     [alVc,~] = align2behavior(cPath,Animal,Rec,inds{i}); %pass trialinds based on the sessiondata file, this function will work out the imaging data
@@ -14,9 +14,9 @@ for i = 1:length(inds) %will iterate thru each trial set and calculate a PSTH fo
     frames = [1 frames];
     for j = 1:length(frames)-1 %iterate thru trial periods
         movie = alignedVc(:,frames(j):frames(j+1));
-        avgmovie = squeeze(mean(double(movie),2,'omitnan'));%avg over time
+        movie_var = var(movie,0,2,'omitnan');
         %avgmovie = zscore(avgmovie); %z score over pixels
-        out{i,j} = arrayShrink(avgmovie,mask,'split');
+        out{i,j} = arrayShrink(movie_var,mask,'split');
     end
 end
 
