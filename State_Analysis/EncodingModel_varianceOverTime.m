@@ -12,7 +12,7 @@ mintrialnum = 20; %the minimum number of trials per state to be included in plot
 dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 
-%% rerun encoding model - general variable groups
+%% rerun encoding model - general variable groups , show variance over time
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
         animals{i}
@@ -22,7 +22,7 @@ for i = 1:length(animals)
     end
 end
 
-%%
+%% 
 counter = 1;
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
@@ -121,7 +121,6 @@ legend({'','','Engaged','','','Disengaged','','','',''})
 
 
 
-%exportgraphics(gcf,'C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\encoding_model.pdf');
 %exportgraphics(gcf,'C:\Data\churchland\PowerpointsPostersPresentations\SFN2022/FridayUpdate\encodingmodel\fullcvr.pdf');
 %% rerun encoding model - choice lick, and stim encoding
 for i = 1:length(animals)
