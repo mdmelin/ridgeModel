@@ -14,7 +14,7 @@ sessionind = find(strcmp(model_training_sessions,Rec));%find the index of the se
 postprob_nonan = posterior_probs{sessionind}; %grab the proper session
 nochoice = isnan(bhv.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
 counterind = 1;
-numstates = 3;
+numstates = size(postprob_nonan,2);
 for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice.
     if ~nochoice(i) %if a choice was made
         postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
@@ -46,11 +46,14 @@ elseif strcmp(method,'cutoff')
     useIdx = useIdx & (Atemp | Btemp); %and only use trials where P of ANY state was > .8
 end
 
-if dualCase
-    %inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.ResponseSide == 1, inf, true)); %equalize state and L/R choices, should also do reward.
+if strcmp(dualCase,'choice')
+    inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.ResponseSide == 1, inf, true)); %equalize state AND L/R choices
+elseif strcmp(dualCase,'reward')
     inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, bhv.Rewarded == 1, inf, true));  %equalize to state AND rewarded vs unrewarded
-else
+elseif strcmp(dualCase,'none')
     inds = find(rateDisc_equalizeTrials(useIdx, state1hot == 1, [], inf, []));  %equalize to state only
+else
+    error('Need to input a valid dualCase parameter')
 end
 
 attendinds = inds(state1hot(inds) == 1);
