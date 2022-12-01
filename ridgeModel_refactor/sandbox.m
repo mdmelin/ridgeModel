@@ -29,7 +29,8 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 %%
 
 [regLabels,regIdx,fullR,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
-shuffledDesignMatrix = shuffleDesignMatrix(designMatrix); %pass shuffle indices or labels here
+shuffleLabels = regLabels(1:30);
+shuffledDesignMatrix = shuffleDesignMatrix(regLabels,regIdx,fullR,shuffleLabels); %pass shuffle indices or labels here
 ridgeRegressionCrossvalidate();
 saveEncodingModelResults();
 
