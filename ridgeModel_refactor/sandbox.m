@@ -7,7 +7,6 @@ glmFile = 'allaudio_detection.mat';
 method = 'cutoff';
 
 mintrialnum = 20; %the minimum number of trials per state to be included in plotting
-dualcase = true;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 
 %% pseudo-code
@@ -25,10 +24,14 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
     %end
 
 %end
+%save
 
 %%
-[inds, attendinds, biasinds, ~, ~, ~] = getStateInds(cPath,animals{1},sessiondates{1}{1},method,glmFile,dualcase);
-[designMatrix, labels, labelIndices] = generateDesignMatrix_SpatialDisc(); %generate the design matrix for the SpatialDisc task
-Y = alignWidefieldToDesignMatrix();
+
+[regLabels,regIdx,fullR,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
 shuffledDesignMatrix = shuffleDesignMatrix(designMatrix); %pass shuffle indices or labels here
 ridgeRegressionCrossvalidate();
+saveEncodingModelResults();
+
+%TODO: move trial selection outside of first function
+%TODO: separate out video alignment and imaging alignment in python

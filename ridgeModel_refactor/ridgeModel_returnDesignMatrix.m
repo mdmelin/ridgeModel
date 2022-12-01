@@ -1,4 +1,4 @@
-function [saveLabels,regIdx,saveR] = ridgeModel_sepByState(cPath,Animal,Rec,glmFile,desiredstate,dType,returnmat)
+function [regLabels,regIdx,fullR,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType)
 %By Max Melin. Trains the ridge regression model described in Musall 2019 
 %on that same dataset. In this code, no state regressors are added. Rather, 
 %trials are split up by state (predicted by the Ashwood GLM-HMM) and used to
@@ -918,113 +918,12 @@ trialIdx = isnan(mean(fullR,2)); %don't use first trial or trials that failed to
 fprintf(1, 'Rejected %d/%d trials for NaN entries in regressors\n', sum(trialIdx)/frames, trialCnt);
 fullR(trialIdx,:) = []; %clear bad trials
 
-saveLabels = regLabels;
-saveR = fullR;
-
-if returnmat
-    return
-end
-
-%% save modified Vc
 Vc(:,trialIdx) = []; %clear bad trials
-Vc = bsxfun(@minus, Vc, mean(Vc,2)); %should be zero-mean
+zeromeanVc = bsxfun(@minus, Vc, mean(Vc,2)); %should be zero-mean
 
-if strcmpi(dType,'Widefield')
-    save([cPath 'interpVc.mat'], 'Vc', 'frames', 'preStimDur', 'postStimDur', 'bTrials');
-elseif strcmpi(dType,'twoP')
-    DS(:,trialIdx) = []; %clear bad trials
-    save([cPath 'interpVc.mat'], 'Vc', 'DS', 'frames', 'preStimDur', 'postStimDur', 'bTrials');
-end
+regLabels;
+fullR;
 
-%% apply gaussian filter to design matrix if using sub-sampling
-% if gaussShift > 1
-%     [a,b] = size(fullR);
-%
-%     % find non-continous regressors (contain values different from -1, 0 or 1)
-%     temp = false(size(fullR));
-%     temp(fullR(:) ~= 0 & fullR(:) ~= 1 & fullR(:) ~= -1 & ~isnan(fullR(:))) = true;
-%     regIdx = nanmean(temp) == 0; %index for non-continous regressors
-%
-%     % do gaussian convolution. perform trialwise to avoid overlap across trials.
-%     trialCnt = a/frames;
-%     fullR = reshape(fullR,frames,trialCnt,b);
-%     for iTrials = 1:trialCnt
-%         fullR(:,iTrials,regIdx) = smoothCol(squeeze(fullR(:,iTrials,regIdx)),gaussShift*2,'gauss');
-%     end
-%     fullR = reshape(fullR,a,b);
-% end
-
-%% clear individual regressors
-clear stimR lGrabR lGrabRelR rGrabR rGrabRelR waterR lLickR rLickR ...
-    lAudStimR rAudStimR rewardR prevRewardR ChoiceR ...
-    prevChoiceR prevStimR nextChoiceR repeatChoiceR fastPupilR moveR piezoR whiskR noseR faceR bodyR attentiveR lBiasR rBiasR
-
- glmFile = strrep(glmFile,'.mat','_'); %for nicer filenames
- desiredstate = convertStringsToChars(desiredstate); %needs to be char for filename
- %% Get some label groups
-taskvarlabels = {'Choice','reward','handleSound','lfirstTacStim','lTacStim','rfirstTacStim','rTacStim','lfirstAudStim','lAudStim','rfirstAudStim','rAudStim','prevReward','prevChoice','nextChoice','water'};
-opmotorlabels = {'lGrab','lGrabRel','rGrab','rGrabRel','lLick','rLick'};
-spontmotorlabels = {'piezo','whisk','nose','fastPupil','slowPupil','face','body','Move','bhvVideo'};
-
-%% run ridge regression in low-D, with state this time
-%run model. Zero-mean without intercept. only video qr.
-
-labels = regLabels;
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'fullmodel.mat'], 'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on all regressors
-
-%% Run WITHOUT task variables 
-
-labels = regLabels(~ismember(regLabels, taskvarlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'notaskvars.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-%% Run WITHOUT operant motor labels
-
-labels = regLabels(~ismember(regLabels, opmotorlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'noopmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-
-%% Run WITHOUT spontaneous motor labels
-
-labels = regLabels(~ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'nospontmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-
-%% Run WITH ONLY task variables 
-
-labels = regLabels(ismember(regLabels, taskvarlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'onlytaskvars.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-%% Run WITH ONLY operant motor labels
-
-labels = regLabels(ismember(regLabels, opmotorlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'onlyopmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-
-%% Run WITH ONLY spontaneous motor labels
-
-labels = regLabels(ismember(regLabels, spontmotorlabels)); %get all regressors except task vars
-labels = regLabels(sort(find(ismember(regLabels,labels)))); %make sure Labels is in the right order
-
-[Vm, fullBeta, R, fullIdx, fullRidge, fullLabels, fullLabelInds, fullMap, fullMovie] = crossValModel(fullR,U,Vc,labels,regLabels,regIdx,frames,10);
-save([cPath desiredstate '_' glmFile 'onlyspontmotor.mat'],'Vm', 'fullBeta', 'R', 'fullIdx', 'fullRidge', 'fullLabels', 'fullLabelInds', 'fullMap', 'fullMovie','-v7.3'); %this saves model info based on original model
-
-
-
-
-
-%% nested functions
-%theyre gone now
 
 end
 
