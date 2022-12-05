@@ -55,8 +55,6 @@ motorIdx = [-(mPreTime: -1 : 1) 0 (1:mPostTime)]; %index for design matrix to co
 tapDur = 0.1;      % minimum time of lever contact, required to count as a proper grab.
 leverMoveDur = 0.3; %duration of lever movement. this is used to orthogonalize video against lever movement.
 leverMoveDur = ceil(leverMoveDur * sRate); %convert to frames
-ridgeFolds = 10; %number of cross-validations for motor/task models
-opMotorLabels = {'lLick' 'rLick' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel'}; %operant motor regressors
 shVal = sRate * opts.preStim  + 1; %expected position of stimulus onset in the imaging data (s).
 maxStimShift = 1 * sRate; % maximal stimulus onset after handle grab. (default is 1s - this means that stimulus onset should not be more than 1s after handle grab. Cognitive regressors will have up to 1s of baseline because of stim jitter.)
 bhvDimCnt = 200;    % number of dimensions from behavioral videos that are used as regressors.
@@ -519,11 +517,24 @@ for iTrials = 1:trialCnt
     %% choice and reward
     stimTemp = false(frames, frames + maxStimShift);
     stimShift = round(stimTime(iTrials) * sRate); %amount of stimshift compared to possible maximum. move diagonal on x-axis accordingly.
+
     if (stimShift > maxStimShift) || isnan(stimTime(iTrials))
         stimTemp = NaN(frames, frames + maxStimShift); %don't use trial if stim onset is too late
     else
         stimTemp(:, end - stimShift - frames + 1 : end - stimShift) = timeR;
     end
+
+
+% 
+%     figure
+%     imshow(stimTemp)
+%     title(['stim shift is ' num2str(stimShift)]);
+
+
+
+
+
+
     rewardR{iTrials} = false(size(stimTemp));
     
     if bhv.Rewarded(iTrials) %rewarded
@@ -829,9 +840,9 @@ timeR = repmat(logical(diag(ones(1,frames))),trialCnt,1); %time regressor
 timeR = timeR(:,1:end-4);
 
 lGrabR = cat(1,lGrabR{:});
-lGrabRelR = cat(1,lGrabRelR{:});
+lGrabRelR = cat(1,lGrabRelR{:}); %not in the model currently
 rGrabR = cat(1,rGrabR{:});
-rGrabRelR = cat(1,rGrabRelR{:});
+rGrabRelR = cat(1,rGrabRelR{:}); %not in the model currently
 
 lLickR = cat(1,lLickR{:});
 rLickR = cat(1,rLickR{:});
@@ -872,7 +883,7 @@ slowPupilR(~isnan(slowPupilR(:,1)),:) = zscore(slowPupilR(~isnan(slowPupilR(:,1)
 
 %% create full design matrix
 
-fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
+fullR = [timeR ChoiceR rewardR lGrabR rGrabR  ...
     lLickR rLickR handleSoundR lfirstTacStimR lTacStimR rfirstTacStimR rTacStimR ...
     lfirstAudStimR lAudStimR rfirstAudStimR rAudStimR prevRewardR prevChoiceR ...
     nextChoiceR waterR piezoAnalog piezoDigital piezoMoveAnalog piezoMoveDigital piezoMoveHiDigital whiskAnalog whiskDigital whiskHiDigital noseAnalog noseDigital noseHiDigital fastPupilAnalog fastPupilDigital fastPupilHiDigital ...
@@ -882,7 +893,7 @@ fullR = [timeR ChoiceR rewardR lGrabR lGrabRelR rGrabR rGrabRelR ...
 
 % labels for different regressor sets. It is REALLY important this agrees with the order of regressors in fullR.
 regLabels = {
-    'time' 'Choice' 'reward' 'lGrab' 'lGrabRel' 'rGrab' 'rGrabRel' 'lLick' 'rLick' 'handleSound' ...
+    'time' 'Choice' 'reward' 'lGrab' 'rGrab' 'lLick' 'rLick' 'handleSound' ...
     'lfirstTacStim' 'lTacStim' 'rfirstTacStim' 'rTacStim' 'lfirstAudStim' 'lAudStim' 'rfirstAudStim' 'rAudStim' ...
     'prevReward' 'prevChoice' 'nextChoice' 'water' 'piezoAnalog' 'piezoDigital' 'piezoMoveAnalog' 'piezoMoveDigital' 'piezoMoveHiDigital' 'whiskAnalog' 'whiskDigital' 'whiskHiDigital' 'noseAnalog' 'noseDigital' 'noseHiDigital' 'fastPupilAnalog' 'fastPupilDigital' 'fastPupilHiDigital' 'slowPupil' 'faceAnalog' 'faceDigital' 'faceHiDigital' 'bodyAnalog' 'bodyDigital' 'bodyHiDigital' 'Move' 'bhvVideo'};
 
@@ -892,9 +903,7 @@ regIdx = [
     ones(1,size(ChoiceR,2))*find(ismember(regLabels,'Choice')) ...
     ones(1,size(rewardR,2))*find(ismember(regLabels,'reward')) ...
     ones(1,size(lGrabR,2))*find(ismember(regLabels,'lGrab')) ...
-    ones(1,size(lGrabRelR,2))*find(ismember(regLabels,'lGrabRel')) ...
     ones(1,size(rGrabR,2))*find(ismember(regLabels,'rGrab')) ...
-    ones(1,size(rGrabRelR,2))*find(ismember(regLabels,'rGrabRel')) ...
     ones(1,size(lLickR,2))*find(ismember(regLabels,'lLick')) ...
     ones(1,size(rLickR,2))*find(ismember(regLabels,'rLick')) ...
     ones(1,size(handleSoundR,2))*find(ismember(regLabels,'handleSound')) ...
@@ -936,9 +945,11 @@ regIdx = [
 %% compute the indices of the event that we're aligning to - for easier recovery of kernels
 preStimFrames = preStimDur*sRate;
 postStimFrames = postStimDur*sRate;
-regZeroFrames = [zeros(1,size(timeR,2))];
-%WORK IN PROGRESS
-
+timeZero = zeros(1,size(timeR,2)); timeZero(preStimFrames) = 1; %handle grab time
+choiceZero = zeros(1,size(ChoiceR,2)); choiceZero(preStimFrames + maxStimShift) = 1; %stim on time choice is realigned to stimulus
+rewardZero = choiceZero; %stim on time, same alignment as choice
+lGrabZero = zeros(1,size(lGrabR,2)); lGrabZero(mPreTime + 1) = 1; %frame of actual motor event
+rGrabZero = lGrabZero;
 %%
 
 % orthogonalize video against spout/handle movement
