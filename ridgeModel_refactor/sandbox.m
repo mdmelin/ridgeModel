@@ -28,10 +28,12 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 
 %%
 
-[regLabels,regIdx,fullR,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
-shuffleLabels = regLabels(1:30);
+[regLabels,regIdx,fullR,regZeroFrames,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
+%need to return the kernel zero points in the functionn above, make NaN if
+%analog
+% shuffleLabels = regLabels(1:30);
 shuffledDesignMatrix = shuffleDesignMatrix(regLabels,regIdx,fullR,shuffleLabels); %pass shuffle indices or labels here
-ridgeRegressionCrossvalidate();
+ridgeRegressionCrossvalidate(); %need to adjust kernel zero points if they get discarded, or maybe make them nans
 saveEncodingModelResults();
 
 %TODO: move trial selection outside of first function

@@ -1,4 +1,4 @@
-function [regLabels,regIdx,fullR,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType)
+function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType)
 %By Max Melin. Trains the ridge regression model described in Musall 2019 
 %on that same dataset. In this code, no state regressors are added. Rather, 
 %trials are split up by state (predicted by the Ashwood GLM-HMM) and used to
@@ -42,7 +42,7 @@ else
 end
 
 preStimDur = floor(2 * sRate) / sRate; % Duration of trial before lever grab in seconds
-postStimDur = floor(3 *sRate) / sRate; % Duration of trial after lever grab onset in seconds
+postStimDur = floor(3 * sRate) / sRate; % Duration of trial after lever grab onset in seconds
 frames = round((preStimDur + postStimDur) * sRate); %nr of frames per trial
 trialDur = (frames * (1/sRate)); %duration of trial in seconds
 
@@ -902,6 +902,13 @@ regIdx = [
     ones(1,size(bodyR,2))*find(ismember(regLabels,'body')) ...
     ones(1,size(moveR,2))*find(ismember(regLabels,'Move')) ...
     ones(1,size(vidR,2))*find(ismember(regLabels,'bhvVideo'))];
+%% compute the indices of the event that we're aligning to - for easier recovery of kernels
+preStimFrames = preStimDur*sRate;
+postStimFrames = postStimDur*sRate;
+regZeroFrames = [zeros(1,size(timeR,2))];
+%WORK IN PROGRESS
+
+%%
 
 % orthogonalize video against spout/handle movement
 vidIdx = find(ismember(regIdx, find(ismember(regLabels,{'Move' 'bhvVideo'})))); %index for video regressors
