@@ -1,4 +1,4 @@
-function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType)
+function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType)
 %By Max Melin. Trains the ridge regression model described in Musall 2019 
 %on that same dataset. In this code, no state regressors are added. Rather, 
 %trials are split up by state (predicted by the Ashwood GLM-HMM) and used to
