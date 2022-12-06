@@ -943,13 +943,62 @@ regIdx = [
     ones(1,size(moveR,2))*find(ismember(regLabels,'Move')) ...
     ones(1,size(vidR,2))*find(ismember(regLabels,'bhvVideo'))];
 %% compute the indices of the event that we're aligning to - for easier recovery of kernels
+
 preStimFrames = preStimDur*sRate;
 postStimFrames = postStimDur*sRate;
+
 timeZero = zeros(1,size(timeR,2)); timeZero(preStimFrames) = 1; %handle grab time
 choiceZero = zeros(1,size(ChoiceR,2)); choiceZero(preStimFrames + maxStimShift) = 1; %stim on time choice is realigned to stimulus
-rewardZero = choiceZero; %stim on time, same alignment as choice
+rewardZero = zeros(1,size(rewardR,2)); rewardZero(preStimFrames + maxStimShift) = 1; %stim on time, same alignment as choice
 lGrabZero = zeros(1,size(lGrabR,2)); lGrabZero(mPreTime + 1) = 1; %frame of actual motor event
-rGrabZero = lGrabZero;
+rGrabZero = zeros(1,size(rGrabR,2)); rGrabZero(mPreTime + 1) = 1;
+lLickZero = zeros(1,size(lLickR,2)); lLickZero(mPreTime + 1) = 1;
+rLickZero = zeros(1,size(rLickR,2)); rLickZero(mPreTime + 1) = 1;
+handleSoundZero = zeros(1,size(handleSoundR,2)); handleSoundZero(1) = 1; %first frame marks event
+lfirstTacStimZero = zeros(1,size(lfirstTacStimR,2)); lfirstTacStimZero(1) = 1; %first frame marks event
+lTacStimZero = zeros(1,size(lTacStimR,2)); lTacStimZero(1) = 1;
+rfirstTacStimZero = zeros(1,size(rfirstTacStimR,2)); rfirstTacStimZero(1) = 1;
+rTacStimZero = zeros(1,size(rTacStimR,2)); rTacStimZero(1) = 1;
+lfirstAudStimZero = zeros(1,size(lfirstAudStimR,2)); lfirstAudStimZero(1) = 1; %first frame marks event
+lAudStimZero = zeros(1,size(lAudStimR,2)); lAudStimZero(1) = 1;
+rfirstAudStimZero = zeros(1,size(rfirstAudStimR,2)); rfirstAudStimZero(1) = 1;
+rAudStimZero = zeros(1,size(rAudStimR,2)); rAudStimZero(1) = 1;
+prevRewardZero = zeros(1,size(prevRewardR,2)); prevRewardZero(preStimFrames) = 1; %previous trial regressors are aligned to handle grab on current trial
+prevChoiceZero = zeros(1,size(prevChoiceR,2)); prevChoiceZero(preStimFrames) = 1;
+nextChoiceZero = zeros(1,size(nextChoiceR,2)); nextChoiceZero(preStimFrames) = 1;
+waterZero = zeros(1,size(waterR,2)); waterZero(1) = 1; %begins at water delivery, lots of trials are cut off by trial end
+piezoAnalogZero = zeros(1,size(piezoAnalog,2)); %analog regressors have no alignment value
+piezoDigitalZero = zeros(1,size(piezoDigital,2)); piezoDigitalZero(mPreTime + 1) = 1;
+piezoMoveAnalogZero = zeros(1,size(piezoMoveAnalog,2));
+piezoMoveDigitalZero = zeros(1,size(piezoMoveDigital,2)); piezoMoveDigitalZero(mPreTime + 1) = 1;
+piezoMoveHiDigitalZero = zeros(1,size(piezoMoveHiDigital,2)); piezoMoveHiDigitalZero(mPreTime + 1) = 1;
+whiskAnalogZero = zeros(1,size(whiskAnalog,2));
+whiskDigitalZero = zeros(1,size(whiskDigital,2)); whiskDigitalZero(mPreTime + 1) = 1;
+whiskHiDigitalZero = zeros(1,size(whiskHiDigital,2)); whiskHiDigitalZero(mPreTime + 1) = 1;
+noseAnalogZero = zeros(1,size(noseAnalog,2));
+noseDigitalZero = zeros(1,size(noseDigital,2)); noseDigitalZero(mPreTime + 1) = 1;
+noseHiDigitalZero = zeros(1,size(noseHiDigital,2)); noseHiDigitalZero(mPreTime + 1) = 1;
+fastPupilAnalogZero = zeros(1,size(fastPupilAnalog,2));
+fastPupilDigitalZero = zeros(1,size(fastPupilDigital,2)); fastPupilDigitalZero(mPreTime + 1) = 1;
+fastPupilHiDigitalZero = zeros(1,size(fastPupilHiDigital,2)); fastPupilHiDigitalZero(mPreTime + 1) = 1;
+slowPupilZero = zeros(1,size(slowPupilR,2));
+faceAnalogZero = zeros(1,size(faceAnalog,2));
+faceDigitalZero = zeros(1,size(faceDigital,2)); faceDigitalZero(mPreTime + 1) = 1;
+faceHiDigitalZero = zeros(1,size(faceHiDigital,2)); faceHiDigitalZero(mPreTime + 1) = 1;
+bodyAnalogZero = zeros(1,size(bodyAnalog,2));
+bodyDigitalZero = zeros(1,size(bodyDigital,2)); bodyDigitalZero(mPreTime + 1) = 1;
+bodyHiDigitalZero = zeros(1,size(bodyHiDigital,2)); bodyHiDigitalZero(mPreTime + 1) = 1;
+moveRZero = zeros(1,size(moveR,2));
+vidRZero = zeros(1,size(vidR,2));
+
+regZeroFrames = [timeZero choiceZero rewardZero lGrabZero rGrabZero lLickZero rLickZero handleSoundZero ... 
+    lfirstTacStimZero lTacStimZero rfirstTacStimZero rTacStimZero lfirstAudStimZero lAudStimZero ...
+    rfirstAudStimZero rAudStimZero prevRewardZero prevChoiceZero nextChoiceZero waterZero piezoAnalogZero ...
+    piezoDigitalZero piezoMoveAnalogZero  piezoMoveDigitalZero piezoMoveHiDigitalZero whiskAnalogZero ... 
+    whiskDigitalZero whiskHiDigitalZero noseAnalogZero noseDigitalZero noseHiDigitalZero fastPupilAnalogZero ...
+    fastPupilDigitalZero fastPupilHiDigitalZero slowPupilZero faceAnalogZero faceDigitalZero faceHiDigitalZero ...
+    bodyAnalogZero bodyDigitalZero bodyHiDigitalZero moveRZero vidRZero];
+
 %%
 
 % orthogonalize video against spout/handle movement
