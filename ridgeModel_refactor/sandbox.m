@@ -27,11 +27,13 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 %save
 
 %%
-
+NFOLDS = 10;
+REJECT_EMPTY_REGRESSORS = true; 
+REJECT_RANK_DEFICIENT = true;
 [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
 shuffleLabels = regLabels(1:30);
 shuffledDesignMatrix = shuffleDesignMatrix(regLabels,regIdx,fullR,shuffleLabels); %pass shuffle indices or labels here
-[Vm, betas, RwithRejections, lambdas, rejIdx, cMap, cMovie] = ridgeRegressionCrossvalidate(fullR,U,zeromeanVc,regLabels,regIdx,75,10); %need to adjust kernel zero points if they get discarded, or maybe make them nans
+[Vm, betas, RwithRejections, lambdas, rejIdx, cMap, cMovie] = ridgeRegressionCrossvalidate(fullR,U,zeromeanVc,regLabels,regIdx,75,NFOLDS,REJECT_EMPTY_REGRESSORS,REJECT_RANK_DEFICIENT); %need to adjust kernel zero points if they get discarded, or maybe make them nans
 %here: check if the alignment event frames got rejected
 saveEncodingModelResults();
 
