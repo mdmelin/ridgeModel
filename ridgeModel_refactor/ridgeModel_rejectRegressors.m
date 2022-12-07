@@ -16,7 +16,7 @@ if sum(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))) < siz
     temp = ~(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))); %reject regressors that cause rank-defficint matrix
     rejIdx(~rejIdx) = temp;
     deficientLabels = unique(regLabels(regIdx2(temp)));
-    fprintf('WARNING: %s is at least partially deficient. \n', deficientLabels{:});
+    fprintf('WARNING: %s is at least partially rank deficient. \n', deficientLabels{:});
     fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 else
     fprintf('No regressors were rank deficient!\n');

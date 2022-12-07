@@ -24,6 +24,3 @@ shuffledR = shuffleDesignMatrix(regLabelsFull,regIdxFull,fullR,shuffleLabels);
 %ridgeModel_saveResults(cPath,animal,rec, FILENAME, Vm, zeromeanVc, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 end
-
-
-%run with full shuffle
