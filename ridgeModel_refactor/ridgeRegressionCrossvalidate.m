@@ -6,14 +6,17 @@ rejIdx = false(1,size(fullR,2));
 if rejectEmpty %reject empty regressors
     rejIdx = nansum(abs(fullR)) < MIN_ENTRIES; %for analog regressors with less than min entries
     fprintf(1, 'Rejected %d of %d total regressors for emptiness (less than %d entries).\n', sum(rejIdx),length(rejIdx), MIN_ENTRIES);
+    regIdx2 = regIdx(~rejIdx);
 end
 
 if rejectRankDeficient
     [~, fullQRR] = qr(bsxfun(@rdivide,fullR(:,~rejIdx),sqrt(sum(fullR(:,~rejIdx).^2))),0); %orthogonalize design matrix
     %figure; plot(abs(diag(fullQRR))); ylim([0 1.1]); title('Regressor orthogonality'); drawnow; %this shows how orthogonal individual regressors are to the rest of the matrix
-    if sum(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1))) < size(fullR,2) %check if design matrix is full rank
-        temp = ~(abs(diag(fullQRR)) > max(size(fullR)) * eps(fullQRR(1))); %reject regressors that cause rank-defficint matrix
+    if sum(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))) < size(fullR(:,~rejIdx),2) %check if design matrix is full rank
+        temp = ~(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))); %reject regressors that cause rank-defficint matrix
         rejIdx(~rejIdx) = temp;
+        deficientLabels = unique(regLabels(regIdx2(temp)));
+        fprintf('WARNING: %s is at least partially deficient. \n', deficientLabels{:});
     end
     fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 end
@@ -31,7 +34,7 @@ for i = unique(regIdx)
 end
 
 if length(discardLabels) > 0
-    fprintf('\nFully discarded regressor: %s because of NaN''s or emptiness \n', discardLabels{:});
+    fprintf('Fully discarded regressor: %s because of NaN''s or emptiness \n', discardLabels{:});
 else
     fprintf('\nNo regressors were FULLY discarded\n');
 end
