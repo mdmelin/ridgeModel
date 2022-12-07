@@ -18,7 +18,8 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 %     end
 % end
 
-%% Retrain models over different states 
+
+%% Retrain models over different states
 for i = 1:length(animals)
     parfor j = 1:length(sessiondates{i})
         fprintf('\nRunning for %s, %s.\n\n',animals{i},sessiondates{i}{j});
@@ -59,7 +60,7 @@ dtaskb = fullb-notaskvarb;
 dopa = fulla-noopa;
 dopb = fullb-noopb;
 
-%% plotting 
+%% plotting
 time = linspace(0,5,size(fulla,2));
 time = time-time(30);
 

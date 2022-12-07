@@ -14,6 +14,9 @@ REJECT_RANK_DEFICIENT = true;
 [regLabelsAll,regIdxAll,RA,regZeroFramesAll,zeromeanVcA,U] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmFile,'attentive',[]);
 [~,~,RB,~,zeromeanVcB,~] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmFile,'biased',[]);
 
+if isempty(RA) || isempty(RB) %skip sessions with too few trials
+    return
+end
 % create some label groups
 taskvarlabels = {'time', 'Choice','reward','handleSound','lfirstTacStim','lTacStim','rfirstTacStim','rTacStim','lfirstAudStim','lAudStim','rfirstAudStim','rAudStim','prevReward','prevChoice','nextChoice','water'};
 opmotorlabels = {'lGrab','lGrabRel','rGrab','rGrabRel','lLick','rLick'};

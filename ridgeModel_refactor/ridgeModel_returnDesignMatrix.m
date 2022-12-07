@@ -169,7 +169,12 @@ trialCnt = length(bTrials);
 mintrials = 30;
 if trialCnt < mintrials
     fprintf('\there are less than %i trials, aborting for this session.\n',mintrials);
-    saveLabels=[];regIdx=[];saveR=[];
+    regIdx=[];
+    regLabels = [];
+    fullR = [];
+    regZeroFrames = [];
+    zeromeanVc = [];
+    U = [];
     return 
 end
 %% load behavior data
