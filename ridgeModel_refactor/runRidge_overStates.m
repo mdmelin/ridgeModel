@@ -25,28 +25,28 @@ spontmotorlabels = regLabelsAll(sort(find(ismember(regLabelsAll,spontmotorlabels
 
 
 
-%run engaged trials with regressor rejection
-[R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(RA,regLabelsAll,regIdxAll,regZeroFramesAll);
-[Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, 'fullA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
-
-%run disengaged trials with regressor rejection
-[R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(RB,regLabelsAll,regIdxAll,regZeroFramesAll);
-[Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'fullB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
-
-%run with only task variables - shuffle spont and op motor labels
-shuffleLabels = regLabelsAll(~ismember(regLabelsAll, taskvarlabels)); 
-
-R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
-[R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
-[Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'taskA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
-
-R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
-[R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
-[Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'taskB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+% %run engaged trials with regressor rejection
+% [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(RA,regLabelsAll,regIdxAll,regZeroFramesAll);
+% [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
+% ridgeModel_saveResults(cPath,animal,rec, 'fullA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+% 
+% %run disengaged trials with regressor rejection
+% [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(RB,regLabelsAll,regIdxAll,regZeroFramesAll);
+% [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
+% ridgeModel_saveResults(cPath,animal,rec, 'fullB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+% 
+% %run with only task variables - shuffle spont and op motor labels
+% shuffleLabels = regLabelsAll(~ismember(regLabelsAll, taskvarlabels)); 
+% 
+% R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
+% [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
+% [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS); 
+% ridgeModel_saveResults(cPath,animal,rec, 'taskA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+% 
+% R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
+% [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
+% [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
+% ridgeModel_saveResults(cPath,animal,rec, 'taskB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 %run with only operant variables
 shuffleLabels = regLabelsAll(~ismember(regLabelsAll, opmotorlabels)); 
@@ -54,12 +54,12 @@ shuffleLabels = regLabelsAll(~ismember(regLabelsAll, opmotorlabels));
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'opA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, 'operantA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'opB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, 'operantB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 %run with only spontaneous motor variables
 shuffleLabels = regLabelsAll(~ismember(regLabelsAll, spontmotorlabels)); 
@@ -94,12 +94,12 @@ shuffleLabels = regLabelsAll(ismember(regLabelsAll, opmotorlabels));
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'noopA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, 'nooperantA', Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS); 
-ridgeModel_saveResults(cPath,animal,rec, 'noopB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, 'nooperantB', Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels, regZeroFrames);
 
 %run without spontaneous motor variables
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, spontmotorlabels)); 
