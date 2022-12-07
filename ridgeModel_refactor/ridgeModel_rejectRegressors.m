@@ -17,12 +17,15 @@ if sum(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))) < siz
     rejIdx(~rejIdx) = temp;
     deficientLabels = unique(regLabels(regIdx2(temp)));
     fprintf('WARNING: %s is at least partially deficient. \n', deficientLabels{:});
+    fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
+else
+    fprintf('No regressors were rank deficient!\n');
+    temp = zeros(1,length(regIdx2));
 end
-fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 
 
-fullR(:,rejIdx) = []; %clear empty and rank deficient regressors if requested
-regIdx = regIdx2(~temp); %clear rank deficient regressors
+fullR(:,rejIdx) = []; %clear empty and rank deficient regressors
+regIdx = regIdx2(~temp); %clear empty and rank deficient regressors
 
 regLabelsOld = regLabels;
 regLabels = regLabels(unique(regIdx));

@@ -26,39 +26,11 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 %end
 %save
 %%
-runRidge_fullAndShuffle(cPath,animals{1},sessiondates{1}{1},glmFile)
-
-%%
-%TODO: move trial selection outside of first function
-%TODO: separate out video alignment and imaging alignment in python
-NFOLDS = 10;
-REJECT_EMPTY_REGRESSORS = true;
-REJECT_RANK_DEFICIENT = true;
-FILENAME = 'deleteme';
-
-
-[regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
-shuffleLabels = regLabels(1:30);
-shuffledDesignMatrix = shuffleDesignMatrix(regLabels,regIdx,fullR,shuffleLabels); %pass shuffle indices or labels here
-[Vm, betas, RwithRejections, lambdas, rejIdx, cMap, cMovie] = ridgeRegressionCrossvalidate(fullR,U,zeromeanVc,regLabels,regIdx,75,NFOLDS,REJECT_EMPTY_REGRESSORS,REJECT_RANK_DEFICIENT); %need to adjust kernel zero points if they get discarded, or maybe make them nans
-
-rejectedAlignmentFrameLabels = regLabels(regIdx(rejIdx & regZeroFrames));%check if the alignment event frames got rejected
-fprintf('WARNING: The alignment frame for %s was rejected. \n', rejectedAlignmentFrameLabels{:});
-
-R = RwithRejections;
-regIdx = regIdx(~rejIdx);
-regLabels = regLabels(unique(regIdx));
-
-temp = []; count = 1;
-for i = unique(regIdx)
-    temp(regIdx == i) = count;
-    count = count+1;
+for i = 1:length(animals)
+    for j = 1:length(sessiondates{i})
+        runRidge_fullAndShuffle(cPath,animals{1},sessiondates{1}{1},glmFile);
+    end
 end
-regIdx = temp;
-
-saveEncodingModelResults(cPath,animals{1},sessiondates{1}{1}, FILENAME, Vm, zeromeanVc, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels);
-
-
 
 
 
