@@ -1,4 +1,4 @@
-function [Vm, betas, fullR, lambdas, rejIdx, cMap, cMovie] =  ridgeRegressionCrossvalidate(fullR,U,Vc,regLabels,regIdx,frames,ridgeFolds,rejectEmpty,rejectRankDeficient)
+function [Vm, betas, fullR, lambdas, rejIdx, regIdx, regLabels, cMap, cMovie] =  ridgeRegressionCrossvalidate(fullR,U,Vc,regLabels,regIdx,frames,ridgeFolds,rejectEmpty,rejectRankDeficient)
 % maybe make Vc zero mean in this function instead of the other
 % one?
 MIN_ENTRIES = 10;
@@ -17,11 +17,22 @@ if rejectRankDeficient
         rejIdx(~rejIdx) = temp;
         deficientLabels = unique(regLabels(regIdx2(temp)));
         fprintf('WARNING: %s is at least partially deficient. \n', deficientLabels{:});
+        
     end
     fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 end
 
 fullR(:,rejIdx) = []; %clear empty and rank deficient regressors if requested
+regIdx = regIdx2(~temp); %clear rank deficient regressors
+
+regLabels = regLabels(unique(regIdx));
+
+temp = []; count = 1;
+for i = unique(regIdx) %remove the skiped indices for discared reginds
+    temp(regIdx == i) = count;
+    count = count+1;
+end
+regIdx = temp;
 
 %print out the regressors that were fully discarded
 discardLabels = [];
@@ -41,6 +52,10 @@ end
 
 regMarkers = [1 diff(regIdx)]; %marks the indices where regressors begin
 figure; hold on;plot(regMarkers); plot(rejIdx); legend('regMarkers','rejIdx');
+
+
+
+
 
 %now move on to the regression
 Vm = zeros(size(Vc),'single'); %pre-allocate reconstructed V

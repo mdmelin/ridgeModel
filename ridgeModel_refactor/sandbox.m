@@ -25,6 +25,8 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 
 %end
 %save
+%%
+runRidge_fullAndShuffle(cPath,animals{1},sessiondates{1}{1},glmFile)
 
 %%
 %TODO: move trial selection outside of first function
@@ -33,7 +35,7 @@ NFOLDS = 10;
 REJECT_EMPTY_REGRESSORS = true;
 REJECT_RANK_DEFICIENT = true;
 FILENAME = 'deleteme';
-TASK = 'SpatialDisc';
+
 
 [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,animals{1},sessiondates{1}{1},glmFile,'attentive',[]);
 shuffleLabels = regLabels(1:30);
@@ -52,9 +54,10 @@ for i = unique(regIdx)
     temp(regIdx == i) = count;
     count = count+1;
 end
-regLabels = temp;
+regIdx = temp;
 
-saveEncodingModelResults(cPath,animals{1},sessiondates{1}{1}, FILENAME, Vm, Vc, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels);
+saveEncodingModelResults(cPath,animals{1},sessiondates{1}{1}, FILENAME, Vm, zeromeanVc, U, R, betas, lambdas, cMap, cMovie, rejIdx, regIdx, regLabels);
+
 
 
 
