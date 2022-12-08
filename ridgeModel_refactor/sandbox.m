@@ -26,6 +26,7 @@ for i = 1:length(animals)
         runRidge_overStates(cPath,animals{i},sessiondates{i}{j},glmFile);
     end
 end
+%% IN THE FUTURE, TEST WITH DOING REWARD EQUALIZATION LATER (LINE 150 IN RETURN DESIGN MATRIX CODE)
 
 %% Now plot those results
 
