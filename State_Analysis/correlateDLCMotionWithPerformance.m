@@ -25,7 +25,7 @@ load('X:\labelNames.mat')
 
 %%
 function [me_out,state_out,A,B,R,P] = get_motion_energy(rec, filename, epoch, smooth, shuffle)
-[inds, attendinds,biasinds,~, postprobs_sorted,correct] = getStateInds('X:/Widefield','mSM63',rec,'cutoff','allaudio_detection.mat',true);
+[inds, attendinds,biasinds,~, postprobs_sorted,correct] = getStateInds('X:/Widefield','mSM63',rec,'cutoff','allaudio_detection.mat','reward');
 
 
 load('X:\labelNames.mat')
@@ -48,7 +48,7 @@ p_eng = postprobs_sorted(1,:);
 p_eng = p_eng(1:size(mean_me,1));
 
 correct = correct(1:length(p_eng));
-correct = smoothdata(correct,2,'movmean',40);
+correct_smooth = smoothdata(correct,2,'movmean',40);
 
 
 if shuffle
@@ -69,23 +69,38 @@ for i = 1:size(mean_me,2) %the separation way
     a = part_me(p_eng > .8);
     b = part_me(p_eng < .2);
     a = a(randperm(length(a),length(b))); %subsample
+    
+    c = part_me(correct);
+    d = part_me(~correct);
+    c = c(randperm(length(c),length(d))); %subsample
+
     %figure; hold on;
     %histogram(a,'BinWidth',.1);
     %histogram(b,'BinWidth',.1);
 
+    %plot over different states
+    figure; hold on;xlim([0 3]);
+    xticks([1 2]); xticklabels({'Engaged','Disengaged'});
+    ylabel('Average ME in trial epoch');
+    title([Laterl_labels{i} '. P = ' num2str(P(i))]);
+    aa = ones(length(a));
+    bb = ones(length(b));
+    scatter(aa,a);
+    scatter(bb.*2,b);
 
-%     figure; hold on;xlim([0 3]);
-%     xticks([1 2]); xticklabels({'Engaged','Disengaged'});
-%     ylabel('Average ME in trial epoch');
-%     title([Laterl_labels{i} '. P = ' num2str(P(i))]);
-%     aa = ones(length(a));
-%     bb = ones(length(b));
-%     scatter(aa,a);
-%     scatter(bb.*2,b);
+    %plot over correct vs incorrect
+    %[t1, t2 ] = ttest2(c,d);
+    figure; hold on;xlim([0 3]);
+    xticks([1 2]); xticklabels({'Correct','Incorrect'});
+    ylabel('Average ME in trial epoch');
+    cc = ones(length(c));
+    dd = ones(length(d));
+    scatter(cc,c);
+    scatter(dd.*2,d);
 
-    figure;hold on
-    scatter(part_me, correct)
-    title([Laterl_labels{i} ' mean ME vs performance: ' epoch ' window']);
+%     figure;hold on
+%     scatter(part_me, correct_smooth)
+%     title([Laterl_labels{i} ' mean ME vs performance: ' epoch ' window']);
 
     %exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\FridayUpdate\DLC_Motionenergy' filesep epoch filesep rec '_' Laterl_labels{i} '.pdf'],'ContentType','vector')
 
