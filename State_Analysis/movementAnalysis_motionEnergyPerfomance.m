@@ -12,9 +12,9 @@ animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = 'allaudio_detection.mat';
 
 method = 'cutoff';
 mintrials = 20; %the minimum number of trials per state to be included in plotting
-dualcase = true;
+dualcase = 'reward';
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
-
+correctSmoothWindow = 30;
 %% check alignment
 % [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{1},sessiondates{1}{1},10:14); %[x,y,z,frames,trials]
 % generateVideo('C:\Data\churchland\temp1',vidA.cam1,2);
@@ -24,12 +24,21 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 count = 1;
 for i = 1:length(sessiondates)
     for j = 1:length(sessiondates{i})
-        [inds,a,b,~,postprobs] = getStateInds(cPath,animals{i},sessiondates{i}{j},'cutoff',glmFile,dualcase);
-        [~,maxstate] = max(postprobs,[],1);
+        [inds, attendinds,biasinds,Y, postprobs_sorted, correct] = getStateInds(cPath,animals{i},sessiondates{i}{j},'cutoff',glmFile,dualcase);
+        [~,maxstate] = max(postprobs_sorted,[],1);
+        correct = smoothdata(correct,2,'movmean',correctSmoothWindow);
+        a = find(correct > .85);
+        b = find(correct < .75);
+        if length(a) > length(b)
+        a = a(randperm(length(a),length(b)));
+        else
+        b = b(randperm(length(b),length(a)));
+        end
+
         if length(a) > mintrials
             fprintf('\nRunning %s, %s\n',animals{i},sessiondates{i}{j});
-            [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},find(maxstate == 1),1); %[x,y,z,frames,trials]
-            [vidB,bhvB,goodtrialsB] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},find(maxstate ~= 1),1); %[x,y,z,frames,trials]
+            [vidA,bhvA,goodtrialsA] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},a,1); %[x,y,z,frames,trials]
+            [vidB,bhvB,goodtrialsB] = alignvideo2behavior(cPath,animals{i},sessiondates{i}{j},b,1); %[x,y,z,frames,trials]
         else
             continue
         end
@@ -57,13 +66,13 @@ for i = 1:length(sessiondates)
 
 
 
-            subplot(3,5,trialperiod); title('Engaged trials')
+            subplot(3,5,trialperiod); title('Hi-performance trials')
             imagesc(A1avg,clim1);
             colormap(gca,'inferno')
             title(titles(trialperiod));
             axis('square');set(gca,'XTick',[], 'YTick', [])
             if trialperiod == 1
-                ylabel('Engaged')
+                ylabel('High Performance')
             end
             if trialperiod == 5
                 cb=colorbar;
@@ -72,12 +81,12 @@ for i = 1:length(sessiondates)
             end
 
 
-            subplot(3,5,trialperiod + 5); title('Biased trials')
+            subplot(3,5,trialperiod + 5); title('Lo-performance trials')
             imagesc(B1avg,clim1);
             colormap(gca,'inferno')
             axis('square');set(gca,'XTick',[], 'YTick', [])
             if trialperiod == 1
-                ylabel('Biased')
+                ylabel('Low Performance')
             end
             if trialperiod == 5
                 cb=colorbar;
@@ -158,17 +167,6 @@ for trialperiod = 1:5
     end
     %exportgraphics(gcf,['C:\Data\churchland\PowerpointsPostersPresentations\SFN2022\MotionEnergy_visualization\avg.pdf']);
 end
-%%
-framerate = 30;
-generateVideo('C:\Data\churchland\temp1',vidA.cam1,framerate);
-generateVideo('C:\Data\churchland\temp2',vidB.cam1,framerate);
-generateVideo('C:\Data\churchland\temp3',vidA.cam2,framerate);
-generateVideo('C:\Data\churchland\temp4',vidB.cam2,framerate);
-generateVideo('C:\Data\churchland\temp5',Avar,framerate);
-generateVideo('C:\Data\churchland\temp6',Bvar,framerate);
-generateVideo('C:\Data\churchland\temp7',Aavg,framerate);
-generateVideo('C:\Data\churchland\temp8',Bavg,framerate);
-generateVideo('C:\Data\churchland\temp9',A1m,framerate);
-generateVideo('C:\Data\churchland\temp10',B1m,framerate);
+
 
 

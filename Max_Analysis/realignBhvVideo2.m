@@ -67,7 +67,7 @@ for iTrials = 1 : length(goodtrials) %get number of trials in full session
         rejCnt1 = rejCnt1 + 1;
     end
     newV1 = newV1(:,:,1:segFrames1(end)); %experimental code
-    newFrames(:,:,:,iTrials) = newV1;
+    newFrames(:,:,:,iTrials) = newV1; %this needs to be memory mapped for speed
     %stim2spout(iTrials) = cIdx1(4) - cIdx1(2);
     %delay2spout(iTrials) = cIdx1(4) - cIdx1(2);
 end
