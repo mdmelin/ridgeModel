@@ -1,4 +1,4 @@
-function ridgeModel_saveResults(cPath,animal,rec, filename, Vm, zeromeanVc, U, R, betas, lambdas, cMap, cMovie, regIdx, regLabels, rejIdx, regZeroFrames)
+function ridgeModel_saveResults(cPath,animal,rec, filename, Vm, zeromeanVc, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames)
 TASK = 'SpatialDisc';
 
 if ~strcmpi(filename(end-3:end),'.mat')
