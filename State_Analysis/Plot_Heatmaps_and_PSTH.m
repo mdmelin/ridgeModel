@@ -14,12 +14,12 @@ cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'}; glmFile = '
 
 method = 'cutoff';
 mintrialnum = 20; %the minimum number of trials per state to be included in plotting
-dualcase = true;
+dualcase = 'reward';
 fsize = 29;
 sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
 %clims = {[-.01 .01],[-.005 .005]};
-%clims = {[-.01 .01],[-.01 .01]}; %for df/f
-clims = {[-.0001 .0001],[-.00001 .00001]}; %for variance
+clims = {[-.01 .01],[-.01 .01]}; %for df/f
+%clims = {[-.0001 .0001],[-.00001 .00001]}; %for variance
 %% Plot avg activity map
 inds = {NaN,NaN};
 for i = 1:length(animals) %try a few different sessions
@@ -32,8 +32,8 @@ for i = 1:length(animals) %try a few different sessions
         if length(a) < mintrialnum %skip if too few trials
             out{i,j,:,:} = [];
         else
-            %out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
-            out{i,j,:,:} = plotVarianceMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
+            out{i,j,:,:} = plotActivationMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
+            %out{i,j,:,:} = plotVarianceMap(cPath,animals{i},Rec,{a,b},[animals{i} ' ' Rec ': ' nt ' trials per state'],{'Attentive trials','Bias trials'},clims,fsize,false);
         end
     end
 end
