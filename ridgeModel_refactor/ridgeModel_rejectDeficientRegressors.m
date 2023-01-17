@@ -1,13 +1,7 @@
-function [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectRegressors(fullR,regLabels,regIdx,regZeroFrames)
-
-MIN_ENTRIES = 10;
+function [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(fullR,regLabels,regIdx,regZeroFrames)
 
 rejIdx = false(1,size(fullR,2));
 
-%reject empty regressors
-rejIdx = nansum(abs(fullR)) < MIN_ENTRIES; %for analog regressors with less than min entries
-fprintf(1, 'Rejected %d of %d total regressors for emptiness (less than %d entries).\n', sum(rejIdx),length(rejIdx), MIN_ENTRIES);
-regIdx2 = regIdx(~rejIdx);
 
 %reject rank deficient regressors
 [~, fullQRR] = qr(bsxfun(@rdivide,fullR(:,~rejIdx),sqrt(sum(fullR(:,~rejIdx).^2))),0); %orthogonalize design matrix
@@ -15,7 +9,7 @@ regIdx2 = regIdx(~rejIdx);
 if sum(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))) < size(fullR(:,~rejIdx),2) %check if design matrix is full rank
     temp = ~(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))); %reject regressors that cause rank-defficint matrix
     rejIdx(~rejIdx) = temp;
-    deficientLabels = unique(regLabels(regIdx2(temp)));
+    deficientLabels = unique(regLabels(regIdx(temp)));
     fprintf('WARNING: %s is at least partially rank deficient. \n', deficientLabels{:});
     fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 else
@@ -25,7 +19,7 @@ end
 
 
 fullR(:,rejIdx) = []; %clear empty and rank deficient regressors
-regIdx = regIdx2(~temp); %clear empty and rank deficient regressors
+regIdx = regIdx(~rejIdx); %clear empty and rank deficient regressors
 
 regLabelsOld = regLabels;
 regLabels = regLabels(unique(regIdx));
@@ -40,9 +34,9 @@ regIdx = temp;
 %print out the regressors that were fully discarded
 discardLabels = regLabelsOld(~ismember(regLabelsOld,regLabels));
 if length(discardLabels) > 0
-    fprintf('Fully discarded regressor: %s \n', discardLabels{:});
+    fprintf('Fully discarded regressor: %s due to rank deficiency \n', discardLabels{:});
 else
-    fprintf('\nNo regressors were FULLY discarded\n');
+    fprintf('\nNo regressors were FULLY discarded due to rank deficiency\n');
 end
 regZeroFrames = regZeroFrames(~rejIdx);
 R = fullR;
