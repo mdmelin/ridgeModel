@@ -14,7 +14,7 @@ if sum(abs(diag(fullQRR)) > max(size(fullR(:,~rejIdx))) * eps(fullQRR(1))) < siz
     fprintf(1, 'Rejected %d of %d total regressors for rank deficiency.\n', sum(temp),length(rejIdx));
 else
     fprintf('No regressors were rank deficient!\n');
-    temp = zeros(1,length(regIdx2));
+    temp = zeros(1,length(regIdx));
 end
 
 

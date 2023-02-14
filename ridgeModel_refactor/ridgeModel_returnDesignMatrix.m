@@ -1,4 +1,4 @@
-function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmFile,desiredstate,dType,randomizeStates)
+function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmPath,desiredstate,dType,randomizeStates)
 %By Max Melin. Trains the ridge regression model described in Musall 2019
 %on that same dataset. In this code, no state regressors are added. Rather,
 %trials are split up by state (predicted by the Ashwood GLM-HMM) and used to
@@ -26,7 +26,6 @@ elseif strcmpi(dType,'Widefield')
 end
 
 Paradigm = 'SpatialDisc';
-glmPath = [cPath Animal filesep 'glm_hmm_models'];
 cPath = [cPath Animal filesep Paradigm filesep Rec filesep]; %Widefield data path
 sPath = ['\\grid-hs\churchland_nlsas_data\data\BpodImager\Animals\' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
 % sPath = ['/sonas-hs/churchland/hpc/home/space_managed_data/BpodImager/Animals/' Animal filesep Paradigm filesep Rec filesep]; %server data path. not used on hpc.
@@ -67,16 +66,20 @@ dims = 200; %number of dims in Vc that are used in the model
 %% load data
 bhvFile = dir([cPath filesep Animal '_' Paradigm '*.mat']);
 load([cPath bhvFile(1).name],'SessionData'); %load behavior data
-load([glmPath filesep glmFile],'glmhmm_params','choices','posterior_probs','model_training_sessions','state_label_indices'); %load latent states and model info
+load(glmPath,'mouse','masks','glmhmm_params','posterior_probs','model_training_sessions','state_label_indices'); %load latent states and model info
 SessionData.TrialStartTime = SessionData.TrialStartTime * 86400; %convert trailstart timestamps to seconds
 nochoice = isnan(SessionData.ResponseSide); %trials without choice. used for interpolation of latent state on NaN choice trials (GLMHMM doesn't predict for these trials)
 
 model_training_sessions = cellstr(model_training_sessions); %convert to cell
-sessionidx = find(strcmp(Rec,model_training_sessions)); %find the index of the session we want to pull latent states for
+mouse = cellstr(mouse);
+sessionidx = find(strcmp(Rec,model_training_sessions) & strcmp(Animal,mouse)); %find the index of the session we want to pull latent states for
 postprob_nonan = posterior_probs{sessionidx}; %get latent states for desired session
+mask = masks{sessionidx};
 counterind = 1;
-for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice.
-    if ~nochoice(i) %if a choice was made
+%this should probably be moved to the python side
+postprob_withnan = NaN(1,3);
+for i = 1:length(mask) %this for loop adds nan's to the latent state array. The nans will ultimatel get discarded later since the encoding model doesn't use trials without choice.
+    if mask(i) == 1 %if not masked
         postprob_withnan(i,:) = postprob_nonan(counterind,:); %just put the probabilities into the new array
         counterind = counterind + 1;
     else %if no choice was made
@@ -84,13 +87,13 @@ for i = 1:length(nochoice) %this for loop adds nan's to the latent state array. 
     end
 end
 postprobs = postprob_withnan;
-postprobs = postprobs(:,str2num(state_label_indices)); %permute the states to the correct indices
+postprobs = postprobs(:,state_label_indices); %permute the states to the correct indices
 clear postprob_withnan postprob_nonan;
 if randomizeStates
     postprobs = postprobs(randperm(size(postprobs,1)),:);
 end
 glmweights = squeeze(glmhmm_params.observations.Wk);
-glmweights = glmweights(str2num(state_label_indices),:);
+glmweights = glmweights(state_label_indices,:);
 fprintf('\nGLM weights:\n');
 disp(glmweights);
 
@@ -149,9 +152,14 @@ attentiveind = inds == 1; %get attentive trials
 biasind = inds ~= 1;
 
 %equalize L/R choices
+% useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
+% choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
+% choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', [], inf, []); %equalize attentive and inattentive state
+
+%equalize state and reward
 useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
-choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
-choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', [], inf, []); %equalize attentive and inattentive state
+choiceIdx = rateDisc_equalizeTrials(useIdx, attentiveind', bhv.Rewarded, inf, true);
+
 
 if desiredstate == "attentive"
     choiceIdx = choiceIdx & attentiveind';
@@ -169,7 +177,7 @@ bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that
 trialCnt = length(bTrials);
 [~,trialstates] = max(postprobs,[],2);
 
-mintrials = 30;
+mintrials = 32;
 if trialCnt < mintrials
     fprintf('\there are less than %i trials, aborting for this session.\n',mintrials);
     regIdx=[];
