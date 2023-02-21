@@ -85,6 +85,9 @@ end
 % This is needed to estimate lambdas, but if recenter = 0, the mean will be
 % restored later for the beta estimation
 
+%YStd = std(Y, 0, 1); %%%%%%%%%%%%%%%%
+%Y = bsxfun(@rdivide, Y, YStd); %%%%%%%%%%%
+
 if computeL || recenter
   YMean = mean(Y, 1);
   Y = bsxfun(@minus, Y, YMean);

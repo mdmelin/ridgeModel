@@ -4,15 +4,17 @@ addpath('C:\Data\churchland\ridgeModel\Max_Analysis')
 addpath('C:\Data\churchland\ridgeModel\widefield')
 
 cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'};
+%cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP32','CSP38'};
 
-%glmFile = 'allaudio_detection.mat';
-glmPath = 'X:\Widefield\glm_hmm_models\global_model_map.mat';
-%sessiondates = getGLMHMMSessions(cPath,animals,); %get sessions with GLM-HMM data
-sessiondates = getGlobalGLMHMMSessions(glmPath); %get sessions with GLM-HMM data
+glmFile = 'allaudio_detection.mat';
+%glmPath = 'X:\Widefield\glm_hmm_models\global_model_map.mat';
+%glmPath = 'X:\Widefield\glm_hmm_models\global_model_map_csp.mat';
+sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
+%sessiondates = getGlobalGLMHMMSessions(glmPath); %get sessions with GLM-HMM data
 
 %% Retrain models over different states
 diary on
-%runRidge_overStates(cPath,'mSM64','02-Jul-2018',glmPath);
+%runRidge_overStates(cPath,'CSP22','23-Jun-2020',glmPath);
 
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
@@ -23,25 +25,25 @@ end
 diary off
 
 %% Now plot those results
-
+fileprefix = '';
 counter = 1;
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
-        fulla(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'fullA.mat');
-        sponta(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'spontA.mat');
-        opa(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'operantA.mat');
-        taskvara(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'taskA.mat');
-        nosponta(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'nospontA.mat');
-        noopa(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'nooperantA.mat');
-        notaskvara(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'notaskA.mat');
+        fulla(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'fullA.mat']);
+        sponta(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'spontA.mat']);
+        opa(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'operantA.mat']);
+        taskvara(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'taskA.mat']);
+        nosponta(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nospontA.mat']);
+        noopa(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nooperantA.mat']);
+        notaskvara(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'notaskA.mat']);
 
-        fullb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'fullB.mat');
-        spontb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'spontB.mat');
-        opb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'operantB.mat');
-        taskvarb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'taskB.mat');
-        nospontb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'nospontB.mat');
-        noopb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'nooperantB.mat');
-        notaskvarb(counter,:) = returnVarianceMovie(animals{i},sessiondates{i}{j},'notaskB.mat');
+        fullb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'fullB.mat']);
+        spontb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'spontB.mat']);
+        opb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'operantB.mat']);
+        taskvarb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'taskB.mat']);
+        nospontb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nospontB.mat']);
+        noopb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nooperantB.mat']);
+        notaskvarb(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'notaskB.mat']);
 
         counter = counter + 1;
         fprintf('\ncounter is %i\n',counter);
@@ -61,6 +63,8 @@ time = time-time(30);
 
 figure; hold on;
 title('Full Model')
+%plot(fulla,'r')
+%plot(fullb,'b')
 stdshade(fulla,.2,'red',time,6,[30],[]);
 stdshade(fullb,.2,'blue',time,6,[30],[]);
 ylabel('cvR^2');
@@ -166,7 +170,7 @@ dopb = fullb-noopb;
 
 time = linspace(0,5,size(fulla,2));
 time = time-time(30);
-
+%%
 figure; hold on;
 title('Full Model')
 stdshade(fulla,.2,'red',time,6,[30],[]);

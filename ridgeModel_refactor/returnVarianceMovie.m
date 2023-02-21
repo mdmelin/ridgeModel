@@ -1,5 +1,6 @@
-function out = returnVarianceMovie(mouse,rec,modelfile)
-datapath = ['X:\Widefield' filesep mouse filesep 'SpatialDisc' filesep rec filesep];load('C:\Data\churchland\ridgeModel\widefield\allenDorsalMapSM.mat','dorsalMaps'); %Get allen atlas
+function out = returnVarianceMovie(cpath,mouse,rec,modelfile)
+datapath = [cpath filesep mouse filesep 'SpatialDisc' filesep rec filesep];
+load('C:\Data\churchland\ridgeModel\widefield\allenDorsalMapSM.mat','dorsalMaps'); %Get allen atlas
 try
     load([datapath modelfile]);
 catch
