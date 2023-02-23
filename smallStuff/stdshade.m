@@ -40,7 +40,7 @@ else
         F = 1 : length(amean);
     else
         amean=smooth(nanmean(amatrix,1),smth)';
-        astd=nanstd(amatrix)/sqrt(size(amatrix,1)); % to get sem shading
+        astd=nanstd(amatrix)/sqrt(sum(~isnan(amatrix(:,1)))); % to get sem shading
         astd(isnan(astd)) = 0;
     end
     %     astd=nanstd(amatrix); % to get std shading
