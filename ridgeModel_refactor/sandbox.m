@@ -3,14 +3,14 @@ clc;clear all;close all;
 addpath('C:\Data\churchland\ridgeModel\Max_Analysis')
 addpath('C:\Data\churchland\ridgeModel\widefield')
 
-cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'};
-%cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP32','CSP38'};
+%cPath = 'X:\Widefield'; animals = {'mSM63','mSM64','mSM65','mSM66'};
+cPath = 'Y:\Widefield'; animals = {'CSP22','CSP23','CSP32','CSP38'};
 
-glmFile = 'allaudio_detection.mat';
+%glmFile = 'allaudio_detection.mat';
 %glmPath = 'X:\Widefield\glm_hmm_models\global_model_map.mat';
-%glmPath = 'X:\Widefield\glm_hmm_models\global_model_map_csp.mat';
-sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
-%sessiondates = getGlobalGLMHMMSessions(glmPath); %get sessions with GLM-HMM data
+glmPath = 'X:\Widefield\glm_hmm_models\global_model_map_csp.mat';
+%sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-HMM data
+sessiondates = getGlobalGLMHMMSessions(glmPath); %get sessions with GLM-HMM data
 
 %% Retrain models over different states
 diary on
@@ -80,7 +80,7 @@ xlabel('Time from handle grab (s)')
 legend({'','','Engaged','','','Disengaged','','','',''})
 
 figure; hold on;
-title('Operant Motor Variables')
+title('Instructed Motor Variables')
 stdshade(opa,.2,'red',time,6,[30],[]);
 stdshade(opb,.2,'blue',time,6,[30],[]);
 ylabel('cvR^2');
@@ -88,7 +88,7 @@ xlabel('Time from handle grab (s)')
 legend({'','','Engaged','','','Disengaged','','','',''})
 
 figure; hold on;
-title('Spontaneous Motor Variables')
+title('Uninstructed Motor Variables')
 stdshade(sponta,.2,'red',time,6,[30],[]);
 stdshade(spontb,.2,'blue',time,6,[30],[]);
 ylabel('cvR^2');
@@ -106,7 +106,7 @@ xlabel('Time from handle grab (s)')
 legend({'','','Engaged','','','Disengaged','','','',''})
 
 figure; hold on;
-title('Operant Motor Variables')
+title('Instructed Motor Variables')
 stdshade(dopa,.2,'red',time,6,[30],[]);
 stdshade(dopb,.2,'blue',time,6,[30],[]);
 ylabel('deltaR^2');
@@ -114,7 +114,7 @@ xlabel('Time from handle grab (s)')
 legend({'','','Engaged','','','Disengaged','','','',''})
 
 figure; hold on;
-title('Spontaneous Motor Variables')
+title('Uninstructed Motor Variables')
 stdshade(dsponta,.2,'red',time,6,[30],[]);
 stdshade(dspontb,.2,'blue',time,6,[30],[]);
 ylabel('deltaR^2');
