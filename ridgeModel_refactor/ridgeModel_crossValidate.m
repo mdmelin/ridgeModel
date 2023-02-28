@@ -41,7 +41,7 @@ covP = sum((U * cCovV) .* U, 2)';  % 1 x P
 varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
 varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
 stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-cMap = gather((covP ./ stdPxPy)');
+cMap = gather((covP ./ stdPxPy)') .^ 2;
 
 % movie for predicted variance
 cMovie = zeros(size(U,1),frames, 'single');
@@ -56,7 +56,7 @@ for iFrames = 1:frames
     varP1 = sum((U * covVc) .* U, 2)';  % 1 x P
     varP2 = sum((U * covVm) .* U, 2)';  % 1 x P
     stdPxPy = varP1 .^ 0.5 .* varP2 .^ 0.5; % 1 x P
-    cMovie(:,iFrames) = gather(covP ./ stdPxPy)';
+    cMovie(:,iFrames) = gather(covP ./ stdPxPy)' .^ 2;
     clear cData cModel
 end
 
