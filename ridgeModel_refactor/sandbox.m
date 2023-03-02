@@ -17,14 +17,14 @@ sessiondates = getGlobalGLMHMMSessions(glmPath); %get sessions with GLM-HMM data
 %runRidge_overStates(cPath,'CSP22','23-Jun-2020',glmPath);
 
 for i = 1:length(animals)
-    for j = 1:length(sessiondates{i})
+    parfor j = 1:length(sessiondates{i})
         fprintf('\nRunning for %s, %s.\n\n',animals{i},sessiondates{i}{j});
         runRidge_overStates(cPath,animals{i},sessiondates{i}{j},glmPath);
     end
 end
 
 
-%% Now plot those results
+%% get the data
 fileprefix = '';
 counter = 1;
 for i = 1:length(animals)

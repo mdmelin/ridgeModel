@@ -9,8 +9,8 @@ NFOLDS = 10;
 fileprefix = '';
 
 %get the design matrices
-[regLabelsAll,regIdxAll,RA,regZeroFramesAll,zeromeanVcA,U] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmPath,'attentive',[],false);
-[~,~,RB,~,zeromeanVcB,~] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmPath,'biased',[],false);
+[regLabelsAll,regIdxAll,RA,regZeroFramesAll,zeromeanVcA,U,usedTrialsA] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmPath,'attentive',[],false);
+[~,~,RB,~,zeromeanVcB,~,usedTrialsB] = ridgeModel_returnDesignMatrix(cPath,animal,rec,glmPath,'biased',[],false);
 
 if isempty(RA) || isempty(RB) %skip sessions with too few trials
     return
@@ -30,13 +30,13 @@ spontmotorlabels = regLabelsAll(sort(find(ismember(regLabelsAll,spontmotorlabels
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(RA,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'fullA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'fullA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 %run disengaged trials with regressor rejection
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(RB,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'fullB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'fullB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %run single variable for piezo
 shuffleLabels = regLabelsAll(~ismember(regLabelsAll, {'piezoAnalog','piezoDigital','piezoMoveAnalog','piezoMoveDigital','piezoMoveHiDigital'}));
@@ -45,13 +45,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'piezoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'piezoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'piezoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'piezoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for piezo
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'piezoAnalog','piezoDigital','piezoMoveAnalog','piezoMoveDigital','piezoMoveHiDigital'}));
@@ -60,13 +60,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopiezoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopiezoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopiezoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopiezoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %run single variable for whisk
 shuffleLabels = regLabelsAll(~ismember(regLabelsAll, {'whiskAnalog','whiskDigital','whiskHiDigital'}));
@@ -75,13 +75,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'whiskA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'whiskA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'whiskB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'whiskB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for whisk
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'whiskAnalog','whiskDigital','whiskHiDigital'}));
@@ -90,13 +90,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nowhiskA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nowhiskA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nowhiskB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nowhiskB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 
 %run single variable for nose
@@ -106,13 +106,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'noseA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'noseA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'noseB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'noseB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for nose
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'noseAnalog','noseDigital','noseHiDigital'}));
@@ -121,13 +121,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nonoseA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nonoseA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nonoseB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nonoseB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 
 %run single variable for pupil
@@ -137,13 +137,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'pupilA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'pupilA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'pupilB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'pupilB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for pupil
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'fastPupilAnalog','fastPupilDigital','fastPupilHiDigital','slowPupil'}));
@@ -152,13 +152,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopupilA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopupilA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopupilB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nopupilB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 
 
@@ -169,13 +169,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'faceA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'faceA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'faceB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'faceB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for face
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'faceAnalog','faceDigital','faceHiDigital'}));
@@ -184,13 +184,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nofaceA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nofaceA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nofaceB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nofaceB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 
 
@@ -201,13 +201,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'bodyA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'bodyA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'bodyB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'bodyB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for body
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'bodyAnalog','bodyDigital','bodyHiDigital'}));
@@ -216,13 +216,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nobodyA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nobodyA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nobodyB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'nobodyB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 
 %run single variable for video
@@ -232,13 +232,13 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'videoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'videoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'videoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'videoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 %deltaR2 for video
 shuffleLabels = regLabelsAll(ismember(regLabelsAll, {'Move','bhvVideo'}));
@@ -247,12 +247,12 @@ R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RA,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcA,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'novideoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'novideoA'], Vm, zeromeanVcA, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsA);
 
 R = shuffleDesignMatrix(regLabelsAll,regIdxAll,RB,shuffleLabels);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectEmptyRegressors(R,regLabelsAll,regIdxAll,regZeroFramesAll);
 [R, regLabels, regIdx, regZeroFrames, rejIdx] = ridgeModel_rejectDeficientRegressors(R,regLabels,regIdx,regZeroFrames);
 [Vm, betas, lambdas, cMap, cMovie] = ridgeModel_crossValidate(R,U,zeromeanVcB,75,NFOLDS);
-ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'novideoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames);
+ridgeModel_saveResults(cPath,animal,rec, [fileprefix 'novideoB'], Vm, zeromeanVcB, U, R, betas, lambdas, cMap, cMovie, regLabels, regIdx, rejIdx, regZeroFrames, usedTrialsB);
 
 end
