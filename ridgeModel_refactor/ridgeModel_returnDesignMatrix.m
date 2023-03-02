@@ -127,27 +127,41 @@ trials(ind) = [];
 bTrials(ind) = [];
 Vc(:,:,ind) = [];
 
-
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 postprobs = postprobs(bTrials,:); %trim to sessions with good imaging
-[~,inds] = max(postprobs,[],2);
-attentiveind = inds == 1; %get attentive trials
-biasind = inds ~= 1;
 
-%equalize L/R choices
+ 
+% %%%%%%%%%%%%%%%%% this just gets the state with the highest probability
+% [~,inds] = max(postprobs,[],2);
+% attentiveind = (inds == 1)'; %get attentive trials
+% biasind = (inds ~= 1)';
 % useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
-% choiceIdx = rateDisc_equalizeTrials(useIdx, bhv.ResponseSide == 1, bhv.Rewarded, inf, true); %equalize correct L/R choices
-% choiceIdx = rateDisc_equalizeTrials(choiceIdx, attentiveind', [], inf, []); %equalize attentive and inattentive state
+% %%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%% this gets states greater than .8
+binary = postprobs > .8; %get indices with P(state) > .8
+for i = 1:size(binary,1)
+    temp = binary(i,:) == 1;
+    if sum(temp) == 0
+        state1hot(i) = 0; % if no states are P > .8, set to 0 to indicate no state
+    else
+        state1hot(i) = find(temp);
+    end
+end
+attentiveind = state1hot == 1';
+biasind = state1hot == 2 | state1hot == 3';
+useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
+useIdx = useIdx & (attentiveind | biasind); %and only use trials where P of ANY state was > .8
+%%%%%%%%%%%%%%%%%%%
 
 %equalize state and reward
-useIdx = ~isnan(bhv.ResponseSide); %only use performed trials
-choiceIdx = rateDisc_equalizeTrials(useIdx, attentiveind', bhv.Rewarded, inf, true);
+choiceIdx = rateDisc_equalizeTrials(useIdx, attentiveind, bhv.Rewarded, inf, true);
 
 
 if desiredstate == "attentive"
-    choiceIdx = choiceIdx & attentiveind';
+    choiceIdx = choiceIdx & attentiveind;
 elseif desiredstate == "biased"
-    choiceIdx = choiceIdx & biasind';
+    choiceIdx = choiceIdx & biasind;
 else
     error('Pick the desired state');
 end
