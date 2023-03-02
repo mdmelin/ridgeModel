@@ -112,39 +112,24 @@ disp(glmweights);
 % legend('Attentive','Lbias','Rbias');
 % drawnow;
 
-if strcmpi(dType,'Widefield')
-    if exist([cPath vcFile],'file') ~= 2 %check if data file exists and get from server otherwise
-        copyfile([sPath vcFile],[cPath vcFile]);
-        copyfile([sPath 'mask.mat'],[cPath 'mask.mat']);
-        bhvFile = dir([sPath filesep Animal '_' Paradigm '*.mat']);
-        copyfile([sPath bhvFile.name],[cPath bhvFile.name]);
-    end
-    load([cPath vcFile], 'Vc', 'U', 'trials', 'bTrials')
-    Vc = Vc(1:dims,:,:);
-    U = U(:,:,1:dims);
 
-    % ensure there are not too many trials in Vc
-    ind = trials > SessionData.nTrials;
-    trials(ind) = [];
-    bTrials(ind) = [];
-    Vc(:,:,ind) = [];
-
-elseif strcmpi(dType,'twoP')
-
-    load([cPath 'data'], 'data'); %load 2p data
-    % ensure there are not too many trials in the dataset
-    bTrials = data.trialNumbers;
-    trials = bTrials;
-    bTrials(~ismember(data.trialNumbers,data.bhvTrials)) = []; %don't use trials that have problems with trial onset times
-    bTrials(SessionData.DidNotChoose(bTrials) | SessionData.DidNotLever(bTrials) | ~SessionData.Assisted(bTrials)) = []; %don't use unperformed/assisted trials
-
-    data.dFOF(:,:,~ismember(data.trialNumbers,bTrials)) = [];
-    data.DS(:,:,~ismember(data.trialNumbers,bTrials)) = [];
-    data.analog(:,:,~ismember(data.trialNumbers,bTrials)) = [];
-
-    Vc = data.dFOF; %Vc is now neurons x frames x trials
-    dims = size(data.dFOF,1); %dims is now # of neurons instead
+if exist([cPath vcFile],'file') ~= 2 %check if data file exists and get from server otherwise
+    copyfile([sPath vcFile],[cPath vcFile]);
+    copyfile([sPath 'mask.mat'],[cPath 'mask.mat']);
+    bhvFile = dir([sPath filesep Animal '_' Paradigm '*.mat']);
+    copyfile([sPath bhvFile.name],[cPath bhvFile.name]);
 end
+load([cPath vcFile], 'Vc', 'U', 'trials', 'bTrials')
+Vc = Vc(1:dims,:,:);
+U = U(:,:,1:dims);
+
+% ensure there are not too many trials in Vc
+ind = trials > SessionData.nTrials;
+trials(ind) = [];
+bTrials(ind) = [];
+Vc(:,:,ind) = [];
+
+
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 postprobs = postprobs(bTrials,:); %trim to sessions with good imaging
 [~,inds] = max(postprobs,[],2);
