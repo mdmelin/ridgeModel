@@ -1,4 +1,4 @@
-function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmPath,desiredstate,dType,randomizeStates)
+function [regLabels,regIdx,fullR,regZeroFrames,zeromeanVc,U,usedTrials] = ridgeModel_returnDesignMatrix(cPath,Animal,Rec,glmPath,desiredstate,dType,randomizeStates)
 %By Max Melin. Trains the ridge regression model described in Musall 2019
 %on that same dataset. In this code, no state regressors are added. Rather,
 %trials are split up by state (predicted by the Ashwood GLM-HMM) and used to
@@ -59,8 +59,6 @@ maxStimShift = 1 * sRate; % maximal stimulus onset after handle grab. (default i
 bhvDimCnt = 200;    % number of dimensions from behavioral videos that are used as regressors.
 gaussShift = 1;     % inter-frame interval between regressors. Will use only every 'gaussShift' regressor and convolve with gaussian of according FHWM to reduce total number of used regressors.
 dims = 200; %number of dims in Vc that are used in the model
-
-
 
 
 %% load data
@@ -157,10 +155,9 @@ end
 trials = trials(choiceIdx);
 bTrials = bTrials(choiceIdx);
 Vc = Vc(:,:,choiceIdx);
-postprobs = postprobs(choiceIdx,:);
 bhv = selectBehaviorTrials(SessionData,bTrials); %only use completed trials that are in the Vc dataset
 trialCnt = length(bTrials);
-[~,trialstates] = max(postprobs,[],2);
+usedTrials = bTrials;
 
 mintrials = 32;
 if trialCnt < mintrials
@@ -1020,9 +1017,9 @@ fullR(trialIdx,:) = []; %clear bad trials
 Vc(:,trialIdx) = []; %clear bad trials
 zeromeanVc = bsxfun(@minus, Vc, mean(Vc,2)); %should be zero-mean
 
-regLabels;
-fullR;
-
+trialIdx = trialIdx(1:75:end);
+usedTrials = usedTrials(~trialIdx);
+assert(length(usedTrials) == size(fullR,1) / frames, 'there is a mismatch between usedTrials and the length of the design matrix')
 
 end
 
