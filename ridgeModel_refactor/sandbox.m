@@ -29,6 +29,12 @@ fileprefix = '';
 counter = 1;
 for i = 1:length(animals)
     for j = 1:length(sessiondates{i})
+
+        if sum(ismember(mouse,'mSM')) == 3 %mSM Mice
+            segIdx = [1 0.5 1.00 0.75 .75] %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for EMX mice
+        elseif sum(ismember(mouse,'CSP')) == 3 %CSP Mice
+            segIdx = [1 0.5 1.00 0.4 .75] %testing
+        end
         fulla(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'fullA.mat']);
         sponta(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'spontA.mat']);
         opa(counter,:) = returnVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'operantA.mat']);
@@ -122,3 +128,44 @@ xlabel('Time from handle grab (s)')
 legend({'','','Engaged','','','Disengaged','','','',''})
 
 %exportgraphics(gcf,'C:\Data\churchland\PowerpointsPostersPresentations\SFN2022/FridayUpdate\encodingmodel\fullcvr.pdf');
+
+%% get the data - but now with better alignment
+fileprefix = '';
+NFRAMES = 75;
+counter = 1;
+for i = 1:length(animals)
+    for j = 1:length(sessiondates{i})
+        
+        if sum(ismember(animals{i},'mSM')) == 3 %mSM Mice
+            segIdx = [1 0.5 1.00 0.75 .75] %[baseline, handle, stim, delay, response] maximal duration of each segment in seconds, use this for EMX mice
+        elseif sum(ismember(animals{i},'CSP')) == 3 %CSP Mice
+            segIdx = [1 0.5 1.00 0.4 .75] %testing
+        end
+
+        fulla(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'fullA.mat'], segIdx, NFRAMES);
+        sponta(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'spontA.mat'], segIdx, NFRAMES);
+        opa(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'operantA.mat'], segIdx, NFRAMES);
+        taskvara(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'taskA.mat'], segIdx, NFRAMES);
+        nosponta(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nospontA.mat'], segIdx, NFRAMES);
+        noopa(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nooperantA.mat'], segIdx, NFRAMES);
+        notaskvara(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'notaskA.mat'], segIdx, NFRAMES);
+
+        fullb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'fullB.mat'], segIdx, NFRAMES);
+        spontb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'spontB.mat'], segIdx, NFRAMES);
+        opb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'operantB.mat'], segIdx, NFRAMES);
+        taskvarb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'taskB.mat'], segIdx, NFRAMES);
+        nospontb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nospontB.mat'], segIdx, NFRAMES);
+        noopb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'nooperantB.mat'], segIdx, NFRAMES);
+        notaskvarb(counter,:) = returnRealignedVarianceMovie(cPath, animals{i},sessiondates{i}{j}, [fileprefix 'notaskB.mat'], segIdx, NFRAMES);
+
+        counter = counter + 1;
+        fprintf('\ncounter is %i\n',counter);
+    end
+end
+
+dsponta = fulla-nosponta;
+dspontb = fullb-nospontb;
+dtaska = fulla-notaskvara;
+dtaskb = fullb-notaskvarb;
+dopa = fulla-noopa;
+dopb = fullb-noopb;

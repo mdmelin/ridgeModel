@@ -79,11 +79,12 @@ dpupilb = fullb - nopupilb;
 dfaceb = fullb - nofaceb;
 dbodyb = fullb - nobodyb;
 dvideob = fullb - novideob;
-%%
+
+%% plot the data
 Adata = {fulla, piezoa, whiska, nosea, pupila, facea, bodya, videoa, dpiezoa, dwhiska, dnosea, dpupila, dfacea, dbodya, dvideoa};
 Bdata = {fullb, piezob, whiskb, noseb, pupilb, faceb, bodyb, videob, dpiezob, dwhiskb, dnoseb, dpupilb, dfaceb, dbodyb, dvideob};
 titles = {'full model cvR2','piezo cvR2','whisk cvR2','nose cvR2','pupil cvR2','face cvR2','body cvR2','video cvR2','deltaR2 piezo','deltaR2 whisk','deltaR2 nose','deltaR2 pupil','deltaR2 face','deltaR2 body','deltaR2 video'};
-%% plot the data
+
 time = linspace(0,5,size(Adata{1},2));
 time = time-time(30);
 
