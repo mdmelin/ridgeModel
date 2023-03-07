@@ -39,7 +39,7 @@ alignedVm = reshape(alignedVm,200,[]);
 
 % movie for predicted variance - after realignment
 alignedVariance = computeFramewiseVariance(alignedVc, alignedVm, U, alingnednframes);
-alignedVariance = mean(alignedVariance,1);
+alignedVariance = nanmean(alignedVariance,1);
 
 %% inner function
     function alignedVc = innerAlignFunc(Vc)
@@ -69,7 +69,7 @@ alignedVariance = mean(alignedVariance,1);
         maxDiff = min([segFrames(3) + (diff(cIdx(3:4))) segFrames(5)]) - segFrames(3); %maximal possible delay duration
 
         if cIdx(4) > cIdx(5) %if response occurs after truncation of imaging data
-
+            alignedVc(:, segFrames(3) + 1 : segFrames(3) + (cIdx(5) - cIdx(3)), iTrials) = Vc(:, cIdx(3) + 1 : cIdx(5), iTrials);
         else
             alignedVc(:, segFrames(3) + 1 : segFrames(3) + maxDiff, iTrials) = Vc(:, cIdx(3) + 1 : cIdx(3) + maxDiff, iTrials); %delay period
         end

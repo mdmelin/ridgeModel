@@ -169,3 +169,70 @@ dtaska = fulla-notaskvara;
 dtaskb = fullb-notaskvarb;
 dopa = fulla-noopa;
 dopb = fullb-noopb;
+
+%% plotting
+time = 1:size(fulla,2);
+naninds = cumsum(floor(segIdx * 15));
+naninds = naninds(1:end-1);
+
+
+figure; hold on;
+title('Full Model')
+%plot(fulla,'r')
+%plot(fullb,'b')
+stdshade(fulla,.2,'red',time,6,naninds,[]);
+stdshade(fullb,.2,'blue',time,6,naninds,[]);
+ylabel('cvR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+figure; hold on;
+title('Task Variables')
+stdshade(taskvara,.2,'red',time,6,naninds,[]);
+stdshade(taskvarb,.2,'blue',time,6,naninds,[]);
+ylabel('cvR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+figure; hold on;
+title('Instructed Motor Variables')
+stdshade(opa,.2,'red',time,6,naninds,[]);
+stdshade(opb,.2,'blue',time,6,naninds,[]);
+ylabel('cvR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+figure; hold on;
+title('Uninstructed Motor Variables')
+stdshade(sponta,.2,'red',time,6,naninds,[]);
+stdshade(spontb,.2,'blue',time,6,naninds,[]);
+ylabel('cvR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+
+
+figure; hold on;
+title('Task Variables')
+stdshade(dtaska,.2,'red',time,6,naninds,[]);
+stdshade(dtaskb,.2,'blue',time,6,naninds,[]);
+ylabel('deltaR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+figure; hold on;
+title('Instructed Motor Variables')
+stdshade(dopa,.2,'red',time,6,naninds,[]);
+stdshade(dopb,.2,'blue',time,6,naninds,[]);
+ylabel('deltaR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
+figure; hold on;
+title('Uninstructed Motor Variables')
+stdshade(dsponta,.2,'red',time,6,naninds,[]);
+stdshade(dspontb,.2,'blue',time,6,naninds,[]);
+ylabel('deltaR^2');
+xlabel('Time from handle grab (s)')
+legend({'','','Engaged','','','Disengaged','','','',''})
+
