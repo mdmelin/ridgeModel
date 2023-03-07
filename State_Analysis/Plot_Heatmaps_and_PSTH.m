@@ -20,14 +20,13 @@ sessiondates = getGLMHMMSessions(cPath,animals,glmFile); %get sessions with GLM-
 %clims = {[-.01 .01],[-.005 .005]};
 clims = {[-.01 .01],[-.01 .01]}; %for df/f
 %clims = {[-.0001 .0001],[-.00001 .00001]}; %for variance
-%% Plot avg activity map
+%% Plot avg activity map - individual sessions
 inds = {NaN,NaN};
 for i = 1:length(animals) %try a few different sessions
     for j = 1:length(sessiondates{i})
         Rec = sessiondates{i}{j};
         fprintf('\nrunning %s on %s\n',animals{i},Rec);
-        [~,a,b] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase);
-        [inds, attendinds,biasinds,Y, postprobs_sorted] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase); %deleteme
+        [~, a, b, ~, ~, SessionData] = getStateInds(cPath,animals{i},Rec,method,glmFile,dualcase);
         nt = num2str(length(a));
         if length(a) < mintrialnum %skip if too few trials
             out{i,j,:,:} = [];
