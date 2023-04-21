@@ -59,31 +59,49 @@ end
 
 figureTitles = {'handles','licks','piezo','whisk','nose','pupil','face','body','video and videoME'};
 
-
+animalindex = [];
+for i = 1:length(animals)
+    animalindex = [animalindex; repmat(i, length(sessiondates{i}),1)];
+end
 
 onevec = ones(size(taskDependentVarianceA(:,1),1),1);
 twovec = onevec.*2;
+threevec = onevec.*3;
+fourvec = onevec.*4;
 
 for i = 1:size(taskDependentVarianceA,2)
-    figure; hold on;
+    figure('Position',[500 500 900 400]); hold on;
     title(figureTitles{i})
-    scatter(onevec,taskDependentVarianceA(:,i))
-    scatter(twovec,taskDependentVarianceB(:,i))
-    parallelcoords([taskDependentVarianceA(:,i),taskDependentVarianceB(:,i)])
-    ylabel('Task Dependent Variance')
-    xlim([0 3])
-    xticks([1 2])
-    xticklabels({'Engaged','Disengaged'})
+    scatter(onevec,taskDependentVarianceA(:,i),'b')
+    scatter(twovec,taskDependentVarianceB(:,i),'r')
+    scatter(threevec,taskIndependentVarianceA(:,i),'b')
+    scatter(fourvec,taskIndependentVarianceB(:,i),'r')
 
-    figure; hold on;
+    parallelcoords([taskDependentVarianceA(:,i),taskDependentVarianceB(:,i),taskIndependentVarianceA(:,i),taskIndependentVarianceB(:,i)])
+    ylabel('R^2')
+    xlim([.5 4.5])
+    xticks([1.5 3.5])
+    xticklabels({'Task Dependent Variance','Task Independent Variance'})
+    legend('Engaged','Disengaged','Location','southeast')
+
+
+end
+%% alternative plotting
+
+for i = 1:size(taskDependentVarianceA,2)
+    figure('Position',[600 500 900 400]); hold on;
     title(figureTitles{i})
-    scatter(onevec,taskIndependentVarianceA(:,i))
-    scatter(twovec,taskIndependentVarianceB(:,i))
-    parallelcoords([taskIndependentVarianceA(:,i),taskIndependentVarianceB(:,i)])
-    ylabel('Task Independent Variance')
-    xlim([0 3])
-    xticks([1 2])    
+    scatter(onevec,taskDependentVarianceA(:,i),'b')
+    scatter(twovec,taskIndependentVarianceA(:,i),'r')
+    scatter(threevec,taskDependentVarianceB(:,i),'b')
+    scatter(fourvec,taskIndependentVarianceB(:,i),'r')
+
+    parallelcoords([taskDependentVarianceA(:,i),taskIndependentVarianceA(:,i),taskDependentVarianceB(:,i),taskIndependentVarianceB(:,i)])
+    ylabel('R^2')
+    xlim([.5 4.5])
+    xticks([1.5 3.5])
     xticklabels({'Engaged','Disengaged'})
+    legend('Task Dependent Variance','Task Independent Variance','Location','southeast')
 
 
 end
